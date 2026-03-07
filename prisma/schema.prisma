@@ -1,0 +1,355 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────
+// PROJECT — Core listing
+// ─────────────────────────────────────────────
+model Project {
+  id                  String          @id @default(uuid())
+  slug                String          @unique
+  title               String
+  subtitle            String?
+  description         String
+  category            ProjectCategory @default(COMMERCIAL)
+  status              ProjectStatus   @default(PLANNED)
+  reraId              String?
+  developerName       String?
+  developerLogo       String?
+  possessionDate      DateTime?
+  launchDate          DateTime?
+  address             String
+  locality            String?
+  city                String?
+  state               String?
+  latitude            Float?
+  longitude           Float?
+  currency            String          @default("INR")
+  featuredImage       String
+  galleryImages       String[]        @default([])
+  videoUrls           String[]        @default([])
+  basePrice           String?
+  priceRange          String?
+  priceMin            Int?
+  priceMax            Int?
+  bannerTitle         String?
+  bannerSubtitle      String?
+  bannerDescription   String?
+  aboutTitle          String?
+  aboutDescription    String?
+  sitePlanTitle       String?
+  sitePlanImage       String?
+  sitePlanDescription String?
+  minRatePsf          String?
+  maxRatePsf          String?
+  minUnitArea         Int?
+  maxUnitArea         Int?
+  totalUnits          Int?
+  soldUnits           Int?
+  availableUnits      Int?
+  landArea            String?
+  numberOfTowers      Int?
+  numberOfFloors      Int?
+  numberOfApartments  Int?
+  seoTitle            String?
+  seoDescription      String?
+  seoKeywords         String[]        @default([])
+  isTrending          Boolean         @default(false)
+  totalClicks         Int             @default(0)
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  // Relations
+  amenities    Amenity[]
+  documents    Document[]
+  faqs         Faq[]
+  floorPlans   FloorPlan[]
+  highlights   Highlight[]
+  media        Media[]
+  nearbyPoints NearbyPoint[]
+  pricingTable PricingTable[]
+  clicks       ProjectClick[]
+  seo          ProjectSeo?
+  offerings    Offering[]
+
+  @@index([createdAt], map: "idx_project_created_at")
+  @@index([updatedAt], map: "idx_project_updated_at")
+  @@index([status], map: "idx_project_status")
+  @@index([category], map: "idx_project_category")
+  @@index([status, updatedAt], map: "idx_project_status_updated")
+  @@index([isTrending], map: "idx_project_trending")
+  @@index([priceMin], map: "idx_project_price_min")
+  @@index([priceMax], map: "idx_project_price_max")
+  @@index([priceMin, priceMax], map: "idx_project_price_range")
+  @@index([city], map: "idx_project_city")
+}
+
+// ─────────────────────────────────────────────
+// HIGHLIGHT — USP bullet points
+// e.g. "✅ RERA Approved", "🚗 Metro – 5 min"
+// ─────────────────────────────────────────────
+model Highlight {
+  id        String  @id @default(uuid())
+  projectId String
+  label     String
+  icon      String?
+  sortOrder Int     @default(0)
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+// ─────────────────────────────────────────────
+// AMENITY — Features grouped by category
+// e.g. category: "Parking" → name: "1000+ car basement"
+// ─────────────────────────────────────────────
+model Amenity {
+  id        String  @id @default(uuid())
+  projectId String
+  category  String
+  name      String
+  details   String?
+  sortOrder Int     @default(0)
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+// ─────────────────────────────────────────────
+// FAQ — Q&A section + Google Featured Snippets
+// ─────────────────────────────────────────────
+model Faq {
+  id        String  @id @default(uuid())
+  projectId String
+  question  String
+  answer    String
+  sortOrder Int     @default(0)
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+// ─────────────────────────────────────────────
+// MEDIA — Images, videos, brochures, 360° tours
+// ─────────────────────────────────────────────
+model Media {
+  id        String    @id @default(uuid())
+  projectId String
+  type      MediaType
+  url       String
+  caption   String?
+  tags      String[]  @default([])
+  floor     String?
+  sortOrder Int       @default(0)
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([projectId, type])
+}
+
+// ─────────────────────────────────────────────
+// FLOOR PLAN — Level-wise layout images
+// ─────────────────────────────────────────────
+model FloorPlan {
+  id        String  @id @default(uuid())
+  projectId String
+  level     String
+  title     String?
+  imageUrl  String
+  details   Json?
+  sortOrder Int     @default(0)
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+// ─────────────────────────────────────────────
+// DOCUMENT — RERA approvals, brochures, deeds
+// ─────────────────────────────────────────────
+model Document {
+  id         String    @id @default(uuid())
+  projectId  String
+  docType    DocType
+  title      String
+  fileUrl    String
+  number     String?
+  issueDate  DateTime?
+  expiryDate DateTime?
+  project    Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+// ─────────────────────────────────────────────
+// NEARBY POINT — Location & connectivity
+// e.g. METRO: "HUDA City Centre – 2.5km – 8min"
+// ─────────────────────────────────────────────
+model NearbyPoint {
+  id            String     @id @default(uuid())
+  projectId     String
+  type          NearbyType
+  name          String
+  distanceKm    Float?
+  travelTimeMin Int?
+  project       Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+// ─────────────────────────────────────────────
+// PRICING TABLE — Price list per unit type
+// e.g. "Retail Shop | 320 sqft | ₹1.2Cr | ₹37,500/sqft"
+// ─────────────────────────────────────────────
+model PricingTable {
+  id             String  @id @default(uuid())
+  projectId      String
+  type           String
+  reraArea       String
+  price          String
+  pricePerSqft   String?
+  availableUnits Int?
+  floorNumbers   String?
+  features       Json?
+  project        Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+// ─────────────────────────────────────────────
+// PROJECT SEO — Per-project SEO config
+// ─────────────────────────────────────────────
+model ProjectSeo {
+  id              String   @id @default(uuid())
+  projectId       String   @unique
+  metaTitle       String?
+  metaDescription String?
+  metaKeywords    String[] @default([])
+  canonicalUrl    String?
+  ogTitle         String?
+  ogDescription   String?
+  ogImage         String?
+  twitterCard     String   @default("summary_large_image")
+  schemaMarkup    Json? // Full JSON-LD: RealEstateListing / FAQPage / LocalBusiness
+  h1Tag           String?
+  h2Tags          String[] @default([])
+  featuredImgAlt  String?
+  imageAltMap     Json? // { "imageUrl": "alt text" }
+  localHeading    String?
+  localContent    String?
+  longFormTitle   String?
+  longFormContent String?
+  isIndexable     Boolean  @default(true)
+  sitemapPriority Float    @default(0.8)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  project         Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────────
+// PROJECT CLICK — Daily click analytics
+// ─────────────────────────────────────────────
+model ProjectClick {
+  id          String   @id @default(uuid())
+  projectId   String
+  clickCount  Int      @default(1)
+  clickDate   DateTime
+  lastClickAt DateTime @default(now())
+  clientIP    String?
+  createdAt   DateTime @default(now())
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, clickDate])
+}
+
+// ─────────────────────────────────────────────
+// LEAD — Enquiry form / CRM
+// ─────────────────────────────────────────────
+model Lead {
+  id           String     @id @default(uuid())
+  name         String
+  phone        String
+  email        String
+  propertyType String
+  city         String
+  state        String
+  timeline     String?
+  projectSlug  String?
+  projectTitle String?
+  sourcePath   String?
+  status       LeadStatus @default(NEW)
+  createdAt    DateTime   @default(now())
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([projectSlug])
+}
+
+// ─────────────────────────────────────────────
+// OFFERING — Space type sections
+// e.g. "🛍 High-Street Retail Shops" with description
+// Renders as icon cards on project detail page
+// ─────────────────────────────────────────────
+model Offering {
+  id          String  @id @default(uuid())
+  projectId   String
+  icon        String? // "🛍" or icon class name
+  title       String // "High-Street Retail Shops"
+  description String // Marketing copy paragraph
+  sortOrder   Int     @default(0)
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  CLOSED
+  ARCHIVED
+}
+
+enum ProjectCategory {
+  COMMERCIAL
+  RETAIL_ONLY
+  MIXED_USE
+  RESIDENTIAL
+}
+
+enum ProjectStatus {
+  PLANNED
+  UNDER_CONSTRUCTION
+  READY
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  PLAN
+  BROCHURE
+  VIRTUAL_TOUR
+}
+
+enum DocType {
+  APPROVAL
+  BROCHURE
+  SPEC
+  TITLE
+}
+
+enum NearbyType {
+  METRO
+  MALL
+  OFFICE_HUB
+  HOTEL
+  ROAD
+  AIRPORT
+}
