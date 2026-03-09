@@ -15,7 +15,7 @@ type HeroSectionProps = {
   backgroundMobileSrc?: string;
 };
 
-export default function HeroSection({
+const HeroSection = ({
   className = '',
   onSearch,
   headingStart = 'Find Your',
@@ -25,9 +25,9 @@ export default function HeroSection({
   contactHref = '/contact',
   backgroundDesktopSrc = '/home/homepage.webp',
   backgroundMobileSrc = '/home/home-mobile.webp',
-}: HeroSectionProps) {
+}: HeroSectionProps) => {
   return (
-    <section className={`flex items-center justify-center h-screen ${className}`}>
+    <section className={`relative pb-10 flex items-center justify-center min-h-screen ${className}`}>
       <Image
         src={backgroundDesktopSrc}
         alt="Hero Background"
@@ -47,14 +47,14 @@ export default function HeroSection({
       <div className="hidden lg:block absolute inset-0 bg-linear-to-r from-black/50 via-[#112D48]/20 to-transparent z-10" />
       <div className="block lg:hidden absolute inset-0 bg-linear-to-b from-black/50 via-[#112D48]/20 to-transparent z-10" />
 
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col items-center lg:items-start justify-center h-full mt-20 sm:mt-24 lg:mt-0">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col items-center lg:items-start justify-center h-full mt-20">
         <div className="flex flex-col items-center lg:items-start justify-center text-center lg:text-left space-y-6 sm:space-y-8 lg:space-y-10 w-full lg:w-[60%]">
-          <div className="space-y-3 sm:space-y-0 max-w-4xl mx-auto lg:mx-0 lg:mr-auto">
+          <div className="space-y-3 sm:space-y-5 max-w-4xl mx-auto lg:mx-0 lg:mr-auto">
             <div className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-2 sm:gap-0 flex-wrap">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight text-white drop-shadow-lg text-center lg:text-left">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-tight text-white drop-shadow-lg text-center lg:text-left">
                 {headingStart}
               </h1>
-              <span className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight bg-linear-to-r from-[#FBB70F] to-[#FBB70F] bg-clip-text text-transparent drop-shadow-sm text-center lg:text-left">
+              <span className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold -mt-5 leading-tight bg-linear-to-r from-[#FBB70F] to-[#FBB70F] bg-clip-text text-transparent drop-shadow-sm text-center lg:text-left">
                 {headingAccent}
               </span>
             </div>
@@ -67,13 +67,13 @@ export default function HeroSection({
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start items-center w-full max-w-xs sm:max-w-md md:max-w-lg mx-auto lg:mx-0 lg:mr-auto">
             <a
               href={exploreHref}
-              className="w-full sm:w-auto rounded-xl text-sm sm:text-base px-6 py-3 sm:py-4 min-w-40 shadow-lg bg-[#FBB70F] text-[#112D48] font-semibold hover:bg-[#e5a60d] hover:scale-105 transition-transform text-center"
+              className="w-full sm:w-auto rounded text-sm sm:text-base px-6 py-3 min-w-40 shadow-lg bg-[#FBB70F] text-[#112D48] font-semibold hover:bg-[#e5a60d] hover:scale-105 transition-transform text-center"
             >
               Explore Projects
             </a>
             <a
               href={contactHref}
-              className="w-full sm:w-auto rounded-xl text-sm sm:text-base px-6 py-3 sm:py-4 min-w-40 shadow-lg bg-[#112D48] text-white font-semibold hover:bg-[#091a30] hover:scale-105 transition-transform text-center"
+              className="w-full sm:w-auto rounded text-sm sm:text-base px-6 py-3 min-w-40 shadow-lg bg-[#112D48] text-white font-semibold hover:bg-[#091a30] hover:scale-105 transition-transform text-center"
             >
               Get In Touch
             </a>
@@ -86,4 +86,6 @@ export default function HeroSection({
       </div>
     </section>
   );
-}
+};
+
+export default HeroSection;
