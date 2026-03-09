@@ -1,10 +1,11 @@
 import HeroSection from '@/components/home/hero-section';
+import BenefitsSection from '@/components/home/benefit-section';
 
 const page = () => {
   return (
-    <div>
+    <div className="">
       <HeroSection />
-      <div></div>
+      <BenefitsSection />
     </div>
   );
 };

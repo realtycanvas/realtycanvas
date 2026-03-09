@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import SmartImage from '../ui/SmartImage';
 import Link from 'next/link';
+import Image from 'next/image';
+import { useEffect, useMemo, useState } from 'react';
 
 type NavItem = {
   name: string;
@@ -55,12 +55,21 @@ function CloseIcon({ className }: { className?: string }) {
 
 function PhoneIcon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={className} strokeWidth="1.8">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth="1.5"
+      stroke="currentColor"
+      aria-hidden="true"
+      data-slot="icon"
+      className="h-5 w-5"
+    >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
-        d="M2.25 4.5a2.25 2.25 0 012.25-2.25h2.152a2.25 2.25 0 012.166 1.638l.58 2.03a2.25 2.25 0 01-.574 2.261l-1.11 1.11a16.02 16.02 0 006.435 6.435l1.11-1.11a2.25 2.25 0 012.262-.573l2.03.58a2.25 2.25 0 011.637 2.165V19.5a2.25 2.25 0 01-2.25 2.25h-.75C10.066 21.75 2.25 13.934 2.25 4.5v0z"
-      />
+        d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"
+      ></path>
     </svg>
   );
 }
@@ -79,8 +88,17 @@ function ShareIcon({ className }: { className?: string }) {
 
 function WhatsappIcon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-      <path d="M12 2.25A9.75 9.75 0 004.05 17.7L2.4 21.6l4.05-1.59A9.75 9.75 0 1012 2.25zm0 17.625c-1.462 0-2.886-.39-4.14-1.13l-.297-.173-2.404.944.98-2.327-.194-.31a8.072 8.072 0 1113.83.01A8.05 8.05 0 0112 19.875zm4.433-5.98c-.243-.122-1.439-.712-1.662-.793-.223-.081-.385-.121-.548.122-.162.243-.628.793-.77.956-.142.162-.284.183-.527.06-.243-.121-1.027-.378-1.957-1.207-.724-.646-1.214-1.444-1.356-1.687-.142-.243-.015-.374.107-.496.11-.108.243-.284.365-.426.122-.142.162-.243.244-.406.08-.162.04-.304-.02-.426-.061-.122-.548-1.321-.75-1.808-.197-.472-.397-.407-.548-.414l-.467-.008a.896.896 0 00-.648.304c-.223.243-.851.833-.851 2.03 0 1.197.872 2.354.994 2.516.122.162 1.717 2.625 4.16 3.68.582.251 1.036.401 1.39.513.584.186 1.115.16 1.535.097.468-.07 1.44-.588 1.643-1.156.203-.569.203-1.056.142-1.156-.06-.102-.223-.163-.466-.284z" />
+    <svg
+      stroke="currentColor"
+      fill="currentColor"
+      strokeWidth="0"
+      viewBox="0 0 448 512"
+      className="h-5 w-5"
+      height="1em"
+      width="1em"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"></path>
     </svg>
   );
 }
@@ -138,7 +156,7 @@ export default function Navbar({
 
   return (
     <nav
-      className={`${showSolidNav ? 'bg-white shadow-lg' : 'bg-transparent'} fixed w-full z-50 transition-all duration-300`}
+      className={`${showSolidNav ? 'bg-white shadow-lg' : 'bg-transparent'} fixed top-0 w-full z-50 transition-all duration-300`}
     >
       <div
         className={`max-w-7xl mx-auto px-2 sm:px-4 ${showSolidNav ? 'bg-transparent' : 'bg-transparent hover:bg-black/20'} rounded-lg mx-4 mt-2 transition-colors duration-300`}
@@ -146,8 +164,8 @@ export default function Navbar({
         <div className="h-16 px-4 lg:px-4 flex items-center justify-between">
           <Link href="/" className="flex items-center no-underline hover:no-underline focus:no-underline">
             {/* Logo - Light version only */}
-            <SmartImage
-              src={showSolidNav ? '/logo-original.webp' : '/logo-white.webp'}
+            <Image
+              src={showSolidNav ? '/logo/logo-original.webp' : '/logo/logo-white.webp'}
               alt="Reality Canvas"
               width={1200}
               height={100}
