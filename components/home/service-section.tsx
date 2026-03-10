@@ -32,7 +32,7 @@ export default function ServicesSection() {
               <div className="mb-5 bg-linear-to-r from-brand-primary to-brand-primary p-2 rounded w-10 h-10 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform duration-300">
                 <Icon className="w-6 h-6 text-white" />
               </div>
-              <h3 className="text-md font-bold text-gray-900 dark:text-white mb-2 text-center capitalize">{title}</h3>
+              <h3 className="text-md font-bold text-gray-900 dark:text-white mb-2 text-center capitalize whitespace-pre-line">{title}</h3>
               <p className="text-gray-600 text-xs text-center leading-relaxed">{description}</p>
             </div>
           ))}

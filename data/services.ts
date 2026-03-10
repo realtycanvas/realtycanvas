@@ -28,7 +28,7 @@ export const services: Service[] = [
   },
   {
     icon: MagnifyingGlassIcon,
-    title: 'Site Visits & Analysis',
+    title: 'Site Visits &\n Analysis',
     description: 'Guided property tours with complete market analysis and ROI projections',
   },
   {
@@ -38,7 +38,7 @@ export const services: Service[] = [
   },
   {
     icon: HandRaisedIcon,
-    title: 'Possession & Beyond',
+    title: 'Possession &\n Beyond',
     description: 'Handover support and rental assistance',
   },
 ];

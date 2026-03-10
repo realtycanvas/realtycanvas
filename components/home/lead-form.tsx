@@ -80,7 +80,7 @@ export default function LeadForm({ onSuccess, onCancel, showCancelButton = true 
       <fieldset className="space-y-1.5">
         <legend className="block text-sm font-medium text-gray-700">Property Type *</legend>
         <div className="flex items-center gap-4">
-          <label className="inline-flex items-center gap-2 text-xs text-gray-700">
+          <label className="inline-flex items-center gap-3 text-sm text-gray-700">
             <input
               type="radio"
               name="propertyType"
@@ -88,11 +88,11 @@ export default function LeadForm({ onSuccess, onCancel, showCancelButton = true 
               checked={formData.propertyType === 'COMMERCIAL'}
               onChange={() => handleInputChange('propertyType', 'COMMERCIAL')}
               required
-              className="accent-blue-600"
+              className="accent-blue-600 w-4 h-4"
             />
-            <span>🏢 Commercial</span>
+            <span className="text-base">🏢 Commercial</span>
           </label>
-          <label className="inline-flex items-center gap-2 text-xs text-gray-700">
+          <label className="inline-flex items-center gap-3 text-sm text-gray-700">
             <input
               type="radio"
               name="propertyType"
@@ -100,9 +100,9 @@ export default function LeadForm({ onSuccess, onCancel, showCancelButton = true 
               checked={formData.propertyType === 'RESIDENTIAL'}
               onChange={() => handleInputChange('propertyType', 'RESIDENTIAL')}
               required
-              className="accent-blue-600"
+              className="accent-blue-600 w-4 h-4"
             />
-            <span>🏠 Residential</span>
+            <span className="text-base">🏠 Residential</span>
           </label>
         </div>
       </fieldset>
@@ -122,34 +122,36 @@ export default function LeadForm({ onSuccess, onCancel, showCancelButton = true 
         />
       </div>
 
-      <div className="space-y-1.5">
-        <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-          Phone Number *
-        </label>
-        <Input
-          id="phone"
-          type="tel"
-          placeholder="Enter your phone number"
-          value={formData.phone}
-          onChange={(e) => handleInputChange('phone', e.target.value)}
-          required
-          className="w-full h-10 text-sm rounded"
-        />
-      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <div className="space-y-1.5">
+          <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+            Phone Number *
+          </label>
+          <Input
+            id="phone"
+            type="tel"
+            placeholder="Enter your phone number"
+            value={formData.phone}
+            onChange={(e) => handleInputChange('phone', e.target.value)}
+            required
+            className="w-full h-10 text-sm rounded"
+          />
+        </div>
 
-      <div className="space-y-1.5">
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-          Email ID *
-        </label>
-        <Input
-          id="email"
-          type="email"
-          placeholder="Enter your email address"
-          value={formData.email}
-          onChange={(e) => handleInputChange('email', e.target.value)}
-          required
-          className="w-full h-10 text-sm rounded"
-        />
+        <div className="space-y-1.5">
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            Email ID *
+          </label>
+          <Input
+            id="email"
+            type="email"
+            placeholder="Enter your email address"
+            value={formData.email}
+            onChange={(e) => handleInputChange('email', e.target.value)}
+            required
+            className="w-full h-10 text-sm rounded"
+          />
+        </div>
       </div>
 
       {/* City and State Fields */}
