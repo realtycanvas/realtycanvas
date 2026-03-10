@@ -1,6 +1,8 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
+import { BrandButton } from '@/components/ui/BrandButton';
 import ProjectSearchBar from './project-search';
 
 type HeroSectionProps = {
@@ -65,18 +67,24 @@ const HeroSection = ({
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start items-center w-full max-w-xs sm:max-w-md md:max-w-lg mx-auto lg:mx-0 lg:mr-auto">
-            <a
-              href={exploreHref}
-              className="w-full sm:w-auto rounded text-sm sm:text-base px-6 py-3 min-w-40 shadow-lg bg-[#FBB70F] text-[#112D48] font-semibold hover:bg-[#e5a60d] hover:scale-105 transition-transform text-center"
-            >
-              Explore Projects
-            </a>
-            <a
-              href={contactHref}
-              className="w-full sm:w-auto rounded text-sm sm:text-base px-6 py-3 min-w-40 shadow-lg bg-[#112D48] text-white font-semibold hover:bg-[#091a30] hover:scale-105 transition-transform text-center"
-            >
-              Get In Touch
-            </a>
+            <Link href={exploreHref} className="w-full sm:w-auto">
+              <BrandButton
+                variant="primary"
+                size="lg"
+                className="rounded text-sm sm:text-base px-6 py-3 sm:py-4 w-full sm:w-auto min-w-40 shadow-lg hover:scale-105 transition-transform"
+              >
+                Explore Projects
+              </BrandButton>
+            </Link>
+            <Link href={contactHref} className="w-full sm:w-auto">
+              <BrandButton
+                variant="secondary"
+                size="lg"
+                className="rounded text-sm sm:text-base px-6 py-3 sm:py-4 w-full sm:w-auto min-w-40 bg-[#112D48]! text-white! hover:bg-[#091a30]! shadow-lg hover:scale-105 transition-transform"
+              >
+                Get In Touch
+              </BrandButton>
+            </Link>
           </div>
 
           <div className="w-full max-w-sm sm:max-w-xl md:max-w-3xl lg:max-w-4xl mx-auto lg:mx-0 lg:mr-auto mt-4 sm:mt-8 px-2 sm:px-0">
