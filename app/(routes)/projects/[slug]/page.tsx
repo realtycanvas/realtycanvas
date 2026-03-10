@@ -385,7 +385,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
       <JsonLd data={realEstateLd} />
       <JsonLd data={breadcrumbLd} />
       {faqLd ? <JsonLd data={faqLd} /> : null}
-      <ProjectDetailClient project={project} slug={project.slug} />
+      <ProjectDetailClient project={project} />
     </main>
   );
 }
