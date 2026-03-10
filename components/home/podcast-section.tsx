@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
 import { Play, Mic, Headphones, Clock, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -74,6 +74,8 @@ const podcastEpisodes = [
 
 export default function PodcastSection() {
   const [cards, setCards] = useState(podcastEpisodes);
+  const sectionRef = useRef<HTMLElement>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const removeCard = (id: number) => {
     setCards((prev) => {
@@ -84,8 +86,44 @@ export default function PodcastSection() {
     });
   };
 
+  const advanceCard = useCallback(() => {
+    setCards((prev) => {
+      const newCards = [...prev];
+      const movedCard = newCards.shift();
+      if (movedCard) newCards.push(movedCard);
+      return newCards;
+    });
+  }, []);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting) {
+          intervalRef.current = setInterval(advanceCard, 5000);
+        } else {
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+          }
+        }
+      },
+      { threshold: 0.3 }
+    );
+
+    observer.observe(section);
+
+    return () => {
+      observer.disconnect();
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [advanceCard]);
+
   return (
-    <section className="py-6 lg:py-16 bg-white  overflow-hidden relative">
+    <section ref={sectionRef} className="py-6 lg:py-16 bg-white  overflow-hidden relative">
       {/* Background decoration */}
       <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
       <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
@@ -148,7 +186,7 @@ export default function PodcastSection() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="w-full max-w-64 flex justify-center items-center h-112.5 relative"
+            className="w-full max-w-64 flex justify-center items-center h-112.5 relative mb-16 md:mb-20 lg:mb-0"
           >
             <div className="relative w-full max-w-60 aspect-9/16">
               {cards
