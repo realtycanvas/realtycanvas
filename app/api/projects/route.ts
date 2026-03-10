@@ -37,6 +37,28 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category') || 'ALL';
     const status = searchParams.get('status') || 'ALL';
     const city = searchParams.get('city')?.trim() || '';
+    const slug = searchParams.get('slug')?.trim() || '';
+
+    if (slug) {
+      const normalized = decodeURIComponent(slug)
+        .trim()
+        .replace(/^\/+|\/+$/g, '');
+      const project = await prisma.project.findFirst({
+        where: { slug: { equals: normalized, mode: 'insensitive' } },
+        include: {
+          amenities: { orderBy: { sortOrder: 'asc' } },
+          highlights: { orderBy: { sortOrder: 'asc' } },
+          faqs: { orderBy: { sortOrder: 'asc' } },
+          media: { orderBy: { sortOrder: 'asc' } },
+          pricingTable: true,
+          nearbyPoints: true,
+        },
+      });
+      if (!project) {
+        return NextResponse.json({ error: `Project with slug '${slug}' not found` }, { status: 404 });
+      }
+      return NextResponse.json(project);
+    }
 
     // Create cache key
     const cacheKey = createCacheKey({ page, search, category, status, city, limit });
@@ -133,5 +155,88 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Projects API error:', error);
     return NextResponse.json({ error: 'Failed to fetch projects' }, { status: 500 });
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+
+    // Validate required fields
+    const requiredFields = ['title', 'slug', 'description', 'address', 'featuredImage'];
+    for (const field of requiredFields) {
+      if (!body[field] || (typeof body[field] === 'string' && body[field].trim() === '')) {
+        return NextResponse.json({ error: `Missing required field: ${field}` }, { status: 400 });
+      }
+    }
+
+    const slug = body.slug.toLowerCase().trim();
+    console.log(`[Projects API] Creating project with slug: "${slug}"`);
+
+    // Check if slug already exists
+    const existingProject = await prisma.project.findUnique({
+      where: { slug },
+    });
+
+    if (existingProject) {
+      return NextResponse.json({ error: 'Project with this slug already exists' }, { status: 409 });
+    }
+
+    // Create the project
+    const project = await prisma.project.create({
+      data: {
+        title: body.title.trim(),
+        subtitle: body.subtitle?.trim() || null,
+        slug, // Use lowercase trimmed slug
+        description: body.description.trim(),
+        category: body.category || 'COMMERCIAL',
+        status: body.status || 'PLANNED',
+        address: body.address.trim(),
+        locality: body.locality?.trim() || null,
+        city: body.city?.trim() || null,
+        state: body.state?.trim() || null,
+        developerName: body.developerName?.trim() || null,
+        reraId: body.reraId?.trim() || null,
+        basePrice: body.basePrice?.trim() || null,
+        priceRange: body.priceRange?.trim() || null,
+        priceMin: body.priceMin || null,
+        priceMax: body.priceMax || null,
+        featuredImage: body.featuredImage.trim(),
+        landArea: body.landArea?.trim() || null,
+        totalUnits: body.totalUnits || null,
+        soldUnits: body.soldUnits || null,
+        availableUnits: body.availableUnits || null,
+        numberOfTowers: body.numberOfTowers || null,
+        numberOfFloors: body.numberOfFloors || null,
+        minRatePsf: body.minRatePsf?.trim() || null,
+        maxRatePsf: body.maxRatePsf?.trim() || null,
+        minUnitArea: body.minUnitArea || null,
+        maxUnitArea: body.maxUnitArea || null,
+        bannerTitle: body.bannerTitle?.trim() || null,
+        bannerSubtitle: body.bannerSubtitle?.trim() || null,
+        bannerDescription: body.bannerDescription?.trim() || null,
+        aboutTitle: body.aboutTitle?.trim() || null,
+        aboutDescription: body.aboutDescription?.trim() || null,
+        sitePlanTitle: body.sitePlanTitle?.trim() || null,
+        sitePlanImage: body.sitePlanImage?.trim() || null,
+        sitePlanDescription: body.sitePlanDescription?.trim() || null,
+        seoTitle: body.seoTitle?.trim() || null,
+        seoDescription: body.seoDescription?.trim() || null,
+        seoKeywords: body.seoKeywords || [],
+      },
+    });
+
+    console.log(`[Projects API] Project created successfully: ${project.id} (slug: ${project.slug})`);
+
+    // Clear cache for all project listings
+    cache.clear();
+
+    return NextResponse.json(project, { status: 201 });
+  } catch (error) {
+    console.error('Project creation error:', error);
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json({ error: 'Failed to create project' }, { status: 500 });
   }
 }

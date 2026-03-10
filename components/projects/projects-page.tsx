@@ -41,7 +41,7 @@ export default function ProjectsPage() {
 
   return (
     <>
-      <ProjectsListingClient />
+      <ProjectsListingClient user={user} />
     </>
   );
 }

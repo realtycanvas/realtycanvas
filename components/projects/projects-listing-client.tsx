@@ -33,7 +33,16 @@ interface Pagination {
   hasPrevious: boolean;
 }
 
-export default function ProjectsListingClient() {
+interface User {
+  email: string;
+  role: string;
+}
+
+interface ProjectsListingClientProps {
+  user?: User | null;
+}
+
+export default function ProjectsListingClient({ user }: ProjectsListingClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -57,7 +66,6 @@ export default function ProjectsListingClient() {
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Fetch projects
   const fetchProjects = useCallback(
     async (page: number = 1) => {
       try {
@@ -93,7 +101,6 @@ export default function ProjectsListingClient() {
     [filters]
   );
 
-  // Fetch on filters change
   useEffect(() => {
     fetchProjects(1);
   }, [filters, fetchProjects]);
@@ -126,11 +133,73 @@ export default function ProjectsListingClient() {
     return colors[status] || 'bg-gray-100 text-gray-800';
   };
 
+  const renderPagination = () => {
+    const current = pagination.page;
+    const total = pagination.totalPages;
+
+    return (
+      <div className="flex justify-center items-center gap-2 mb-8">
+        {/* Prev */}
+        <button
+          onClick={() => handlePageChange(current - 1)}
+          disabled={!pagination.hasPrevious}
+          className="w-9 h-9 flex items-center justify-center border border-gray-300 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+        >
+          <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+
+        {/* Page Numbers */}
+        {Array.from({ length: total }, (_, i) => i + 1).map((page) => (
+          <button
+            key={page}
+            onClick={() => handlePageChange(page)}
+            className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${
+              page === current
+                ? 'bg-yellow-500 text-white shadow-sm'
+                : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            {page}
+          </button>
+        ))}
+
+        {/* Next */}
+        <button
+          onClick={() => handlePageChange(current + 1)}
+          disabled={!pagination.hasMore}
+          className="w-9 h-9 flex items-center justify-center border border-gray-300 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+        >
+          <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen pt-24 mt-4 md:mt-10 px-4">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
+            <p className="text-gray-600 mt-1">Browse and manage real estate projects</p>
+          </div>
+          {user && (
+            <Link
+              href="/projects/create"
+              className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-5 py-2 rounded transition"
+            >
+              Create Project
+            </Link>
+          )}
+        </div>
+
         {/* Search */}
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-md mb-8">
           <input
             type="text"
             placeholder="Search projects..."
@@ -139,14 +208,14 @@ export default function ProjectsListingClient() {
             className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-yellow-500"
           />
         </div>
-        {/* Filters Section */}
+
+        {/* Filters */}
         <div className="mt-10">
           <div className="mb-4">
             <h2 className="text-lg font-semibold text-gray-800">Filters</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
-            {/* Category */}
             <div className="w-full">
               <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
               <select
@@ -162,7 +231,6 @@ export default function ProjectsListingClient() {
               </select>
             </div>
 
-            {/* Status */}
             <div className="w-full">
               <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
               <select
@@ -177,7 +245,6 @@ export default function ProjectsListingClient() {
               </select>
             </div>
 
-            {/* City */}
             <div className="w-full">
               <label className="block text-sm font-medium text-gray-700 mb-2">Budget</label>
               <select
@@ -193,7 +260,6 @@ export default function ProjectsListingClient() {
             </div>
           </div>
 
-          {/* Clear Filters */}
           {(filters.search || filters.category !== 'ALL' || filters.status !== 'ALL' || filters.city) && (
             <button
               onClick={() => setFilters({ search: '', category: 'ALL', status: 'ALL', city: '' })}
@@ -204,7 +270,7 @@ export default function ProjectsListingClient() {
           )}
         </div>
 
-        {/* Loading State */}
+        {/* Loading */}
         {loading && (
           <div className="flex justify-center items-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
@@ -216,7 +282,7 @@ export default function ProjectsListingClient() {
           <>
             {projects.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20 mt-10">
                   {projects.map((project) => (
                     <Link
                       key={project.id}
@@ -260,19 +326,16 @@ export default function ProjectsListingClient() {
                               <span className="font-medium">Address:</span> {project.address}
                             </p>
                           )}
-
                           {project.city && (
                             <p className="text-gray-700">
                               <span className="font-medium">City:</span> {project.city}
                             </p>
                           )}
-
                           {project.developerName && (
                             <p className="text-gray-700">
                               <span className="font-medium">Developer:</span> {project.developerName}
                             </p>
                           )}
-
                           {project.basePrice && (
                             <p className="text-yellow-600 font-semibold">
                               <span className="font-medium">Price:</span> {project.basePrice}
@@ -285,45 +348,7 @@ export default function ProjectsListingClient() {
                 </div>
 
                 {/* Pagination */}
-                {pagination.totalPages > 1 && (
-                  <div className="flex justify-center items-center gap-2 mb-8">
-                    <button
-                      onClick={() => handlePageChange(pagination.page - 1)}
-                      disabled={!pagination.hasPrevious}
-                      className="px-4 py-2 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                    >
-                      Previous
-                    </button>
-
-                    {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((pageNum) => (
-                      <button
-                        key={pageNum}
-                        onClick={() => handlePageChange(pageNum)}
-                        className={`px-4 py-2 rounded transition-colors ${
-                          pageNum === pagination.page
-                            ? 'bg-yellow-500 text-white'
-                            : 'border border-gray-300 hover:bg-gray-50'
-                        }`}
-                      >
-                        {pageNum}
-                      </button>
-                    ))}
-
-                    <button
-                      onClick={() => handlePageChange(pagination.page + 1)}
-                      disabled={!pagination.hasMore}
-                      className="px-4 py-2 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                    >
-                      Next
-                    </button>
-                  </div>
-                )}
-
-                <p className="text-center text-gray-600 mb-8">
-                  Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}
-                  {Math.min(pagination.page * pagination.limit, pagination.totalCount)} of {pagination.totalCount}{' '}
-                  projects
-                </p>
+                {pagination.totalPages > 1 && renderPagination()}
               </>
             ) : (
               <div className="text-center pb-12 pt-20 md:pt-32">
