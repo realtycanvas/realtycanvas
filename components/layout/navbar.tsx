@@ -7,7 +7,13 @@ import { defaultNavItems } from '@/data/navbar.data';
 import { useEffect, useMemo, useState } from 'react';
 import { formatPhoneLink, formatWhatsappLink } from '@/helpers/navbar.helper';
 import { BarsIcon, CloseIcon, PhoneIcon, ShareIcon, WhatsappIcon } from '../ui/icon';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { LogoutModal } from '../common/logout-modal';
+
+interface User {
+  email: string;
+  role: string;
+}
 
 const Navbar = ({
   brandName = 'Realty Canvas',
@@ -19,15 +25,32 @@ const Navbar = ({
   currentPath = '/',
 }: NavbarProps) => {
   const pathname = usePathname();
+  const router = useRouter();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const isHomePage = pathname === '/';
   const showSolidNav = isScrolled || !isHomePage || mobileMenuOpen;
 
   const telHref = useMemo(() => formatPhoneLink(phoneNumber), [phoneNumber]);
   const waHref = useMemo(() => formatWhatsappLink(whatsappNumber), [whatsappNumber]);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await fetch('/api/auth/me');
+        const data = await res.json();
+        setUser(data.user);
+      } catch {
+        setUser(null);
+      }
+    };
+    checkAuth();
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 50);
@@ -60,6 +83,22 @@ const Navbar = ({
         await navigator.clipboard.writeText(data.url);
       }
     } catch {}
+  };
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      const res = await fetch('/api/auth/logout', { method: 'POST' });
+      if (res.ok) {
+        setUser(null);
+        setShowLogoutModal(false);
+        router.push('/admin/login');
+      }
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
   return (
     <nav
@@ -117,6 +156,14 @@ const Navbar = ({
               <ShareIcon className="w-4 h-4 mr-2" />
               Share
             </button>
+            {user && (
+              <button
+                onClick={() => setShowLogoutModal(true)}
+                className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-full transition-all duration-300 transform hover:scale-105"
+              >
+                Logout
+              </button>
+            )}
           </div>
 
           <div className="lg:hidden flex items-center space-x-2">
@@ -164,16 +211,33 @@ const Navbar = ({
                 </Link>
                 <button
                   onClick={handleShare}
-                  className="w-full bg-gray-300 text-gray-700 p-3 flex items-center justify-center rounded transition-colors hover:bg-gray-400"
+                  className="w-full bg-gray-300 text-gray-700 p-3 flex items-center justify-center rounded transition-colors hover:bg-gray-400 mb-2"
                 >
                   <ShareIcon className="w-5 h-5 mr-2" />
                   Share
                 </button>
+                {user && (
+                  <button
+                    onClick={() => {
+                      setShowLogoutModal(true);
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 rounded transition-colors"
+                  >
+                    Logout
+                  </button>
+                )}
               </div>
             </div>
           </div>
         )}
       </div>
+      <LogoutModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={handleLogout}
+        isLoading={isLoggingOut}
+      />
     </nav>
   );
 };

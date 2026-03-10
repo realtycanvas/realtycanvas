@@ -353,3 +353,31 @@ enum NearbyType {
   ROAD
   AIRPORT
 }
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  role      String   @default("admin")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sessions  Session[]
+  keys      Key[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Key {
+  id             String  @id
+  userId         String
+  hashedPassword String?
+  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
