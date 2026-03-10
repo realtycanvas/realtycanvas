@@ -132,3 +132,106 @@
     @apply font-mono;
   }
 }
+
+/* Call Now button - phone ringing animation for urgency */
+@keyframes phone-ring {
+  0% {
+    transform: none;
+    box-shadow:
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06),
+      0 0 0 0 rgba(254, 183, 17, 1);
+  }
+  10% {
+    transform: none;
+    box-shadow:
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06),
+      0 0 3px 6px rgba(254, 183, 17, 0.6);
+  }
+  20% {
+    transform: none;
+    box-shadow:
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06),
+      0 0 8px 14px rgba(254, 183, 17, 0);
+  }
+  30% {
+    transform: none;
+    box-shadow:
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06),
+      0 0 0 0 rgba(254, 183, 17, 0);
+  }
+  50% {
+    transform: none;
+    box-shadow:
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06),
+      0 0 0 0 rgba(254, 183, 17, 1);
+  }
+  60% {
+    transform: none;
+    box-shadow:
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06),
+      0 0 3px 6px rgba(254, 183, 17, 0.6);
+  }
+  70% {
+    transform: none;
+    box-shadow:
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06),
+      0 0 8px 14px rgba(254, 183, 17, 0);
+  }
+  80%,
+  100% {
+    transform: none;
+    box-shadow:
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06),
+      0 0 0 0 rgba(254, 183, 17, 0);
+  }
+}
+
+.call-now-pulse {
+  animation: phone-ring 0.7s infinite;
+  transform: none;
+}
+
+.call-now-pulse:hover {
+  animation: none !important;
+  transform: none !important;
+}
+
+/* Shimmer Button animations */
+@keyframes shimmer-slide {
+  to {
+    transform: translate(calc(100cqw - 100%), 0);
+  }
+}
+
+@keyframes spin-around {
+  0% {
+    transform: translateZ(0) rotate(0);
+  }
+  15%,
+  35% {
+    transform: translateZ(0) rotate(90deg);
+  }
+  65%,
+  85% {
+    transform: translateZ(0) rotate(270deg);
+  }
+  100% {
+    transform: translateZ(0) rotate(360deg);
+  }
+}
+
+.animate-shimmer-slide {
+  animation: shimmer-slide var(--speed) ease-in-out infinite alternate;
+}
+
+.animate-spin-around {
+  animation: spin-around calc(var(--speed) * 2) infinite linear;
+}

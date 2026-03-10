@@ -1,190 +1,266 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
+import { usePathname } from 'next/navigation';
+import SmartImage from '@/components/ui/SmartImage';
+import { useState, useEffect, useRef } from 'react';
+import type { MouseEvent as ReactMouseEvent } from 'react';
+import {
+  Bars3Icon,
+  XMarkIcon,
+  ChevronDownIcon,
+  ArrowRightOnRectangleIcon,
+  ShareIcon,
+  PhoneIcon,
+} from '@heroicons/react/24/outline';
+import { FaWhatsapp } from 'react-icons/fa';
+import { Menu, Transition } from '@headlessui/react';
+import { Fragment } from 'react';
+import { useAuth } from '@/hooks/use-auth';
+import { BrandButton } from '@/components/ui/BrandButton';
+import gsap from 'gsap';
 
-import { defaultNavItems } from '@/data/navbar.data';
-import { useEffect, useMemo, useState } from 'react';
-import { formatPhoneLink, formatWhatsappLink } from '@/helpers/navbar.helper';
-import { BarsIcon, CloseIcon, PhoneIcon, ShareIcon, WhatsappIcon } from '../ui/icon';
-import { usePathname, useRouter } from 'next/navigation';
-import { LogoutModal } from '../common/logout-modal';
+const navigation = [
+  { name: 'Home', href: '/' },
+  { name: 'Projects', href: '/projects' },
+  { name: 'Blog', href: '/blog' },
+  { name: 'About', href: '/about' },
+  { name: 'Contact', href: '/contact' },
+];
 
-interface User {
-  email: string;
-  role: string;
-}
-
-const Navbar = ({
-  brandName = 'Realty Canvas',
-  logoLightSrc = '/logo/logo-white.webp',
-  logoDarkSrc = '/logo/logo-original.webp',
-  phoneNumber = '9555562626',
-  whatsappNumber = '9555562626',
-  navItems = defaultNavItems,
-  currentPath = '/',
-}: NavbarProps) => {
+export default function Navbar() {
   const pathname = usePathname();
-  const router = useRouter();
-
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
+  // Determine if we should show the solid navbar (scrolled or not on home page)
   const isHomePage = pathname === '/';
   const showSolidNav = isScrolled || !isHomePage || mobileMenuOpen;
 
-  const telHref = useMemo(() => formatPhoneLink(phoneNumber), [phoneNumber]);
-  const waHref = useMemo(() => formatWhatsappLink(whatsappNumber), [whatsappNumber]);
+  const { user, isAdmin, signOut } = useAuth();
 
+  const hotlineButtonRef = useRef<HTMLAnchorElement | null>(null);
+  const mobileHotlineButtonRef = useRef<HTMLAnchorElement | null>(null);
+
+  // Scroll detection effect
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await fetch('/api/auth/me');
-        const data = await res.json();
-        setUser(data.user);
-      } catch {
-        setUser(null);
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      setIsScrolled(scrollTop > 50);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // GSAP animation for button bounce effect
+  useEffect(() => {
+    // Define event handlers for WhatsApp buttons only
+    const handleHotlineButtonHover = () => {
+      gsap.to(hotlineButtonRef.current, {
+        y: -5,
+        duration: 0.3,
+        repeat: 1,
+        yoyo: true,
+        ease: 'power1.inOut',
+      });
+    };
+
+    const handleMobileHotlineButtonHover = () => {
+      gsap.to(mobileHotlineButtonRef.current, {
+        y: -5,
+        duration: 0.3,
+        repeat: 1,
+        yoyo: true,
+        ease: 'power1.inOut',
+      });
+    };
+
+    // Setup hover animations for WhatsApp buttons only
+    if (hotlineButtonRef.current) {
+      hotlineButtonRef.current.addEventListener('mouseenter', handleHotlineButtonHover);
+    }
+
+    if (mobileHotlineButtonRef.current) {
+      mobileHotlineButtonRef.current.addEventListener('mouseenter', handleMobileHotlineButtonHover);
+    }
+
+    // Cleanup event listeners on component unmount
+    return () => {
+      if (hotlineButtonRef.current) {
+        hotlineButtonRef.current.removeEventListener('mouseenter', handleHotlineButtonHover);
+      }
+      if (mobileHotlineButtonRef.current) {
+        mobileHotlineButtonRef.current.removeEventListener('mouseenter', handleMobileHotlineButtonHover);
       }
     };
-    checkAuth();
   }, []);
 
-  useEffect(() => {
-    const onScroll = () => setIsScrolled(window.scrollY > 50);
-    onScroll();
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  useEffect(() => {
-    const onResize = () => {
-      if (window.innerWidth >= 1024) setMobileMenuOpen(false);
-    };
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
-
-  const handleShare = async () => {
-    const data = {
-      title: brandName,
-      text: `Check out ${brandName}`,
+  function handleShare(event: ReactMouseEvent<HTMLButtonElement>): void {
+    event.preventDefault();
+    const shareData = {
+      title: 'Realty Canvas',
+      text: 'Check out this page from Realty Canvas',
       url: typeof window !== 'undefined' ? window.location.href : '',
     };
 
     try {
       if (navigator.share) {
-        await navigator.share(data);
-        return;
+        void navigator.share(shareData);
+      } else if (navigator.clipboard && shareData.url) {
+        void navigator.clipboard.writeText(shareData.url);
+        // Optionally show a small feedback; keeping it silent to avoid intrusive alerts.
+        // console.log('Link copied to clipboard');
       }
-      if (navigator.clipboard && data.url) {
-        await navigator.clipboard.writeText(data.url);
-      }
-    } catch {}
-  };
-
-  const handleLogout = async () => {
-    setIsLoggingOut(true);
-    try {
-      const res = await fetch('/api/auth/logout', { method: 'POST' });
-      if (res.ok) {
-        setUser(null);
-        setShowLogoutModal(false);
-        router.push('/admin/login');
-      }
-    } catch (error) {
-      console.error('Logout failed:', error);
-    } finally {
-      setIsLoggingOut(false);
+    } catch (err) {
+      console.error('Share action failed:', err);
     }
-  };
+  }
+
   return (
     <nav
-      className={`${showSolidNav ? 'bg-white shadow-lg' : 'bg-transparent'} fixed top-0 w-full z-50 transition-all duration-300`}
+      className={`${showSolidNav ? 'bg-white shadow-lg' : 'bg-transparent'} backdrop-blur-sm fixed w-full z-50 transition-all duration-300`}
     >
       <div
-        className={`mx-auto max-w-7xl ${showSolidNav ? 'bg-transparent' : 'bg-transparent hover:bg-black/20 lg:mt-2'} rounded transition-colors duration-300`}
+        className={`max-w-7xl mx-auto px-2 sm:px-4 ${showSolidNav ? 'bg-transparent' : 'bg-transparent hover:bg-black/20'} transition-colors duration-300 rounded-lg mx-4 mt-2`}
       >
-        <div className="h-20 px-2 sm:px-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center no-underline hover:no-underline focus:no-underline">
-            <Image
-              src={showSolidNav ? logoDarkSrc : logoLightSrc}
-              alt="Reality Canvas"
-              width={1200}
-              height={100}
-              className={`w-auto -ml-4 sm:-ml-2 max-w-32 sm:max-w-40 h-16 object-contain ${showSolidNav ? '' : ''}`}
-              priority
-            />
-          </Link>
+        <div className="flex justify-between items-center h-16 px-4 lg:px-4">
+          {/* Logo */}
+          <div className="">
+            <Link href="/" className="flex items-center no-underline hover:no-underline focus:no-underline">
+              {/* Logo - Light version only */}
+              <SmartImage
+                src={showSolidNav ? '/logo-original.webp' : '/logo-white.webp'}
+                alt="Reality Canvas"
+                width={1200}
+                height={100}
+                className={`w-40 h-10 ${showSolidNav ? '' : ''}`}
+                priority
+              />
+            </Link>
+          </div>
 
-          <div className="hidden lg:flex lg:items-center">
-            {navItems.map((item) => (
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex lg:items-center ">
+            {navigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className={`${showSolidNav ? 'text-gray-700' : 'text-white'} hover:text-[#FBB70F] px-4 py-2 text-base font-medium transition-colors duration-200 relative group no-underline`}
+                className={`${showSolidNav ? 'text-gray-700' : 'text-white'} hover:text-brand-primary px-4 py-2 text-base font-medium transition-colors duration-200 relative group no-underline hover:no-underline focus:no-underline`}
               >
                 {item.name}
-                <span className="absolute inset-x-0 bottom-0 h-0.5 bg-[#FBB70F] scale-x-0 group-hover:scale-x-100 transition-transform duration-200" />
+                <span className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-brand-primary to-brand-primary transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200"></span>
               </Link>
             ))}
           </div>
 
-          <div className="hidden lg:flex lg:items-center lg:space-x-4">
+          {/* Right side items */}
+          <div className="hidden lg:flex lg:items-center lg:space-x-4 pr-10">
+            {/* Theme toggle removed - using light mode only */}
             <Link
-              href={telHref}
-              className="flex items-center gap-2 bg-[#FBB70F] hover:bg-[#e5a60d] text-[#112D48] font-medium px-3 py-2 rounded-full transition-all duration-300 transform hover:scale-105 animate-pulse hover:animate-none whitespace-nowrap shadow-lg"
+              href="tel:9555562626"
+              className="flex items-center gap-2 bg-[#FBB70F] hover:bg-[#e5a60d] text-[#112D48] font-medium px-3 py-2 rounded-full transition-colors duration-300 call-now-pulse whitespace-nowrap shadow-lg"
             >
               <PhoneIcon className="h-4 w-4" />
               Call Now
             </Link>
             <Link
-              href={waHref}
+              href="https://wa.me/9555562626"
+              ref={hotlineButtonRef}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium px-3 py-2 rounded-full transition-all duration-300 transform hover:scale-105 whitespace-nowrap"
             >
-              <WhatsappIcon className="h-4 w-4" />
-              {whatsappNumber}
+              <FaWhatsapp className="h-4 w-4" />
+              9555562626
             </Link>
             <button
               onClick={handleShare}
-              className={`w-full cursor-pointer ${showSolidNav ? 'text-gray-600 bg-gray-300 hover:bg-gray-400' : 'text-white bg-white/20 hover:bg-white/30'} px-3 py-2 flex items-center justify-center rounded-full transition-all duration-300 transform hover:scale-105 whitespace-nowrap`}
+              className={`w-full ${showSolidNav ? 'text-gray-600 bg-[#F0F0F0]' : 'text-white bg-white/20 hover:bg-white/30'} p-3 flex items-center justify-center rounded-full transition-colors`}
             >
               <ShareIcon className="w-4 h-4 mr-2" />
               Share
             </button>
-            {user && (
-              <button
-                onClick={() => setShowLogoutModal(true)}
-                className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-full transition-all duration-300 transform hover:scale-105"
-              >
-                Logout
-              </button>
+            {/* Admin-only Add Project Button */}
+            {isAdmin && (
+              <Link href="/projects/new">
+                <BrandButton variant="primary" size="sm" className="rounded-full whitespace-nowrap text-sm px-3 py-1">
+                  Add Project
+                </BrandButton>
+              </Link>
+            )}
+
+            {/* Admin Authentication - Only show if already logged in as admin */}
+            {user && isAdmin && (
+              <Menu as="div" className="relative">
+                <Menu.Button className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-brand-primary dark:hover:text-brand-primary transition-colors duration-200">
+                  <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                    A
+                  </div>
+                  <span className="text-sm font-medium">Admin</span>
+                  <ChevronDownIcon className="w-4 h-4" />
+                </Menu.Button>
+
+                <Transition
+                  as={Fragment}
+                  enter="transition ease-out duration-100"
+                  enterFrom="transform opacity-0 scale-95"
+                  enterTo="transform opacity-100 scale-100"
+                  leave="transition ease-in duration-75"
+                  leaveFrom="transform opacity-100 scale-100"
+                  leaveTo="transform opacity-0 scale-95"
+                >
+                  <Menu.Items className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                    <div className="py-1">
+                      <Menu.Item>
+                        {({ active }) => (
+                          <button
+                            onClick={signOut}
+                            className={`${
+                              active ? 'bg-gray-100 dark:bg-gray-700' : ''
+                            } flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300`}
+                          >
+                            <ArrowRightOnRectangleIcon className="w-4 h-4 mr-3" />
+                            Sign Out
+                          </button>
+                        )}
+                      </Menu.Item>
+                    </div>
+                  </Menu.Items>
+                </Transition>
+              </Menu>
             )}
           </div>
 
+          {/* Mobile menu button */}
           <div className="lg:hidden flex items-center space-x-2">
+            {/* Theme toggle removed - using light mode only */}
             <button
-              onClick={() => setMobileMenuOpen((prev) => !prev)}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="text-[#FBB70F] hover:text-[#e5a60d] transition-colors duration-200"
-              aria-label="Toggle mobile menu"
             >
-              {mobileMenuOpen ? <CloseIcon className="h-9 w-9" /> : <BarsIcon className="h-9 w-9" />}
+              {mobileMenuOpen ? <XMarkIcon className="h-10 w-10" /> : <Bars3Icon className="h-10 w-10" />}
             </button>
           </div>
         </div>
 
-        {mobileMenuOpen && (
+        {/* Mobile menu */}
+        <Transition
+          show={mobileMenuOpen}
+          enter="transition ease-out duration-100"
+          enterFrom="transform opacity-0 scale-95"
+          enterTo="transform opacity-100 scale-100"
+          leave="transition ease-in duration-75"
+          leaveFrom="transform opacity-100 scale-100"
+          leaveTo="transform opacity-0 scale-95"
+        >
           <div className="lg:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 bg-white shadow-lg rounded-b-lg">
-              {navItems.map((item) => (
+            <div className="px-2 pt-2 pb-3 space-y-1 bg-white dark:bg-gray-900 shadow-lg rounded-b-lg">
+              {navigation.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-[#FBB70F] hover:bg-gray-50 rounded transition-colors duration-200 no-underline"
+                  className="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-brand-primary dark:hover:text-brand-primary hover:bg-gray-50 dark:hover:bg-secondary-800 rounded-md transition-colors duration-200 no-underline hover:no-underline focus:no-underline"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {item.name}
@@ -192,54 +268,52 @@ const Navbar = ({
               ))}
               <div className="px-3 py-2">
                 <Link
-                  href={telHref}
-                  className="flex items-center justify-center gap-2 bg-[#FBB70F] hover:bg-[#e5a60d] text-[#112D48] font-medium py-3 rounded text-center w-full mb-2 transition-all duration-300 transform hover:scale-105 animate-pulse hover:animate-none shadow-lg"
+                  href="tel:9555562626"
+                  className="flex items-center justify-center gap-2 bg-[#FBB70F] hover:bg-[#e5a60d] text-[#112D48] font-medium py-3 rounded-lg text-center w-full mb-2 transition-colors duration-300 call-now-pulse shadow-lg"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <PhoneIcon className="h-5 w-5" />
-                  Call Now: {phoneNumber}
+                  Call Now: 9555562626
                 </Link>
                 <Link
-                  href={waHref}
+                  href="https://wa.me/9555562626"
+                  ref={mobileHotlineButtonRef}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium py-3 rounded text-center w-full mb-2 transition-all duration-300 transform hover:scale-105"
+                  className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium py-3 rounded-lg text-center w-full mb-2 transition-all duration-300 transform hover:scale-105"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  <WhatsappIcon className="h-5 w-5" />
-                  {whatsappNumber}
+                  <FaWhatsapp className="h-5 w-5" />
+                  9555562626
                 </Link>
-                <button
-                  onClick={handleShare}
-                  className="w-full bg-gray-300 text-gray-700 p-3 flex items-center justify-center rounded transition-colors hover:bg-gray-400 mb-2"
-                >
-                  <ShareIcon className="w-5 h-5 mr-2" />
-                  Share
-                </button>
-                {user && (
-                  <button
-                    onClick={() => {
-                      setShowLogoutModal(true);
-                      setMobileMenuOpen(false);
-                    }}
-                    className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 rounded transition-colors"
-                  >
-                    Logout
-                  </button>
+                {/* Admin-only Add Project Button */}
+                {isAdmin && (
+                  <Link href="/projects/new" onClick={() => setMobileMenuOpen(false)}>
+                    <BrandButton variant="primary" size="sm" className="w-full rounded-full">
+                      Add Project
+                    </BrandButton>
+                  </Link>
                 )}
               </div>
+              {/* Admin Authentication for Mobile - Only show if already logged in as admin */}
+              {user && isAdmin && (
+                <div className="px-3 py-2 border-t border-gray-200 dark:border-gray-700">
+                  <button
+                    onClick={() => {
+                      signOut();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="flex items-center w-full px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md transition-colors duration-200"
+                  >
+                    <ArrowRightOnRectangleIcon className="w-5 h-5 mr-3" />
+                    Sign Out (Admin)
+                  </button>
+                </div>
+              )}
             </div>
           </div>
-        )}
+        </Transition>
       </div>
-      <LogoutModal
-        isOpen={showLogoutModal}
-        onClose={() => setShowLogoutModal(false)}
-        onConfirm={handleLogout}
-        isLoading={isLoggingOut}
-      />
     </nav>
   );
-};
-
-export default Navbar;
+}

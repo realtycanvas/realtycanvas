@@ -3,6 +3,12 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
+  async rewrites() {
+    return [
+      { source: '/logo-white.webp', destination: '/logo/logo-white.webp' },
+      { source: '/logo-original.webp', destination: '/logo/logo-original.webp' },
+    ];
+  },
   images: {
     remotePatterns: [
       // Unsplash
