@@ -135,9 +135,7 @@ export default function ProjectSearchBar({ onSearch, className = '', compact = f
   }
 
   return (
-    <div
-      className={`bg-white/20 backdrop-blur-md rounded shadow-xl p-3 sm:p-4 border border-white/30 ${className}`}
-    >
+    <div className={`bg-white/20 backdrop-blur-md rounded shadow p-3 sm:p-4 border border-white/30 ${className}`}>
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 sm:gap-3 items-end">
         <div className="space-y-1 sm:space-y-2">
           <label className="text-xs font-semibold text-white">Category</label>

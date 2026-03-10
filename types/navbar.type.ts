@@ -12,4 +12,3 @@ type NavbarProps = {
   navItems?: NavItem[];
   currentPath?: string;
 };
-

@@ -1,0 +1,120 @@
+import { defineType, defineArrayMember } from 'sanity';
+
+export const blockContent = defineType({
+  title: 'Block Content',
+  name: 'blockContent',
+  type: 'array',
+  of: [
+    defineArrayMember({
+      title: 'Block',
+      type: 'block',
+      styles: [
+        { title: 'H1', value: 'h1' },
+        { title: 'H2', value: 'h2' },
+        { title: 'H3', value: 'h3' },
+        { title: 'H4', value: 'h4' },
+        { title: 'Normal', value: 'normal' },
+        { title: 'Quote', value: 'blockquote' },
+      ],
+      lists: [
+        { title: 'Bullet', value: 'bullet' },
+        { title: 'Numbered', value: 'number' },
+      ],
+      marks: {
+        decorators: [
+          { title: 'Strong', value: 'strong' },
+          { title: 'Emphasis', value: 'em' },
+          { title: 'Code', value: 'code' },
+        ],
+        annotations: [
+          {
+            title: 'URL',
+            name: 'link',
+            type: 'object',
+            fields: [
+              {
+                title: 'URL',
+                name: 'href',
+                type: 'url',
+              },
+            ],
+          },
+        ],
+      },
+    }),
+    defineArrayMember({
+      type: 'image',
+      options: { hotspot: true },
+      fields: [
+        {
+          name: 'alt',
+          type: 'string',
+          title: 'Alternative Text',
+        },
+      ],
+    }),
+    defineArrayMember({
+      type: 'object',
+      name: 'codeBlock',
+      title: 'Code Block',
+      fields: [
+        {
+          name: 'language',
+          title: 'Language',
+          type: 'string',
+          options: {
+            list: [
+              { title: 'JavaScript', value: 'javascript' },
+              { title: 'TypeScript', value: 'typescript' },
+              { title: 'HTML', value: 'html' },
+              { title: 'CSS', value: 'css' },
+              { title: 'Python', value: 'python' },
+              { title: 'JSON', value: 'json' },
+              { title: 'Bash', value: 'bash' },
+            ],
+          },
+        },
+        {
+          name: 'code',
+          title: 'Code',
+          type: 'text',
+          rows: 10,
+        },
+      ],
+    }),
+    defineArrayMember({
+      type: 'table',
+    }),
+    defineArrayMember({
+      type: 'object',
+      name: 'projectSnapshot',
+      title: 'Project Snapshot Table',
+      fields: [
+        {
+          name: 'title',
+          title: 'Table Title',
+          type: 'string',
+          initialValue: 'Project Snapshot',
+        },
+        {
+          name: 'jsonData',
+          title: 'Table Data (Paste JSON)',
+          type: 'text',
+          description: 'Paste JSON array: [{"field": "Name", "details": "Value"}, ...]',
+          rows: 10,
+        },
+      ],
+      preview: {
+        select: {
+          title: 'title',
+        },
+        prepare(selection) {
+          return {
+            title: selection.title || 'Project Snapshot',
+            subtitle: 'JSON Table',
+          };
+        },
+      },
+    }),
+  ],
+});

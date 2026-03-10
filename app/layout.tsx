@@ -11,7 +11,7 @@ export const metadata: Metadata = LAYOUT_METADATA;
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" >
+    <html lang="en">
       <body className={`${InterClassName} antialiased`}>
         <SEO />
         <Navbar />

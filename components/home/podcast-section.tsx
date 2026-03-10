@@ -9,67 +9,67 @@ const podcastEpisodes = [
   {
     id: 1,
     episode: 25,
-    title: "Luxury Home Tours",
-    videoId: "M60HGX3MNWk",
-    duration: "45s",
-    date: "Oct 12, 2023"
+    title: 'Luxury Home Tours',
+    videoId: 'M60HGX3MNWk',
+    duration: '45s',
+    date: 'Oct 12, 2023',
   },
   {
     id: 2,
     episode: 26,
-    title: "Real Estate Investment Tips",
-    videoId: "RAqJZrdHv6Y",
-    duration: "38s",
-    date: "Oct 05, 2023"
+    title: 'Real Estate Investment Tips',
+    videoId: 'RAqJZrdHv6Y',
+    duration: '38s',
+    date: 'Oct 05, 2023',
   },
   {
     id: 3,
     episode: 27,
-    title: "Modern Interior Design",
-    videoId: "PBxmubUc7-I",
-    duration: "42s",
-    date: "Sep 28, 2023"
+    title: 'Modern Interior Design',
+    videoId: 'PBxmubUc7-I',
+    duration: '42s',
+    date: 'Sep 28, 2023',
   },
   {
     id: 4,
     episode: 28,
-    title: "Home Buying Guide",
-    videoId: "vgmTIQJXL0o",
-    duration: "35s",
-    date: "Sep 21, 2023"
+    title: 'Home Buying Guide',
+    videoId: 'vgmTIQJXL0o',
+    duration: '35s',
+    date: 'Sep 21, 2023',
   },
   {
     id: 5,
     episode: 29,
-    title: "Sustainable Living",
-    videoId: "xk7Uf-58pak",
-    duration: "50s",
-    date: "Sep 14, 2023"
+    title: 'Sustainable Living',
+    videoId: 'xk7Uf-58pak',
+    duration: '50s',
+    date: 'Sep 14, 2023',
   },
   {
     id: 6,
     episode: 30,
-    title: "Market Analysis 2024",
-    videoId: "B9KnIMMpWLA",
-    duration: "40s",
-    date: "Sep 07, 2023"
+    title: 'Market Analysis 2024',
+    videoId: 'B9KnIMMpWLA',
+    duration: '40s',
+    date: 'Sep 07, 2023',
   },
   {
     id: 7,
     episode: 31,
-    title: "Smart Home Tech",
-    videoId: "VCHCn5PUsk4",
-    duration: "55s",
-    date: "Aug 31, 2023"
+    title: 'Smart Home Tech',
+    videoId: 'VCHCn5PUsk4',
+    duration: '55s',
+    date: 'Aug 31, 2023',
   },
   {
     id: 8,
     episode: 32,
-    title: "Property Valuation",
-    videoId: "NKIrX2szcG0",
-    duration: "48s",
-    date: "Aug 24, 2023"
-  }
+    title: 'Property Valuation',
+    videoId: 'NKIrX2szcG0',
+    duration: '48s',
+    date: 'Aug 24, 2023',
+  },
 ];
 
 export default function PodcastSection() {
@@ -90,8 +90,8 @@ export default function PodcastSection() {
       <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
       <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
 
-      <div className="max-w-6xl mx-auto px-4 relative z-10">
-        <div className="flex flex-col lg:flex-row items-center gap-16">
+      <div className="max-w-7xl mx-auto px-4 relative z-10">
+        <div className="flex flex-col lg:flex-row items-center lg:justify-center gap-16">
           {/* Text Content - Left Side */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
@@ -101,27 +101,28 @@ export default function PodcastSection() {
             className="w-full lg:w-1/2"
           >
             <div className="flex items-center gap-2 mb-4">
-              <span className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-full text-blue-600 dark:text-blue-400">
-                <Mic className="w-5 h-5" />
+              <span className="p-1 bg-blue-50 dark:bg-blue-900/20 rounded-full text-blue-600 dark:text-blue-400">
+                <Mic className="w-4 h-4" />
               </span>
               <span className="text-sm font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
                 Now Streaming
               </span>
             </div>
 
-            <h2 className="text-3xl md:text-5xl font-bold text-[#0B1A3D] dark:text-white mb-6 leading-tight">
-              Realty Canvas  <br />
+            <h2 className="text-4xl md:text-5xl font-bold text-[#0B1A3D] dark:text-white mb-6 leading-tight">
+              Realty Canvas <br />
               <span className="text-[#FDB022]">Insights Podcast</span>
             </h2>
 
-            <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
-              Join us as we dive deep into the world of real estate, design trends, and market analysis. Expert interviews, tips for buyers and sellers, and the latest industry news.
+            <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 max-w-md">
+              Join us as we dive deep into the world of real estate, design trends, and market analysis. Expert
+              interviews, tips for buyers and sellers, and the latest industry news.
             </p>
 
             <div className="flex flex-wrap gap-4">
               <Button
                 size="lg"
-                className="rounded-full gap-2"
+                className="cursor-pointer rounded gap-2 bg-black hover:bg-black/80 text-white"
                 onClick={() => window.open(`https://youtube.com/shorts/${podcastEpisodes[0].videoId}`, '_blank')}
               >
                 <Play className="w-5 h-5 fill-current" />
@@ -130,8 +131,10 @@ export default function PodcastSection() {
               <Button
                 variant="outline"
                 size="lg"
-                className="rounded-full gap-2"
-                onClick={() => window.open('https://www.youtube.com/@RealInRealtyWithSunilBhambhani/featured', '_blank')}
+                className="cursor-pointer rounded hover:bg-border gap-2"
+                onClick={() =>
+                  window.open('https://www.youtube.com/@RealInRealtyWithSunilBhambhani/featured', '_blank')
+                }
               >
                 <Headphones className="w-5 h-5" />
                 View All Episodes
@@ -145,33 +148,29 @@ export default function PodcastSection() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="w-full lg:w-1/2 flex justify-center items-center h-112.5 relative"
+            className="w-full max-w-64 flex justify-center items-center h-112.5 relative"
           >
             <div className="relative w-full max-w-60 aspect-9/16">
-              {cards.slice(0, 3).reverse().map((card, index) => {
-                // Index logic: 
-                // If we slice 3 items: [0, 1, 2]. Reversed: [2, 1, 0].
-                // So the last item in the map (index 2 in slice) is the top card (cards[0]).
-                // Let's recalculate the visual index.
-                // cards[0] should be front.
-                // slice(0,3).reverse() -> [cards[2], cards[1], cards[0]]
-                // map index i: 0->cards[2], 1->cards[1], 2->cards[0]
+              {cards
+                .slice(0, 3)
+                .reverse()
+                .map((card, index) => {
+                  // Index logic:
+                  // If we slice 3 items: [0, 1, 2]. Reversed: [2, 1, 0].
+                  // So the last item in the map (index 2 in slice) is the top card (cards[0]).
+                  // Let's recalculate the visual index.
+                  // cards[0] should be front.
+                  // slice(0,3).reverse() -> [cards[2], cards[1], cards[0]]
+                  // map index i: 0->cards[2], 1->cards[1], 2->cards[0]
 
-                // So, visual_index (0=front, 1=middle, 2=back)
-                // If i=2 (cards[0]), visual_index=0
-                // If i=1 (cards[1]), visual_index=1
-                // If i=0 (cards[2]), visual_index=2
-                const visualIndex = 2 - index;
+                  // So, visual_index (0=front, 1=middle, 2=back)
+                  // If i=2 (cards[0]), visual_index=0
+                  // If i=1 (cards[1]), visual_index=1
+                  // If i=0 (cards[2]), visual_index=2
+                  const visualIndex = 2 - index;
 
-                return (
-                  <Card
-                    key={card.id}
-                    data={card}
-                    index={visualIndex}
-                    onRemove={() => removeCard(card.id)}
-                  />
-                );
-              })}
+                  return <Card key={card.id} data={card} index={visualIndex} onRemove={() => removeCard(card.id)} />;
+                })}
             </div>
           </motion.div>
         </div>
@@ -180,7 +179,7 @@ export default function PodcastSection() {
   );
 }
 
-function Card({ data, index, onRemove }: { data: any, index: number, onRemove: () => void }) {
+function Card({ data, index, onRemove }: { data: any; index: number; onRemove: () => void }) {
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-18, 18]);
   const opacity = useTransform(x, [-200, -100, 0, 100, 200], [0, 1, 1, 1, 0]);
@@ -213,7 +212,7 @@ function Card({ data, index, onRemove }: { data: any, index: number, onRemove: (
         scale,
         zIndex,
       }}
-      drag={isFront ? "x" : false}
+      drag={isFront ? 'x' : false}
       dragConstraints={{ left: 0, right: 0 }}
       onDragEnd={handleDragEnd}
       onClick={() => isFront && window.open(`https://youtube.com/shorts/${data.videoId}`, '_blank')}
@@ -221,9 +220,9 @@ function Card({ data, index, onRemove }: { data: any, index: number, onRemove: (
         scale,
         rotate: isFront ? 0 : staticRotate, // Ensure static rotation is applied in animation state
         x: isFront ? 0 : xOffset, // Ensure static x offset is applied
-        zIndex
+        zIndex,
       }}
-      transition={{ type: "spring", stiffness: 200, damping: 20 }}
+      transition={{ type: 'spring', stiffness: 200, damping: 20 }}
       className={`absolute top-0 left-0 w-full h-full rounded-2xl shadow-2xl overflow-hidden bg-gray-900 origin-bottom-left ${isFront ? 'cursor-pointer' : 'cursor-default'}`}
     >
       {/* YouTube Short Iframe */}
@@ -258,17 +257,11 @@ function Card({ data, index, onRemove }: { data: any, index: number, onRemove: (
             {/* <span className="bg-[#FDB022] text-[#0B1A3D] px-2 py-1 rounded text-[10px] uppercase tracking-wide font-bold">
                 Ep {data.episode}
                 </span> */}
-            <span className="flex items-center gap-1">
-              {/* <Clock className="w-3 h-3" /> {data.duration} */}
-            </span>
-            <span className="flex items-center gap-1">
-              {/* <Calendar className="w-3 h-3" /> {data.date} */}
-            </span>
+            <span className="flex items-center gap-1">{/* <Clock className="w-3 h-3" /> {data.duration} */}</span>
+            <span className="flex items-center gap-1">{/* <Calendar className="w-3 h-3" /> {data.date} */}</span>
           </div>
 
-          <h3 className="text-2xl font-bold text-white leading-tight">
-            {/* {data.title} */}
-          </h3>
+          <h3 className="text-2xl font-bold text-white leading-tight">{/* {data.title} */}</h3>
         </div>
       </div>
     </motion.div>

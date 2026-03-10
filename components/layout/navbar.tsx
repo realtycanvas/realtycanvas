@@ -7,6 +7,7 @@ import { defaultNavItems } from '@/data/navbar.data';
 import { useEffect, useMemo, useState } from 'react';
 import { formatPhoneLink, formatWhatsappLink } from '@/helpers/navbar.helper';
 import { BarsIcon, CloseIcon, PhoneIcon, ShareIcon, WhatsappIcon } from '../ui/icon';
+import { usePathname } from 'next/navigation';
 
 const Navbar = ({
   brandName = 'Realty Canvas',
@@ -17,10 +18,12 @@ const Navbar = ({
   navItems = defaultNavItems,
   currentPath = '/',
 }: NavbarProps) => {
+  const pathname = usePathname();
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
-  const isHomePage = currentPath === '/';
+  const isHomePage = pathname === '/';
   const showSolidNav = isScrolled || !isHomePage || mobileMenuOpen;
 
   const telHref = useMemo(() => formatPhoneLink(phoneNumber), [phoneNumber]);
@@ -90,7 +93,7 @@ const Navbar = ({
             ))}
           </div>
 
-          <div className="hidden lg:flex lg:items-center lg:space-x-4 pr-10">
+          <div className="hidden lg:flex lg:items-center lg:space-x-4">
             <Link
               href={telHref}
               className="flex items-center gap-2 bg-[#FBB70F] hover:bg-[#e5a60d] text-[#112D48] font-medium px-3 py-2 rounded-full transition-all duration-300 transform hover:scale-105 animate-pulse hover:animate-none whitespace-nowrap shadow-lg"

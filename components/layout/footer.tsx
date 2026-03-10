@@ -12,7 +12,7 @@ const Footer = () => {
         <div className="absolute top-0 right-0 w-64 h-64 bg-linear-to-l from-brand-primary/10 to-brand-primary/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-linear-to-r from-brand-primary/5 to-brand-primary/5 rounded-full blur-3xl"></div>
 
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
             {/* Company Info */}
             <div className="lg:col-span-2">
@@ -34,7 +34,7 @@ const Footer = () => {
                   href="https://www.facebook.com/realtycanvasofficial"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-gray-800 hover:bg-linear-to-r hover:from-brand-primary hover:to-brand-primary p-3 rounded-2xl transition-all duration-300 transform hover:scale-110"
+                  className="bg-gray-800 hover:bg-linear-to-r hover:from-brand-primary hover:to-brand-primary p-3 rounded transition-all duration-300 transform hover:scale-110"
                 >
                   <FaFacebookF className="w-5 h-5" />
                 </Link>
@@ -42,7 +42,7 @@ const Footer = () => {
                   href="https://www.instagram.com/realtycanvas.official/?igsh=NnQ3Nmx2YzBhbDU4"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-gray-800 hover:bg-linear-to-r hover:from-brand-primary hover:to-brand-primary p-3 rounded-2xl transition-all duration-300 transform hover:scale-110"
+                  className="bg-gray-800 hover:bg-linear-to-r hover:from-brand-primary hover:to-brand-primary p-3 rounded transition-all duration-300 transform hover:scale-110"
                 >
                   <FaInstagram className="w-5 h-5" />
                 </Link>
@@ -50,7 +50,7 @@ const Footer = () => {
                   href="https://www.linkedin.com/company/realtycanvas/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-gray-800 hover:bg-linear-to-r hover:from-brand-primary hover:to-brand-primary p-3 rounded-2xl transition-all duration-300 transform hover:scale-110"
+                  className="bg-gray-800 hover:bg-linear-to-r hover:from-brand-primary hover:to-brand-primary p-3 rounded transition-all duration-300 transform hover:scale-110"
                 >
                   <FaLinkedinIn className="w-5 h-5" />
                 </Link>
@@ -58,7 +58,7 @@ const Footer = () => {
                   href="https://www.youtube.com/@Realty_Canvas"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-gray-800 hover:bg-linear-to-r hover:from-brand-primary hover:to-brand-primary p-3 rounded-2xl transition-all duration-300 transform hover:scale-110"
+                  className="bg-gray-800 hover:bg-linear-to-r hover:from-brand-primary hover:to-brand-primary p-3 rounded transition-all duration-300 transform hover:scale-110"
                 >
                   <FaYoutube className="w-5 h-5" />
                 </Link>
@@ -124,8 +124,8 @@ const Footer = () => {
             <div className=" pt-8 ">
               <div className="grid grid-cols-1 -mt-8 gap-6">
                 <h4 className="text-xl font-bold  text-white">Contact Us</h4>
-                <div className="flex items-center space-x-3">
-                  <div className="bg-linear-to-r from-brand-primary to-brand-primary p-2 rounded-xl">
+                <div className="flex items-start space-x-3">
+                  <div className="bg-linear-to-r from-brand-primary to-brand-primary p-2 rounded">
                     <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
                         strokeLinecap="round"
@@ -149,7 +149,7 @@ const Footer = () => {
                 </div>
 
                 <div className="flex items-center space-x-3">
-                  <div className="bg-linear-to-r from-brand-primary to-brand-primary p-2 rounded-xl">
+                  <div className="bg-linear-to-r from-brand-primary to-brand-primary p-2 rounded">
                     <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
                         strokeLinecap="round"
@@ -166,7 +166,7 @@ const Footer = () => {
                 </div>
 
                 <div className="flex items-center space-x-3">
-                  <div className="bg-linear-to-r from-brand-primary to-brand-primary p-2 rounded-xl">
+                  <div className="bg-linear-to-r from-brand-primary to-brand-primary p-2 rounded">
                     <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
                         strokeLinecap="round"
