@@ -7,7 +7,7 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
-const projectSlug = 'spj-vedatam-12';
+const projectSlug = 'spj-vedatam-premier-commercial-and-retail-hub-in-sector-14-gurugram';
 
 const whoShouldConsider = `Who Should Consider SPJ Vedatam?
 
@@ -102,7 +102,7 @@ const projectData = {
     'https://images.unsplash.com/photo-1501183638710-841dd1904471?w=1400&h=900&fit=crop',
   ],
   basePrice: null,
-  priceRange: '₹50 Lakhs* – ₹5.5 Cr*+',
+  priceRange: '₹50 Lakhs – ₹5.5 Cr+',
   bannerTitle: 'SPJ Vedatam – Premier Commercial & Retail Hub in Sector 14, Gurugram',
   bannerSubtitle: 'Premium high-street retail, dining, entertainment & serviced apartments',
   bannerDescription:
@@ -192,10 +192,10 @@ const offeringsData = [
 ];
 
 const pricingData = [
-  { type: 'Retail Shops', reraArea: '300 – 1,465 Sq.ft', price: '₹50 Lakhs* – ₹2.9 Cr*+', pricePerSqft: null },
-  { type: 'Food Court Units', reraArea: '300+ Sq.ft', price: '₹65 Lakhs*+', pricePerSqft: null },
+  { type: 'Retail Shops', reraArea: '300 – 1,465 Sq.ft', price: '₹50 Lakhs – ₹2.9 Cr+', pricePerSqft: null },
+  { type: 'Food Court Units', reraArea: '300+ Sq.ft', price: '₹65 Lakhs+', pricePerSqft: null },
   { type: 'Multiplex & Anchor Spaces', reraArea: 'Custom sizes', price: 'On Request', pricePerSqft: null },
-  { type: 'Serviced Apartments', reraArea: '2,200 – 2,400 Sq.ft', price: '₹4.6 Cr* – ₹5.5 Cr*+', pricePerSqft: null },
+  { type: 'Serviced Apartments', reraArea: '2,200 – 2,400 Sq.ft', price: '₹4.6 Cr – ₹5.5 Cr+', pricePerSqft: null },
 ];
 
 const nearbyPointsData = [
@@ -224,7 +224,7 @@ const faqsData = [
   {
     question: 'What is the indicative price range?',
     answer:
-      'Retail shops start from ₹50 Lakhs* (300 Sq.ft), food court units from ₹65 Lakhs*+, and serviced apartments range from ₹4.6 Cr* to ₹5.5 Cr*+. Prices are indicative and subject to change.',
+      'Retail shops start from ₹50 Lakhs (300 Sq.ft), food court units from ₹65 Lakhs+, and serviced apartments range from ₹4.6 Cr to ₹5.5 Cr+. Prices are indicative and subject to change.',
     sortOrder: 3,
   },
   {

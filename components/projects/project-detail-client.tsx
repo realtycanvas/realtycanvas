@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { MapPin } from 'lucide-react';
+import FaqItem from './faq-item';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -93,7 +94,11 @@ type Project = {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const formatCategory = (value: string) => value.replace(/_/g, ' ');
+const formatCategory = (value: string) =>
+  value
+    .replace(/_/g, ' ')
+    .toLowerCase()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 
 const getStatusStyle = (status: string) => {
   if (status === 'READY') return 'bg-green-100 text-green-800';
@@ -138,7 +143,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8 mt-20">
         {/* Back + CTA */}
         <div className="flex items-center justify-between mb-6">
           <Link href="/projects" className="text-blue-600 hover:text-blue-800 font-medium">
@@ -170,11 +175,6 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                 />
               )}
               <div className="absolute inset-0 bg-black/25" />
-              <div className="absolute right-3 top-3 z-10">
-                <span className={`px-3 py-1 rounded text-sm font-semibold ${getStatusStyle(project.status)}`}>
-                  {formatCategory(project.status)}
-                </span>
-              </div>
               {galleryImages.length > 1 && (
                 <>
                   <button
@@ -206,16 +206,24 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
 
             {/* Title + Address */}
             <div>
+              <div className="mb-2 flex gap-2 ">
+                {project.reraId && (
+                  <span className="inline-block text-[12px] bg-green-100 font-semibold text-green-800 px-2 py-1 rounded">
+                    RERA: {project.reraId}
+                  </span>
+                )}
+
+                <div className="">
+                  <span className={`inline-block text-[12px] bg-brand-primary/50 font-semibold px-2 py-1 rounded`}>
+                    {formatCategory(project.status)}
+                  </span>
+                </div>
+              </div>
               <h1 className="text-4xl font-bold text-gray-900 mb-2">{primaryHeading}</h1>
               <p className="text-gray-600 text-sm flex gap-1 items-center">
                 <MapPin size={16} className="mt-px shrink-0" />
                 {[project.address, project.locality, project.city, project.state].filter(Boolean).join(', ')}
               </p>
-              {project.reraId && (
-                <span className="inline-block mt-2 text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-                  RERA: {project.reraId}
-                </span>
-              )}
             </div>
 
             {/* Short Description */}
@@ -421,46 +429,13 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
             {/* 9. FAQs */}
             {project.faqs.length > 0 && (
               <Section title="Frequently Asked Questions">
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {project.faqs.map((faq) => (
-                    <div key={faq.id} className="border border-gray-200 rounded p-5">
-                      <h3 className="font-semibold text-gray-900 mb-2">{faq.question}</h3>
-                      <p className="text-gray-700 text-sm leading-relaxed">{faq.answer}</p>
-                    </div>
+                    <FaqItem key={faq.id} question={faq.question} answer={faq.answer} />
                   ))}
                 </div>
               </Section>
             )}
-
-            {/* 10. Enquiry Form */}
-            <section id="enquiry" className="bg-yellow-50 border-2 border-yellow-200 rounded p-8">
-              <div className="max-w-2xl mx-auto">
-                <h2 className="text-3xl font-bold text-gray-900 mb-2 text-center">Interested in {project.title}?</h2>
-                <p className="text-center text-gray-600 mb-2 text-sm">
-                  Fill in your details to get exclusive pricing, floor plans, and latest updates.
-                </p>
-                <ul className="text-center text-sm text-gray-500 mb-6 space-y-1">
-                  <li>✓ Current prices & floor plans</li>
-                  <li>✓ Unit availability & payment plans</li>
-                  <li>✓ Exclusive offers for early bookings</li>
-                </ul>
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <input
-                    type="text"
-                    placeholder="Your Name"
-                    className="flex-1 px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                  />
-                  <input
-                    type="tel"
-                    placeholder="Phone Number"
-                    className="flex-1 px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                  />
-                  <button className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-8 py-3 rounded transition">
-                    Send Enquiry
-                  </button>
-                </div>
-              </div>
-            </section>
           </div>
 
           {/* ── Right Sticky Sidebar ─────────────────────────────────────── */}
@@ -469,7 +444,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
               {/* Price Card */}
               <div className="bg-white rounded shadow overflow-hidden">
                 <div className="text-center bg-gray-900 p-6">
-                  <p className="text-xs text-gray-400 mb-1 uppercase tracking-wider">Starting From</p>
+                  {/* <p className="text-xs text-gray-400 mb-1 uppercase tracking-wider">Starting From</p> */}
                   <div className="text-2xl font-bold text-yellow-400">
                     {project.basePrice || project.priceRange || 'Contact for Pricing'}
                   </div>
@@ -480,13 +455,15 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                     { label: 'Land Area', value: project.landArea },
                     { label: 'Floors', value: project.numberOfFloors },
                     { label: 'Total Units', value: project.totalUnits },
-                    { label: 'Available', value: project.availableUnits },
-                  ].map(({ label, value }) => (
-                    <div key={label} className="bg-gray-50 rounded p-3 text-center min-w-[80px]">
-                      <p className="text-base font-semibold text-gray-900">{value || 'N/A'}</p>
-                      <p className="text-xs text-gray-500">{label}</p>
-                    </div>
-                  ))}
+                    { label: 'Category', value: formatCategory(project.category) },
+                  ]
+                    .filter(({ value }) => value !== null && value !== undefined && value !== '')
+                    .map(({ label, value }) => (
+                      <div key={label} className="bg-gray-50 rounded p-3 text-center min-w-20">
+                        <p className="text-base font-semibold text-gray-900">{value}</p>
+                        <p className="text-xs text-gray-500">{label}</p>
+                      </div>
+                    ))}
                 </div>
               </div>
 
@@ -507,26 +484,14 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
 
               {/* CTAs */}
               <div className="space-y-3">
-                <a
-                  href="#enquiry"
-                  className="block text-center bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 rounded transition"
-                >
-                  Request Callback
-                </a>
-                <a
+                <Link
                   href="https://wa.me/919555562626"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block text-center bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded transition"
                 >
                   WhatsApp Inquiry
-                </a>
-                <a
-                  href="tel:9555562626"
-                  className="block text-center border-2 border-gray-300 hover:border-yellow-500 text-gray-700 font-semibold py-3 rounded transition"
-                >
-                  📞 Call: 9555562626
-                </a>
+                </Link>
               </div>
             </div>
           </div>
