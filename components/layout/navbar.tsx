@@ -105,7 +105,7 @@ const Navbar = ({
       className={`${showSolidNav ? 'bg-white shadow-lg' : 'bg-transparent'} fixed top-0 w-full z-50 transition-all duration-300`}
     >
       <div
-        className={`mx-auto max-w-7xl ${showSolidNav ? 'bg-transparent' : 'bg-transparent hover:bg-black/20'} rounded transition-colors duration-300`}
+        className={`mx-auto max-w-7xl ${showSolidNav ? 'bg-transparent' : 'bg-transparent hover:bg-black/20 lg:mt-2'} rounded transition-colors duration-300`}
       >
         <div className="h-20 px-2 sm:px-4 flex items-center justify-between">
           <Link href="/" className="flex items-center no-underline hover:no-underline focus:no-underline">
