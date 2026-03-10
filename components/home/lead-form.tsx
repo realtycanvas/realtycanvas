@@ -12,23 +12,37 @@ interface FormData {
   propertyType: 'COMMERCIAL' | 'RESIDENTIAL' | '';
   city: string;
   state: string;
+  projectSlug?: string;
+  projectTitle?: string;
+  sourcePath?: string;
 }
 
 interface LeadFormProps {
   onSuccess?: () => void;
   onCancel?: () => void;
   showCancelButton?: boolean;
+  defaultValues?: {
+    propertyType?: 'COMMERCIAL' | 'RESIDENTIAL' | '';
+    city?: string;
+    state?: string;
+    projectSlug?: string;
+    projectTitle?: string;
+    sourcePath?: string;
+  };
 }
 
-export default function LeadForm({ onSuccess, onCancel, showCancelButton = true }: LeadFormProps) {
+export default function LeadForm({ onSuccess, onCancel, showCancelButton = true, defaultValues }: LeadFormProps) {
   const [formData, setFormData] = useState<FormData>({
     name: '',
     phone: '',
     email: '',
     timeline: '',
-    propertyType: '',
-    city: '',
-    state: '',
+    propertyType: defaultValues?.propertyType || '',
+    city: defaultValues?.city || '',
+    state: defaultValues?.state || '',
+    projectSlug: defaultValues?.projectSlug,
+    projectTitle: defaultValues?.projectTitle,
+    sourcePath: defaultValues?.sourcePath,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -43,9 +57,7 @@ export default function LeadForm({ onSuccess, onCancel, showCancelButton = true 
     try {
       const response = await fetch('/api/lead-capture', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
 
@@ -58,9 +70,12 @@ export default function LeadForm({ onSuccess, onCancel, showCancelButton = true 
           phone: '',
           email: '',
           timeline: '',
-          propertyType: '',
-          city: '',
-          state: '',
+          propertyType: defaultValues?.propertyType || '',
+          city: defaultValues?.city || '',
+          state: defaultValues?.state || '',
+          projectSlug: defaultValues?.projectSlug,
+          projectTitle: defaultValues?.projectTitle,
+          sourcePath: defaultValues?.sourcePath,
         });
         if (onSuccess) onSuccess();
       } else {
@@ -76,37 +91,28 @@ export default function LeadForm({ onSuccess, onCancel, showCancelButton = true 
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3 w-full">
-      {/* Property Type Radios */}
+      {/* Property Type */}
       <fieldset className="space-y-1.5">
         <legend className="block text-sm font-medium text-gray-700">Property Type *</legend>
         <div className="flex items-center gap-4">
-          <label className="inline-flex items-center gap-3 text-sm text-gray-700">
-            <input
-              type="radio"
-              name="propertyType"
-              value="COMMERCIAL"
-              checked={formData.propertyType === 'COMMERCIAL'}
-              onChange={() => handleInputChange('propertyType', 'COMMERCIAL')}
-              required
-              className="accent-blue-600 w-4 h-4"
-            />
-            <span className="text-base">🏢 Commercial</span>
-          </label>
-          <label className="inline-flex items-center gap-3 text-sm text-gray-700">
-            <input
-              type="radio"
-              name="propertyType"
-              value="RESIDENTIAL"
-              checked={formData.propertyType === 'RESIDENTIAL'}
-              onChange={() => handleInputChange('propertyType', 'RESIDENTIAL')}
-              required
-              className="accent-blue-600 w-4 h-4"
-            />
-            <span className="text-base">🏠 Residential</span>
-          </label>
+          {(['COMMERCIAL', 'RESIDENTIAL'] as const).map((type) => (
+            <label key={type} className="inline-flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
+              <input
+                type="radio"
+                name="propertyType"
+                value={type}
+                checked={formData.propertyType === type}
+                onChange={() => handleInputChange('propertyType', type)}
+                required
+                className="accent-blue-600"
+              />
+              <span>{type === 'COMMERCIAL' ? '🏢 Commercial' : '🏠 Residential'}</span>
+            </label>
+          ))}
         </div>
       </fieldset>
 
+      {/* Name */}
       <div className="space-y-1.5">
         <label htmlFor="name" className="block text-sm font-medium text-gray-700">
           Name *
@@ -122,39 +128,39 @@ export default function LeadForm({ onSuccess, onCancel, showCancelButton = true 
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
-        <div className="space-y-1.5">
-          <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-            Phone Number *
-          </label>
-          <Input
-            id="phone"
-            type="tel"
-            placeholder="Enter your phone number"
-            value={formData.phone}
-            onChange={(e) => handleInputChange('phone', e.target.value)}
-            required
-            className="w-full h-10 text-sm rounded"
-          />
-        </div>
-
-        <div className="space-y-1.5">
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-            Email ID *
-          </label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="Enter your email address"
-            value={formData.email}
-            onChange={(e) => handleInputChange('email', e.target.value)}
-            required
-            className="w-full h-10 text-sm rounded"
-          />
-        </div>
+      {/* Phone */}
+      <div className="space-y-1.5">
+        <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+          Phone Number *
+        </label>
+        <Input
+          id="phone"
+          type="tel"
+          placeholder="Enter your phone number"
+          value={formData.phone}
+          onChange={(e) => handleInputChange('phone', e.target.value)}
+          required
+          className="w-full h-10 text-sm rounded"
+        />
       </div>
 
-      {/* City and State Fields */}
+      {/* Email */}
+      <div className="space-y-1.5">
+        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+          Email ID *
+        </label>
+        <Input
+          id="email"
+          type="email"
+          placeholder="Enter your email address"
+          value={formData.email}
+          onChange={(e) => handleInputChange('email', e.target.value)}
+          required
+          className="w-full h-10 text-sm rounded"
+        />
+      </div>
+
+      {/* City + State */}
       <div className="grid grid-cols-2 gap-2">
         <div className="space-y-1.5">
           <label htmlFor="city" className="block text-sm font-medium text-gray-700">
@@ -179,44 +185,51 @@ export default function LeadForm({ onSuccess, onCancel, showCancelButton = true 
             value={formData.state}
             onChange={(e) => handleInputChange('state', e.target.value)}
             required
-            className="w-full h-10 px-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+            className="w-full h-10 px-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
           >
             <option value="">Select state</option>
-            <option value="Andhra Pradesh">Andhra Pradesh</option>
-            <option value="Arunachal Pradesh">Arunachal Pradesh</option>
-            <option value="Assam">Assam</option>
-            <option value="Bihar">Bihar</option>
-            <option value="Chhattisgarh">Chhattisgarh</option>
-            <option value="Goa">Goa</option>
-            <option value="Gujarat">Gujarat</option>
-            <option value="Haryana">Haryana</option>
-            <option value="Himachal Pradesh">Himachal Pradesh</option>
-            <option value="Jharkhand">Jharkhand</option>
-            <option value="Karnataka">Karnataka</option>
-            <option value="Kerala">Kerala</option>
-            <option value="Madhya Pradesh">Madhya Pradesh</option>
-            <option value="Maharashtra">Maharashtra</option>
-            <option value="Manipur">Manipur</option>
-            <option value="Meghalaya">Meghalaya</option>
-            <option value="Mizoram">Mizoram</option>
-            <option value="Nagaland">Nagaland</option>
-            <option value="Odisha">Odisha</option>
-            <option value="Punjab">Punjab</option>
-            <option value="Rajasthan">Rajasthan</option>
-            <option value="Sikkim">Sikkim</option>
-            <option value="Tamil Nadu">Tamil Nadu</option>
-            <option value="Telangana">Telangana</option>
-            <option value="Tripura">Tripura</option>
-            <option value="Uttar Pradesh">Uttar Pradesh</option>
-            <option value="Uttarakhand">Uttarakhand</option>
-            <option value="West Bengal">West Bengal</option>
-            <option value="Delhi">Delhi</option>
-            <option value="Chandigarh">Chandigarh</option>
-            <option value="Puducherry">Puducherry</option>
+            {[
+              'Andhra Pradesh',
+              'Arunachal Pradesh',
+              'Assam',
+              'Bihar',
+              'Chhattisgarh',
+              'Goa',
+              'Gujarat',
+              'Haryana',
+              'Himachal Pradesh',
+              'Jharkhand',
+              'Karnataka',
+              'Kerala',
+              'Madhya Pradesh',
+              'Maharashtra',
+              'Manipur',
+              'Meghalaya',
+              'Mizoram',
+              'Nagaland',
+              'Odisha',
+              'Punjab',
+              'Rajasthan',
+              'Sikkim',
+              'Tamil Nadu',
+              'Telangana',
+              'Tripura',
+              'Uttar Pradesh',
+              'Uttarakhand',
+              'West Bengal',
+              'Delhi',
+              'Chandigarh',
+              'Puducherry',
+            ].map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
           </select>
         </div>
       </div>
 
+      {/* Timeline */}
       <div className="space-y-1.5">
         <label htmlFor="timeline" className="block text-sm font-medium text-gray-700">
           Purchase Timeline *
@@ -226,7 +239,7 @@ export default function LeadForm({ onSuccess, onCancel, showCancelButton = true 
           value={formData.timeline}
           onChange={(e) => handleInputChange('timeline', e.target.value)}
           required
-          className="w-full h-10 px-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+          className="w-full h-10 px-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
         >
           <option value="">Select your timeline</option>
           <option value="1-month">1 Month</option>
@@ -238,16 +251,16 @@ export default function LeadForm({ onSuccess, onCancel, showCancelButton = true 
 
       <div className="flex gap-2 pt-3">
         {showCancelButton && (
-          <Button type="button" variant="outline" onClick={onCancel} className="flex-1 h-8 text-sm">
+          <Button type="button" variant="outline" onClick={onCancel} className="flex-1 h-9 text-sm">
             Cancel
           </Button>
         )}
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="flex-1 h-8 text-sm bg-blue-600 hover:bg-blue-700 text-white"
+          className="flex-1 h-9 text-sm bg-blue-600 hover:bg-blue-700 text-white"
         >
-          {isSubmitting ? 'Submitting...' : 'Submit'}
+          {isSubmitting ? 'Submitting...' : 'Get Details'}
         </Button>
       </div>
     </form>

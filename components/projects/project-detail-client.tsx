@@ -5,6 +5,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { MapPin } from 'lucide-react';
 import FaqItem from './faq-item';
+import { usePathname } from 'next/navigation';
+import LeadModal from '../common/lead-modal';
+import { ClipboardDocumentIcon } from '@heroicons/react/24/outline';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -122,6 +125,13 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
 export default function ProjectDetailClient({ project }: { project: Project }) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [viewAllPhotos, setViewAllPhotos] = useState(false);
+  const [isLeadModalOpen, setIsLeadModalOpen] = useState(false);
+  const [toast, setToast] = useState('');
+
+  const pathname = usePathname();
+
+  const projectPropertyType: 'COMMERCIAL' | 'RESIDENTIAL' | '' =
+    project.category === 'RESIDENTIAL' ? 'RESIDENTIAL' : 'COMMERCIAL';
 
   const galleryImages = useMemo(() => {
     const images = project.galleryImages?.length ? project.galleryImages : [];
@@ -141,8 +151,47 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
     [project.amenities]
   );
 
+  const leadFormDefaults = {
+    propertyType: projectPropertyType,
+    city: project.city || '',
+    state: project.state || '',
+    projectSlug: project.slug,
+    projectTitle: project.title,
+    sourcePath: typeof window !== 'undefined' ? window.location.href : pathname,
+  };
+
+  const showToast = (message: string) => {
+    setToast(message);
+    window.setTimeout(() => setToast(''), 2500);
+  };
+
+  const handleShare = async () => {
+    const shareData = {
+      title: project?.title ?? 'Project',
+      text: project?.subtitle ?? 'Check out this project',
+      url: typeof window !== 'undefined' ? window.location.href : '',
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        showToast('Share dialog opened');
+      } else if (navigator.clipboard) {
+        await navigator.clipboard.writeText(shareData.url);
+        showToast('Link copied to clipboard');
+      }
+    } catch {
+      showToast('Unable to share');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
+      <LeadModal
+        isOpen={isLeadModalOpen}
+        onClose={() => setIsLeadModalOpen(false)}
+        projectTitle={project.title}
+        defaultValues={leadFormDefaults}
+      />
       <div className="max-w-7xl mx-auto px-4 py-8 mt-20">
         {/* Back + CTA */}
         <div className="flex items-center justify-between mb-6">
@@ -150,9 +199,12 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
             ← Back to Projects
           </Link>
           <div className="flex items-center gap-3">
-            <a href="#enquiry" className="px-4 py-2 rounded bg-yellow-500 text-white font-semibold">
+            <button
+              onClick={() => setIsLeadModalOpen(true)}
+              className="px-4 py-2 rounded bg-yellow-500 text-white font-semibold"
+            >
               Enquire Now
-            </a>
+            </button>
             <a href="tel:9555562626" className="px-4 py-2 rounded bg-green-600 text-white font-semibold">
               Call Now
             </a>
@@ -174,6 +226,14 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
                 />
               )}
+              <div className="absolute top-3 right-3 z-10 flex items-center space-x-3">
+                <button
+                  onClick={handleShare}
+                  className="cursor-pointer w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-colors"
+                >
+                  <ClipboardDocumentIcon className="w-5 h-5 text-gray-700" />
+                </button>
+              </div>
               <div className="absolute inset-0 bg-black/25" />
               {galleryImages.length > 1 && (
                 <>
