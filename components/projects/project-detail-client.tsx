@@ -157,7 +157,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
     state: project.state || '',
     projectSlug: project.slug,
     projectTitle: project.title,
-    sourcePath: typeof window !== 'undefined' ? window.location.href : pathname,
+    sourcePath: pathname,
   };
 
   const showToast = (message: string) => {
@@ -169,7 +169,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
     const shareData = {
       title: project?.title ?? 'Project',
       text: project?.subtitle ?? 'Check out this project',
-      url: typeof window !== 'undefined' ? window.location.href : '',
+      url: window.location.href,
     };
     try {
       if (navigator.share) {
@@ -542,10 +542,11 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                 </div>
               )}
 
-              {/* CTAs */}
               <div className="space-y-3">
                 <Link
-                  href="https://wa.me/919555562626"
+                  href={`https://wa.me/919555562626?text=${encodeURIComponent(
+                    `Hi, I'm interested in *${project.title}*\n📍 ${[project.address, project.city].filter(Boolean).join(', ')}`
+                  )}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block text-center bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded transition"
@@ -570,7 +571,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                 onClick={() => setViewAllPhotos(false)}
                 className="cursor-pointer px-3 py-1.5 rounded bg-gray-200 hover:bg-gray-300 text-sm font-medium"
               >
-                ✕ Close
+                Close
               </button>
             </div>
             <div className="flex-1 grid grid-rows-[1fr_auto] overflow-hidden">

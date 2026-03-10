@@ -258,7 +258,7 @@ export default function LeadForm({ onSuccess, onCancel, showCancelButton = true,
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="flex-1 h-10 roounded text-sm bg-brand-primary hover:bg-brand-primary/80 text-black cursor-pointer"
+          className="flex-1 h-9 text-sm bg-blue-600 hover:bg-blue-700 text-white"
         >
           {isSubmitting ? 'Submitting...' : 'Get Details'}
         </Button>

@@ -21,7 +21,7 @@ export default function LeadModal({ isOpen, onClose, projectTitle, defaultValues
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg w-full max-w-md shadow-xl overflow-hidden">
+      <div className="bg-white rounded w-full max-w-xl shadow-xl overflow-hidden">
         {/* Modal Header */}
         <div className="bg-gray-900 px-6 py-4 flex items-start justify-between gap-4">
           <div>
