@@ -182,12 +182,15 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
   return (
     <div className="min-h-screen pt-24 mt-4 md:mt-10 px-4">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
-            <p className="text-gray-600 mt-1">Browse and manage real estate projects</p>
-          </div>
+        {/* Search */}
+        <div className="w-full flex justify-between items-center gap-4">
+          <input
+            type="text"
+            placeholder="Search projects..."
+            value={filters.search}
+            onChange={(e) => handleFilterChange('search', e.target.value)}
+            className="w-full max-w-md px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-yellow-500"
+          />
           {user && (
             <Link
               href="/projects/create"
@@ -196,17 +199,6 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
               Create Project
             </Link>
           )}
-        </div>
-
-        {/* Search */}
-        <div className="w-full max-w-md mb-8">
-          <input
-            type="text"
-            placeholder="Search projects..."
-            value={filters.search}
-            onChange={(e) => handleFilterChange('search', e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-yellow-500"
-          />
         </div>
 
         {/* Filters */}

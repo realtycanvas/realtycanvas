@@ -109,7 +109,7 @@ const getStatusStyle = (status: string) => {
   return 'bg-brand-primary text-black';
 };
 
-const formatNumber = (value: number | null) => (value != null ? value.toLocaleString() : null);
+const formatNumber = (value: number | null) => (value != null ? value.toLocaleString('en-IN') : null);
 
 // ─── Section Wrapper ──────────────────────────────────────────────────────────
 
@@ -120,12 +120,127 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
   </section>
 );
 
+// ─── Video Helpers ────────────────────────────────────────────────────────
+
+/**
+ * Extracts YouTube video ID from all common URL formats:
+ * - https://www.youtube.com/watch?v=ID
+ * - https://youtu.be/ID
+ * - https://www.youtube.com/embed/ID
+ * - https://youtube.com/shorts/ID
+ */
+const getYouTubeId = (url: string): string | null => {
+  const patterns = [
+    /youtube\.com\/watch\?.*v=([^&#]+)/,
+    /youtu\.be\/([^?&#]+)/,
+    /youtube\.com\/embed\/([^?&#]+)/,
+    /youtube\.com\/shorts\/([^?&#]+)/,
+  ];
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match?.[1]) return match[1];
+  }
+  return null;
+};
+
+/** Generates a YouTube thumbnail URL from a video ID */
+const getYouTubeThumbnail = (videoId: string) => `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
+
+const isYouTubeUrl = (url: string) => getYouTubeId(url) !== null;
+
+// ─── Video Player ─────────────────────────────────────────────────────────
+
+/**
+ * Renders a YouTube <iframe> or a native <video> tag.
+ * `autoplay` is used inside the modal for the active video only.
+ */
+const VideoPlayer = ({
+  url,
+  autoplay = false,
+  className = '',
+}: {
+  url: string;
+  autoplay?: boolean;
+  className?: string;
+}) => {
+  const youtubeId = getYouTubeId(url);
+
+  if (youtubeId) {
+    const src = `https://www.youtube.com/embed/${youtubeId}?rel=0${autoplay ? '&autoplay=1' : ''}`;
+    return (
+      <iframe
+        src={src}
+        title="Project video"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        className={`w-full h-full border-0 ${className}`}
+      />
+    );
+  }
+
+  return (
+    <video src={url} controls autoPlay={autoplay} className={`w-full h-full object-contain bg-black ${className}`}>
+      Your browser does not support the video tag.
+    </video>
+  );
+};
+
+// ─── Video Thumbnail ──────────────────────────────────────────────────────
+
+/**
+ * Shows a clickable thumbnail for each video.
+ * YouTube videos use the real thumbnail image.
+ * Other videos show a generic play-button placeholder.
+ */
+const VideoThumbnail = ({
+  url,
+  index,
+  isActive,
+  onClick,
+  size = 'sm',
+}: {
+  url: string;
+  index: number;
+  isActive: boolean;
+  onClick: () => void;
+  size?: 'sm' | 'lg';
+}) => {
+  const youtubeId = getYouTubeId(url);
+  const sizeClass = size === 'lg' ? 'w-40 h-28' : 'w-20 h-14 md:w-28 md:h-20';
+
+  return (
+    <button
+      onClick={onClick}
+      className={`cursor-pointer rounded border-2 shrink-0 relative overflow-hidden ${
+        isActive ? 'border-yellow-400' : 'border-white/60'
+      } ${sizeClass}`}
+    >
+      {youtubeId ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={getYouTubeThumbnail(youtubeId)} alt={`Video ${index + 1}`} className="w-full h-full object-cover" />
+      ) : (
+        <div className="w-full h-full bg-gray-800 flex items-center justify-center">
+          <span className="text-white text-xl">▶</span>
+        </div>
+      )}
+      {/* Play icon overlay */}
+      <div className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/10 transition-colors">
+        <div className="w-6 h-6 rounded-full bg-white/80 flex items-center justify-center">
+          <span className="text-gray-900 text-xs leading-none pl-0.5">▶</span>
+        </div>
+      </div>
+    </button>
+  );
+};
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function ProjectDetailClient({ project }: { project: Project }) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [viewAllPhotos, setViewAllPhotos] = useState(false);
   const [isLeadModalOpen, setIsLeadModalOpen] = useState(false);
+  const [activeVideoIndex, setActiveVideoIndex] = useState(0);
+  const [viewAllVideos, setViewAllVideos] = useState(false);
   const [toast, setToast] = useState('');
 
   const pathname = usePathname();
@@ -269,10 +384,14 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
               <div className="mb-2 flex gap-2 ">
                 {project.reraId && (
                   <span className="inline-block text-[12px] bg-green-100 font-semibold text-green-800 px-2 py-1 rounded">
+                    RERA: RERA-APPROVED
+                  </span>
+                )}
+                {project.reraId && (
+                  <span className="inline-block text-[12px] bg-green-100 font-semibold text-green-800 px-2 py-1 rounded">
                     RERA: {project.reraId}
                   </span>
                 )}
-
                 <div className="">
                   <span className={`inline-block text-[12px] bg-brand-primary/50 font-semibold px-2 py-1 rounded`}>
                     {formatCategory(project.status)}
@@ -323,7 +442,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                         <span className="font-medium">{point.name}</span>
                         <span className="text-gray-500">
                           {point.distanceKm ? `${point.distanceKm} km` : ''}
-                          {point.travelTimeMin ? ` • ${point.travelTimeMin} min` : ''}
+                          {point.travelTimeMin ? `${point.travelTimeMin} min` : ''}
                           {!point.distanceKm && !point.travelTimeMin ? 'Nearby' : ''}
                         </span>
                       </div>
@@ -453,7 +572,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
 
             {/* 7. Who Should Consider (longFormContent) */}
             {project.seo?.longFormContent && (
-              <Section title={project.seo.longFormTitle || 'Who Should Consider SPJ Vedatam?'}>
+              <Section title={project.seo.longFormTitle || 'Who Should Consider?'}>
                 <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{project.seo.longFormContent}</p>
               </Section>
             )}
@@ -486,7 +605,54 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
               </Section>
             )}
 
-            {/* 9. FAQs */}
+            {/* 9. Project Videos */}
+            {project.videoUrls.length > 0 && (
+              <Section title="Project Videos">
+                {/* Primary Video Player */}
+                <div className="relative aspect-video rounded overflow-hidden bg-black">
+                  <VideoPlayer url={project.videoUrls[activeVideoIndex]} />
+                </div>
+
+                {/* Thumbnail strip + View All button */}
+                {project.videoUrls.length > 1 && (
+                  <div className="mt-4 flex items-end justify-between gap-4">
+                    {/* Thumbnail strip (first 4) */}
+                    <div className="flex gap-3 flex-wrap">
+                      {project.videoUrls.slice(0, 4).map((url, index) => (
+                        <VideoThumbnail
+                          key={url}
+                          url={url}
+                          index={index}
+                          isActive={activeVideoIndex === index}
+                          onClick={() => setActiveVideoIndex(index)}
+                        />
+                      ))}
+                    </div>
+
+                    {/* View All Videos button (if more than 4) */}
+                    {project.videoUrls.length > 4 && (
+                      <button
+                        onClick={() => setViewAllVideos(true)}
+                        className="cursor-pointer shrink-0 bg-white hover:bg-gray-100 border border-gray-200 px-4 py-2 rounded text-gray-800 font-medium text-sm"
+                      >
+                        View All Videos ({project.videoUrls.length})
+                      </button>
+                    )}
+                  </div>
+                )}
+              </Section>
+            )}
+
+            {/* 10. RERA Information */}
+            {project.reraId && (
+              <Section title="RERA Information">
+                <p className="text-gray-700">
+                  <span className="font-semibold">RERA ID:</span> {project.reraId}
+                </p>
+              </Section>
+            )}
+
+            {/* 11. FAQs */}
             {project.faqs.length > 0 && (
               <Section title="Frequently Asked Questions">
                 <div className="space-y-3">
@@ -614,6 +780,72 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                         className="w-24 h-20 object-cover rounded"
                       />
                     </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Video Gallery Modal ───────────────────────────────────────── */}
+      {viewAllVideos && project.videoUrls.length > 0 && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+          <div className="bg-white rounded w-full max-w-6xl h-[90vh] overflow-hidden flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Videos ({activeVideoIndex + 1} / {project.videoUrls.length})
+              </h3>
+              <button
+                onClick={() => setViewAllVideos(false)}
+                className="cursor-pointer px-3 py-1.5 rounded bg-gray-200 hover:bg-gray-300 text-sm font-medium"
+              >
+                Close
+              </button>
+            </div>
+
+            {/* Player + Thumbnails */}
+            <div className="flex-1 grid grid-rows-[1fr_auto] overflow-hidden">
+              {/* Active Video */}
+              <div className="relative bg-black overflow-hidden">
+                <VideoPlayer url={project.videoUrls[activeVideoIndex]} autoplay />
+
+                {/* Prev / Next arrows */}
+                {project.videoUrls.length > 1 && (
+                  <>
+                    <button
+                      onClick={() =>
+                        setActiveVideoIndex(
+                          (activeVideoIndex - 1 + project.videoUrls.length) % project.videoUrls.length
+                        )
+                      }
+                      className="cursor-pointer absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 rounded-full w-10 h-10 flex items-center justify-center text-xl font-bold z-10"
+                    >
+                      ‹
+                    </button>
+                    <button
+                      onClick={() => setActiveVideoIndex((activeVideoIndex + 1) % project.videoUrls.length)}
+                      className="cursor-pointer absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 rounded-full w-10 h-10 flex items-center justify-center text-xl font-bold z-10"
+                    >
+                      ›
+                    </button>
+                  </>
+                )}
+              </div>
+
+              {/* Thumbnail Filmstrip */}
+              <div className="p-4 overflow-x-auto bg-white border-t">
+                <div className="flex gap-3">
+                  {project.videoUrls.map((url, index) => (
+                    <VideoThumbnail
+                      key={url}
+                      url={url}
+                      index={index}
+                      isActive={index === activeVideoIndex}
+                      onClick={() => setActiveVideoIndex(index)}
+                      size="lg"
+                    />
                   ))}
                 </div>
               </div>
