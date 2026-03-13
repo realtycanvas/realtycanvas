@@ -12,7 +12,7 @@ export const metadata: Metadata = LAYOUT_METADATA;
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${InterClassName} antialiased`}>
         <SEO />
         <ClientLayout>

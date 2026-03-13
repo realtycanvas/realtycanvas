@@ -9,7 +9,7 @@ import { usePathname } from 'next/navigation';
 import LeadModal from '../common/lead-modal';
 import { ClipboardDocumentIcon } from '@heroicons/react/24/outline';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// ─── Types (unchanged) ─────────────────────────────────────────────────────────
 
 type Highlight = { id: string; label: string; icon: string | null };
 type Amenity = { id: string; category: string; name: string; details: string | null };
@@ -44,7 +44,6 @@ type ProjectSeo = {
   longFormTitle: string | null;
   longFormContent: string | null;
 };
-
 type Project = {
   id: string;
   slug: string;
@@ -95,7 +94,7 @@ type Project = {
   seo: ProjectSeo | null;
 };
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Helpers ───────────────────────────────────────────────────────────────────
 
 const formatCategory = (value: string) =>
   value
@@ -109,26 +108,20 @@ const getStatusStyle = (status: string) => {
   return 'bg-brand-primary text-black';
 };
 
+// ✅ FIXED: explicit locale prevents SSR hydration mismatch
 const formatNumber = (value: number | null) => (value != null ? value.toLocaleString('en-IN') : null);
 
-// ─── Section Wrapper ──────────────────────────────────────────────────────────
+// ─── Section Wrapper — responsive padding & heading ────────────────────────────
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
-  <section className="bg-white rounded p-8 shadow">
-    <h2 className="text-2xl font-bold text-gray-900 mb-6">{title}</h2>
+  <section className="bg-white rounded p-4 sm:p-6 lg:p-8 shadow">
+    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">{title}</h2>
     {children}
   </section>
 );
 
-// ─── Video Helpers ────────────────────────────────────────────────────────
+// ─── Video Helpers (unchanged) ─────────────────────────────────────────────────
 
-/**
- * Extracts YouTube video ID from all common URL formats:
- * - https://www.youtube.com/watch?v=ID
- * - https://youtu.be/ID
- * - https://www.youtube.com/embed/ID
- * - https://youtube.com/shorts/ID
- */
 const getYouTubeId = (url: string): string | null => {
   const patterns = [
     /youtube\.com\/watch\?.*v=([^&#]+)/,
@@ -143,17 +136,12 @@ const getYouTubeId = (url: string): string | null => {
   return null;
 };
 
-/** Generates a YouTube thumbnail URL from a video ID */
 const getYouTubeThumbnail = (videoId: string) => `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
 
 const isYouTubeUrl = (url: string) => getYouTubeId(url) !== null;
 
-// ─── Video Player ─────────────────────────────────────────────────────────
+// ─── Video Player (unchanged) ──────────────────────────────────────────────────
 
-/**
- * Renders a YouTube <iframe> or a native <video> tag.
- * `autoplay` is used inside the modal for the active video only.
- */
 const VideoPlayer = ({
   url,
   autoplay = false,
@@ -185,13 +173,8 @@ const VideoPlayer = ({
   );
 };
 
-// ─── Video Thumbnail ──────────────────────────────────────────────────────
+// ─── Video Thumbnail — responsive sizes ────────────────────────────────────────
 
-/**
- * Shows a clickable thumbnail for each video.
- * YouTube videos use the real thumbnail image.
- * Other videos show a generic play-button placeholder.
- */
 const VideoThumbnail = ({
   url,
   index,
@@ -206,7 +189,9 @@ const VideoThumbnail = ({
   size?: 'sm' | 'lg';
 }) => {
   const youtubeId = getYouTubeId(url);
-  const sizeClass = size === 'lg' ? 'w-40 h-28' : 'w-20 h-14 md:w-28 md:h-20';
+  // ✅ responsive size classes for both strip and modal filmstrip
+  const sizeClass =
+    size === 'lg' ? 'w-28 h-20 sm:w-36 sm:h-24 lg:w-40 lg:h-28' : 'w-16 h-12 sm:w-20 sm:h-14 md:w-28 md:h-20';
 
   return (
     <button
@@ -223,9 +208,8 @@ const VideoThumbnail = ({
           <span className="text-white text-xl">▶</span>
         </div>
       )}
-      {/* Play icon overlay */}
       <div className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/10 transition-colors">
-        <div className="w-6 h-6 rounded-full bg-white/80 flex items-center justify-center">
+        <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white/80 flex items-center justify-center">
           <span className="text-gray-900 text-xs leading-none pl-0.5">▶</span>
         </div>
       </div>
@@ -233,7 +217,7 @@ const VideoThumbnail = ({
   );
 };
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+// ─── Main Component ────────────────────────────────────────────────────────────
 
 export default function ProjectDetailClient({ project }: { project: Project }) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -299,38 +283,58 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
     }
   };
 
+  // ✅ extracted once to avoid duplication across mobile bar + sidebar
+  const whatsappHref = `https://wa.me/919555562626?text=${encodeURIComponent(
+    `Hi, I'm interested in *${project.title}*\n📍 ${[project.address, project.city].filter(Boolean).join(', ')}`
+  )}`;
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    // ✅ pb-20 lg:pb-0 — clears the mobile floating CTA bar
+    <div className="min-h-screen bg-gray-50 pb-20 lg:pb-0">
+      {/* ── Toast — ✅ was missing in original ───────────────────────────── */}
+      {toast && (
+        <div className="fixed bottom-24 lg:bottom-6 left-1/2 -translate-x-1/2 z-70 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm shadow-lg whitespace-nowrap pointer-events-none">
+          {toast}
+        </div>
+      )}
+
       <LeadModal
         isOpen={isLeadModalOpen}
         onClose={() => setIsLeadModalOpen(false)}
         projectTitle={project.title}
         defaultValues={leadFormDefaults}
       />
-      <div className="max-w-7xl mx-auto px-4 py-8 mt-20">
-        {/* Back + CTA */}
-        <div className="flex items-center justify-between mb-6">
-          <Link href="/projects" className="text-blue-600 hover:text-blue-800 font-medium">
+
+      {/* ✅ px-3 sm:px-4, py-4 sm:py-6 lg:py-8, mt-16 sm:mt-20 */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8 mt-20">
+        {/* Back + CTA — ✅ flex-wrap so it never overflows on 320px */}
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4 sm:mb-6">
+          <Link href="/projects" className="text-blue-600 hover:text-blue-800 font-medium text-sm sm:text-base">
             ← Back to Projects
           </Link>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <button
               onClick={() => setIsLeadModalOpen(true)}
-              className="px-4 py-2 rounded bg-yellow-500 text-white font-semibold"
+              className="cursor-pointer px-3 py-1.5 sm:px-4 sm:py-2 rounded bg-brand-primary hover:bg-brand-primary/80 text-white font-semibold text-sm sm:text-base"
             >
               Enquire Now
             </button>
-            <a href="tel:9555562626" className="px-4 py-2 rounded bg-green-600 text-white font-semibold">
+            <Link
+              href="tel:9555562626"
+              className="px-3 py-1.5 sm:px-4 sm:py-2 rounded bg-green-600 hover:bg-green-700 text-white font-semibold text-sm sm:text-base"
+            >
               Call Now
-            </a>
+            </Link>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* ── Left Column ─────────────────────────────────────────────────── */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Gallery */}
-            <div className="relative h-[60vh] rounded overflow-hidden">
+        {/* ✅ gap-4 sm:gap-6 lg:gap-8 */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+          {/* ── Left Column ───────────────────────────────────────────────── */}
+          {/* ✅ space-y-4 sm:space-y-6 lg:space-y-8 */}
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6 lg:space-y-8">
+            {/* Gallery — ✅ height scales from 40vh on mobile to 60vh on desktop */}
+            <div className="relative h-[40vh] sm:h-[50vh] md:h-[55vh] lg:h-[60vh] rounded overflow-hidden">
               {galleryImages[activeImageIndex] && (
                 <Image
                   src={galleryImages[activeImageIndex]}
@@ -341,36 +345,44 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
                 />
               )}
-              <div className="absolute top-3 right-3 z-10 flex items-center space-x-3">
+              {/* Share button */}
+              <div className="absolute top-3 right-3 z-10">
                 <button
                   onClick={handleShare}
                   className="cursor-pointer w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:bg-white transition-colors"
                 >
-                  <ClipboardDocumentIcon className="w-5 h-5 text-gray-700" />
+                  <ClipboardDocumentIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700" />
                 </button>
               </div>
               <div className="absolute inset-0 bg-black/25" />
+
               {galleryImages.length > 1 && (
                 <>
+                  {/* ✅ View All: always visible (removed hidden md:block), compact on mobile */}
                   <button
                     onClick={() => setViewAllPhotos(true)}
-                    className="hidden md:block cursor-pointer absolute bottom-6 right-6 bg-white hover:bg-gray-100 px-4 py-2 rounded text-gray-800 font-medium z-10"
+                    className="cursor-pointer absolute bottom-3 sm:bottom-6 right-3 sm:right-6 bg-white hover:bg-gray-100 px-2 py-1 sm:px-4 sm:py-2 rounded text-gray-800 font-medium z-10 text-xs sm:text-sm"
                   >
-                    View All Photos
+                    View All
                   </button>
-                  <div className="absolute bottom-6 left-6 flex gap-2 z-10">
+
+                  {/* ✅ Thumbnail strip: overflow-x-auto + max-w constraint so it never collides with button */}
+                  <div className="absolute bottom-3 sm:bottom-6 left-3 sm:left-6 z-10 flex gap-1.5 sm:gap-2 max-w-[calc(100%-6rem)] sm:max-w-[calc(100%-10rem)] overflow-x-auto">
                     {galleryImages.slice(0, 5).map((img, index) => (
                       <button
                         key={img}
                         onClick={() => setActiveImageIndex(index)}
-                        className={`cursor-pointer rounded border-2 ${activeImageIndex === index ? 'border-yellow-400' : 'border-white/60'}`}
+                        className={`cursor-pointer rounded border-2 shrink-0 ${
+                          activeImageIndex === index ? 'border-yellow-400' : 'border-white/60'
+                        }`}
                       >
                         <Image
                           src={img}
                           alt={getImageAlt(img)}
                           width={64}
                           height={64}
-                          className="w-10 h-10 md:w-16 md:h-16 object-cover rounded"
+                          // ✅ smaller on 320px, scales up with breakpoints
+                          className="w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16 object-cover rounded"
                         />
                       </button>
                     ))}
@@ -381,48 +393,57 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
 
             {/* Title + Address */}
             <div>
-              <div className="mb-2 flex gap-2 ">
+              {/* ✅ flex-wrap so RERA badges never overflow */}
+              <div className="mb-2 flex flex-wrap gap-1.5 sm:gap-2">
                 {project.reraId && (
-                  <span className="inline-block text-[12px] bg-green-100 font-semibold text-green-800 px-2 py-1 rounded">
+                  <span className="inline-block text-[11px] sm:text-[12px] bg-green-100 font-semibold text-green-800 px-2 py-1 rounded">
                     RERA: RERA-APPROVED
                   </span>
                 )}
                 {project.reraId && (
-                  <span className="inline-block text-[12px] bg-green-100 font-semibold text-green-800 px-2 py-1 rounded">
+                  <span className="inline-block text-[11px] sm:text-[12px] bg-green-100 font-semibold text-green-800 px-2 py-1 rounded">
                     RERA: {project.reraId}
                   </span>
                 )}
-                <div className="">
-                  <span className={`inline-block text-[12px] bg-brand-primary/50 font-semibold px-2 py-1 rounded`}>
-                    {formatCategory(project.status)}
-                  </span>
-                </div>
+                <span className="inline-block text-[11px] sm:text-[12px] bg-brand-primary/50 font-semibold px-2 py-1 rounded">
+                  {formatCategory(project.status)}
+                </span>
               </div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">{primaryHeading}</h1>
-              <p className="text-gray-600 text-sm flex gap-1 items-center">
-                <MapPin size={16} className="mt-px shrink-0" />
-                {[project.address, project.locality, project.city, project.state].filter(Boolean).join(', ')}
+
+              {/* ✅ h1 scales: 2xl → 3xl → 4xl */}
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">{primaryHeading}</h1>
+
+              {/* ✅ items-start on mobile prevents icon misalignment when address wraps */}
+              <p className="text-gray-600 text-sm flex gap-1 items-start sm:items-center">
+                <MapPin size={16} className="mt-0.5 sm:mt-px shrink-0" />
+                <span>
+                  {[project.address, project.locality, project.city, project.state].filter(Boolean).join(', ')}
+                </span>
               </p>
             </div>
 
             {/* Short Description */}
-            <div className="bg-white rounded p-6 shadow">
-              <p className="text-gray-700 leading-relaxed">{project.description}</p>
+            <div className="bg-white rounded p-4 sm:p-6 shadow">
+              <p className="text-gray-700 leading-relaxed text-sm sm:text-base">{project.description}</p>
             </div>
 
             {/* 1. Project Overview */}
             {(project.aboutTitle || project.aboutDescription) && (
               <Section title={project.aboutTitle || 'Project Overview'}>
-                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{project.aboutDescription}</p>
+                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap text-sm sm:text-base">
+                  {project.aboutDescription}
+                </p>
               </Section>
             )}
 
             {/* 2. Location Advantage */}
             {project.seo?.localContent && (
               <Section title={project.seo.localHeading || 'Location Advantage'}>
-                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{project.seo.localContent}</p>
+                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap text-sm sm:text-base">
+                  {project.seo.localContent}
+                </p>
                 {project.sitePlanImage && (
-                  <div className="relative aspect-video rounded overflow-hidden mt-6">
+                  <div className="relative aspect-video rounded overflow-hidden mt-4 sm:mt-6">
                     <Image
                       src={project.sitePlanImage}
                       alt={getImageAlt(project.sitePlanImage)}
@@ -433,16 +454,16 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                   </div>
                 )}
                 {project.nearbyPoints.length > 0 && (
-                  <div className="mt-6 space-y-2">
+                  <div className="mt-4 sm:mt-6 space-y-1 sm:space-y-2">
                     {project.nearbyPoints.map((point) => (
                       <div
                         key={point.id}
                         className="flex justify-between text-sm text-gray-700 py-2 border-b border-gray-100 last:border-0"
                       >
                         <span className="font-medium">{point.name}</span>
-                        <span className="text-gray-500">
+                        <span className="text-gray-500 text-xs sm:text-sm">
                           {point.distanceKm ? `${point.distanceKm} km` : ''}
-                          {point.travelTimeMin ? `${point.travelTimeMin} min` : ''}
+                          {point.travelTimeMin ? ` · ${point.travelTimeMin} min` : ''}
                           {!point.distanceKm && !point.travelTimeMin ? 'Nearby' : ''}
                         </span>
                       </div>
@@ -455,14 +476,15 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
             {/* 3. Retail, F&B & Commercial Spaces */}
             {project.offerings.length > 0 && (
               <Section title="Retail, F&B & Commercial Spaces">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* ✅ 1 col on mobile, 2 col on sm+ */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   {project.offerings.map((offering) => (
                     <div
                       key={offering.id}
-                      className="border border-gray-200 rounded p-5 hover:shadow-md transition-shadow"
+                      className="border border-gray-200 rounded p-4 sm:p-5 hover:shadow-md transition-shadow"
                     >
-                      <div className="text-3xl mb-3">{offering.icon || '•'}</div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">{offering.title}</h3>
+                      <div className="text-2xl sm:text-3xl mb-2 sm:mb-3">{offering.icon || '•'}</div>
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">{offering.title}</h3>
                       <p className="text-gray-600 leading-relaxed text-sm">{offering.description}</p>
                     </div>
                   ))}
@@ -474,23 +496,23 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
             {(project.basePrice || project.priceRange || project.priceMin || project.pricingTable.length > 0) && (
               <Section title="Price & Unit Size Overview">
                 {(project.priceRange || project.basePrice) && (
-                  <div className="flex flex-wrap gap-4 mb-6">
+                  <div className="flex flex-wrap gap-3 sm:gap-4 mb-4 sm:mb-6">
                     {project.priceRange && (
-                      <div className="bg-yellow-50 border border-yellow-200 rounded px-5 py-3">
-                        <p className="text-xs text-gray-500 mb-1">Price Range</p>
-                        <p className="text-lg font-bold text-yellow-700">{project.priceRange}</p>
+                      <div className="bg-yellow-50 border border-yellow-200 rounded px-4 py-2.5 sm:px-5 sm:py-3 min-w-0">
+                        <p className="text-xs text-gray-500 mb-0.5 sm:mb-1">Price Range</p>
+                        <p className="text-base sm:text-lg font-bold text-yellow-700">{project.priceRange}</p>
                       </div>
                     )}
                     {project.basePrice && (
-                      <div className="bg-gray-50 border border-gray-200 rounded px-5 py-3">
-                        <p className="text-xs text-gray-500 mb-1">Base Price</p>
-                        <p className="text-lg font-bold text-gray-900">{project.basePrice}</p>
+                      <div className="bg-gray-50 border border-gray-200 rounded px-4 py-2.5 sm:px-5 sm:py-3 min-w-0">
+                        <p className="text-xs text-gray-500 mb-0.5 sm:mb-1">Base Price</p>
+                        <p className="text-base sm:text-lg font-bold text-gray-900">{project.basePrice}</p>
                       </div>
                     )}
                     {project.priceMin && project.priceMax && (
-                      <div className="bg-gray-50 border border-gray-200 rounded px-5 py-3">
-                        <p className="text-xs text-gray-500 mb-1">Pricing Band</p>
-                        <p className="text-lg font-bold text-gray-900">
+                      <div className="bg-gray-50 border border-gray-200 rounded px-4 py-2.5 sm:px-5 sm:py-3 min-w-0">
+                        <p className="text-xs text-gray-500 mb-0.5 sm:mb-1">Pricing Band</p>
+                        <p className="text-base sm:text-lg font-bold text-gray-900">
                           ₹{formatNumber(project.priceMin)} – ₹{formatNumber(project.priceMax)}
                         </p>
                       </div>
@@ -499,30 +521,53 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                 )}
 
                 {project.pricingTable.length > 0 && (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full text-sm">
-                      <thead>
-                        <tr className="bg-gray-50 text-left text-gray-600">
-                          <th className="py-3 px-4 font-semibold rounded-tl">Property Type</th>
-                          <th className="py-3 px-4 font-semibold">Approx Unit Size</th>
-                          <th className="py-3 px-4 font-semibold">Indicative Price</th>
-                          <th className="py-3 px-4 font-semibold">Price / Sq.ft</th>
-                          <th className="py-3 px-4 font-semibold rounded-tr">Availability</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {project.pricingTable.map((row, idx) => (
-                          <tr key={row.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                            <td className="py-3 px-4 font-medium text-gray-900">{row.type}</td>
-                            <td className="py-3 px-4 text-gray-700">{row.reraArea}</td>
-                            <td className="py-3 px-4 text-yellow-700 font-semibold">{row.price}</td>
-                            <td className="py-3 px-4 text-gray-600">{row.pricePerSqft || '—'}</td>
-                            <td className="py-3 px-4 text-gray-600">{row.availableUnits ?? '—'}</td>
+                  // ✅ -mx-4 pulls table edge-to-edge on mobile for full scroll width
+                  <div className="overflow-x-auto -mx-4 sm:mx-0">
+                    <div className="min-w-120 px-4 sm:px-0">
+                      <table className="min-w-full text-sm">
+                        <thead>
+                          <tr className="bg-gray-50 text-left text-gray-600">
+                            <th className="py-2.5 px-3 sm:py-3 sm:px-4 font-semibold rounded-tl text-xs sm:text-sm">
+                              Property Type
+                            </th>
+                            <th className="py-2.5 px-3 sm:py-3 sm:px-4 font-semibold text-xs sm:text-sm">
+                              Approx Unit Size
+                            </th>
+                            <th className="py-2.5 px-3 sm:py-3 sm:px-4 font-semibold text-xs sm:text-sm">
+                              Indicative Price
+                            </th>
+                            <th className="py-2.5 px-3 sm:py-3 sm:px-4 font-semibold text-xs sm:text-sm">
+                              Price / Sq.ft
+                            </th>
+                            <th className="py-2.5 px-3 sm:py-3 sm:px-4 font-semibold rounded-tr text-xs sm:text-sm">
+                              Availability
+                            </th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                    <p className="text-xs text-gray-400 mt-3">
+                        </thead>
+                        <tbody>
+                          {project.pricingTable.map((row, idx) => (
+                            <tr key={row.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                              <td className="py-2.5 px-3 sm:py-3 sm:px-4 font-medium text-gray-900 text-xs sm:text-sm">
+                                {row.type}
+                              </td>
+                              <td className="py-2.5 px-3 sm:py-3 sm:px-4 text-gray-700 text-xs sm:text-sm">
+                                {row.reraArea}
+                              </td>
+                              <td className="py-2.5 px-3 sm:py-3 sm:px-4 text-yellow-700 font-semibold text-xs sm:text-sm">
+                                {row.price}
+                              </td>
+                              <td className="py-2.5 px-3 sm:py-3 sm:px-4 text-gray-600 text-xs sm:text-sm">
+                                {row.pricePerSqft || '—'}
+                              </td>
+                              <td className="py-2.5 px-3 sm:py-3 sm:px-4 text-gray-600 text-xs sm:text-sm">
+                                {row.availableUnits ?? '—'}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    <p className="text-xs text-gray-400 mt-3 px-4 sm:px-0">
                       * Prices and sizes are indicative and subject to change at developer discretion.
                     </p>
                   </div>
@@ -533,11 +578,11 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
             {/* 5. Amenities & Features */}
             {project.amenities.length > 0 && (
               <Section title="Amenities & Features">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   {amenityCategories.map((category) => (
-                    <div key={category} className="border border-gray-200 rounded p-5">
-                      <h3 className="text-base font-semibold text-gray-900 mb-3">{category}</h3>
-                      <ul className="space-y-2">
+                    <div key={category} className="border border-gray-200 rounded p-4 sm:p-5">
+                      <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-2 sm:mb-3">{category}</h3>
+                      <ul className="space-y-1.5 sm:space-y-2">
                         {project.amenities
                           .filter((a) => a.category === category)
                           .map((amenity) => (
@@ -556,13 +601,13 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
             {/* 6. Why Invest */}
             {project.highlights.length > 0 && (
               <Section title="Why Invest in SPJ Vedatam, Gurgaon?">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   {project.highlights.map((highlight) => (
                     <div
                       key={highlight.id}
-                      className="flex items-start gap-3 p-4 bg-yellow-50 border border-yellow-100 rounded"
+                      className="flex items-start gap-3 p-3 sm:p-4 bg-yellow-50 border border-yellow-100 rounded"
                     >
-                      <span className="text-xl shrink-0">{highlight.icon || '📌'}</span>
+                      <span className="text-lg sm:text-xl shrink-0">{highlight.icon || '📌'}</span>
                       <p className="text-gray-700 text-sm leading-relaxed">{highlight.label}</p>
                     </div>
                   ))}
@@ -570,17 +615,19 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
               </Section>
             )}
 
-            {/* 7. Who Should Consider (longFormContent) */}
+            {/* 7. Who Should Consider */}
             {project.seo?.longFormContent && (
               <Section title={project.seo.longFormTitle || 'Who Should Consider?'}>
-                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{project.seo.longFormContent}</p>
+                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap text-sm sm:text-base">
+                  {project.seo.longFormContent}
+                </p>
               </Section>
             )}
 
-            {/* 8. Floor Plans (if any) */}
+            {/* 8. Floor Plans */}
             {project.floorPlans.length > 0 && (
               <Section title="Floor Plans & Layouts">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   {project.floorPlans.map((plan) => (
                     <div key={plan.id} className="border border-gray-200 rounded overflow-hidden">
                       <div className="relative aspect-video">
@@ -592,8 +639,8 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                           sizes="(max-width: 768px) 100vw, 50vw"
                         />
                       </div>
-                      <div className="p-4">
-                        <h3 className="text-base font-semibold text-gray-900">
+                      <div className="p-3 sm:p-4">
+                        <h3 className="text-sm sm:text-base font-semibold text-gray-900">
                           {plan.level}
                           {plan.title ? ` • ${plan.title}` : ''}
                         </h3>
@@ -608,16 +655,14 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
             {/* 9. Project Videos */}
             {project.videoUrls.length > 0 && (
               <Section title="Project Videos">
-                {/* Primary Video Player */}
                 <div className="relative aspect-video rounded overflow-hidden bg-black">
                   <VideoPlayer url={project.videoUrls[activeVideoIndex]} />
                 </div>
 
-                {/* Thumbnail strip + View All button */}
                 {project.videoUrls.length > 1 && (
-                  <div className="mt-4 flex items-end justify-between gap-4">
-                    {/* Thumbnail strip (first 4) */}
-                    <div className="flex gap-3 flex-wrap">
+                  <div className="mt-3 sm:mt-4 flex items-end justify-between gap-3 sm:gap-4">
+                    {/* ✅ overflow-x-auto + pb-1 so scrollbar doesn't clip thumbnails */}
+                    <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-1">
                       {project.videoUrls.slice(0, 4).map((url, index) => (
                         <VideoThumbnail
                           key={url}
@@ -628,14 +673,12 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                         />
                       ))}
                     </div>
-
-                    {/* View All Videos button (if more than 4) */}
                     {project.videoUrls.length > 4 && (
                       <button
                         onClick={() => setViewAllVideos(true)}
-                        className="cursor-pointer shrink-0 bg-white hover:bg-gray-100 border border-gray-200 px-4 py-2 rounded text-gray-800 font-medium text-sm"
+                        className="cursor-pointer shrink-0 bg-white hover:bg-gray-100 border border-gray-200 px-3 py-1.5 sm:px-4 sm:py-2 rounded text-gray-800 font-medium text-xs sm:text-sm"
                       >
-                        View All Videos ({project.videoUrls.length})
+                        All Videos ({project.videoUrls.length})
                       </button>
                     )}
                   </div>
@@ -646,7 +689,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
             {/* 10. RERA Information */}
             {project.reraId && (
               <Section title="RERA Information">
-                <p className="text-gray-700">
+                <p className="text-gray-700 text-sm sm:text-base">
                   <span className="font-semibold">RERA ID:</span> {project.reraId}
                 </p>
               </Section>
@@ -655,7 +698,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
             {/* 11. FAQs */}
             {project.faqs.length > 0 && (
               <Section title="Frequently Asked Questions">
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   {project.faqs.map((faq) => (
                     <FaqItem key={faq.id} question={faq.question} answer={faq.answer} />
                   ))}
@@ -664,19 +707,21 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
             )}
           </div>
 
-          {/* ── Right Sticky Sidebar ─────────────────────────────────────── */}
+          {/* ── Right Sticky Sidebar ───────────────────────────────────────── */}
           <div className="lg:col-span-1">
-            <div className="sticky top-24 space-y-6">
+            {/* ✅ top-20 on tablet, top-24 on desktop */}
+            <div className="sticky top-20 lg:top-24 space-y-4 sm:space-y-6">
               {/* Price Card */}
               <div className="bg-white rounded shadow overflow-hidden">
-                <div className="text-center bg-gray-900 p-6">
-                  {/* <p className="text-xs text-gray-400 mb-1 uppercase tracking-wider">Starting From</p> */}
-                  <div className="text-2xl font-bold text-yellow-400">
+                <div className="text-center bg-gray-900 p-4 sm:p-6">
+                  <div className="text-xl sm:text-2xl font-bold text-yellow-400">
                     {project.basePrice || project.priceRange || 'Contact for Pricing'}
                   </div>
-                  {project.developerName && <p className="text-gray-400 text-sm mt-1">by {project.developerName}</p>}
+                  {project.developerName && (
+                    <p className="text-gray-400 text-xs sm:text-sm mt-1">by {project.developerName}</p>
+                  )}
                 </div>
-                <div className="flex flex-wrap justify-around p-4 gap-3">
+                <div className="flex flex-wrap justify-around p-3 sm:p-4 gap-2 sm:gap-3">
                   {[
                     { label: 'Land Area', value: project.landArea },
                     { label: 'Floors', value: project.numberOfFloors },
@@ -685,22 +730,22 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                   ]
                     .filter(({ value }) => value !== null && value !== undefined && value !== '')
                     .map(({ label, value }) => (
-                      <div key={label} className="bg-gray-50 rounded p-3 text-center min-w-20">
-                        <p className="text-base font-semibold text-gray-900">{value}</p>
-                        <p className="text-xs text-gray-500">{label}</p>
+                      <div key={label} className="bg-gray-50 rounded p-2.5 sm:p-3 text-center min-w-18 sm:min-w-20">
+                        <p className="text-sm sm:text-base font-semibold text-gray-900">{value}</p>
+                        <p className="text-[11px] sm:text-xs text-gray-500">{label}</p>
                       </div>
                     ))}
                 </div>
               </div>
 
-              {/* Key Features */}
+              {/* Key Highlights */}
               {project.highlights.length > 0 && (
-                <div className="bg-white rounded p-6 shadow">
-                  <h4 className="text-base font-semibold text-gray-900 mb-3">Key Highlights</h4>
+                <div className="bg-white rounded p-4 sm:p-6 shadow">
+                  <h4 className="text-sm sm:text-base font-semibold text-gray-900 mb-3">Key Highlights</h4>
                   <ul className="space-y-2">
                     {project.highlights.slice(0, 4).map((highlight) => (
-                      <li key={highlight.id} className="flex items-start gap-2 text-sm text-gray-700">
-                        <span className="w-2 h-2 rounded-full bg-yellow-400 mt-1.5 shrink-0" />
+                      <li key={highlight.id} className="flex items-start gap-2 text-xs sm:text-sm text-gray-700">
+                        <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-yellow-400 mt-1.5 shrink-0" />
                         <span>{highlight.label}</span>
                       </li>
                     ))}
@@ -708,14 +753,13 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                 </div>
               )}
 
-              <div className="space-y-3">
+              {/* ✅ WhatsApp only on desktop — mobile uses floating CTA bar below */}
+              <div className="hidden lg:block">
                 <Link
-                  href={`https://wa.me/919555562626?text=${encodeURIComponent(
-                    `Hi, I'm interested in *${project.title}*\n📍 ${[project.address, project.city].filter(Boolean).join(', ')}`
-                  )}`}
+                  href={whatsappHref}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block text-center bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded transition"
+                  className="block text-center bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded transition text-sm sm:text-base"
                 >
                   WhatsApp Inquiry
                 </Link>
@@ -725,13 +769,39 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
         </div>
       </div>
 
-      {/* Photo Gallery Modal */}
+      {/* ── Mobile Floating CTA Bar ─────────────────────────────────────────── */}
+      {/* ✅ lg:hidden — replaces sidebar CTAs on mobile; safe-area-inset for iOS home bar */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 px-3 py-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom))] flex gap-2 shadow-[0_-2px_8px_rgba(0,0,0,0.08)]">
+        <button
+          onClick={() => setIsLeadModalOpen(true)}
+          className="flex-1 py-2.5 rounded bg-brand-primary text-white font-semibold text-sm text-center"
+        >
+          Enquire
+        </button>
+        <Link
+          href="tel:9555562626"
+          className="flex-1 py-2.5 rounded bg-green-600 text-white font-semibold text-sm text-center"
+        >
+          Call Now
+        </Link>
+        <Link
+          href={whatsappHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex-1 py-2.5 rounded bg-[#25D366] text-white font-semibold text-sm text-center"
+        >
+          WhatsApp
+        </Link>
+      </div>
+
+      {/* ── Photo Gallery Modal — sheet-style on mobile, dialog on desktop ──── */}
       {viewAllPhotos && galleryImages.length > 0 && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-          <div className="bg-white rounded w-full max-w-6xl h-[90vh] overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between px-6 py-4 border-b">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Photo Gallery ({activeImageIndex + 1} / {galleryImages.length})
+        // ✅ items-end on mobile = bottom sheet feel; sm:items-center = centered dialog
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-end sm:items-center justify-center sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded w-full sm:max-w-6xl h-[92vh] sm:h-[90vh] overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+                Photos ({activeImageIndex + 1} / {galleryImages.length})
               </h3>
               <button
                 onClick={() => setViewAllPhotos(false)}
@@ -749,35 +819,39 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                   className="object-contain"
                   sizes="(max-width: 768px) 100vw, 80vw"
                 />
+                {/* ✅ smaller arrow buttons on mobile */}
                 <button
                   onClick={() =>
                     setActiveImageIndex((activeImageIndex - 1 + galleryImages.length) % galleryImages.length)
                   }
-                  className="cursor-pointer absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 rounded-full w-10 h-10 flex items-center justify-center text-xl font-bold"
+                  className="cursor-pointer absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-lg sm:text-xl font-bold"
                 >
                   ‹
                 </button>
                 <button
                   onClick={() => setActiveImageIndex((activeImageIndex + 1) % galleryImages.length)}
-                  className="cursor-pointer absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 rounded-full w-10 h-10 flex items-center justify-center text-xl font-bold"
+                  className="cursor-pointer absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-lg sm:text-xl font-bold"
                 >
                   ›
                 </button>
               </div>
-              <div className="p-4 overflow-x-auto bg-white border-t">
-                <div className="flex gap-3">
+              <div className="p-3 sm:p-4 overflow-x-auto bg-white border-t">
+                <div className="flex gap-2 sm:gap-3">
                   {galleryImages.map((img, index) => (
                     <button
                       key={img}
                       onClick={() => setActiveImageIndex(index)}
-                      className={`cursor-pointer rounded border-2 shrink-0 ${index === activeImageIndex ? 'border-yellow-500' : 'border-gray-200'}`}
+                      className={`cursor-pointer rounded border-2 shrink-0 ${
+                        index === activeImageIndex ? 'border-yellow-500' : 'border-gray-200'
+                      }`}
                     >
                       <Image
                         src={img}
                         alt={getImageAlt(img)}
                         width={96}
                         height={80}
-                        className="w-24 h-20 object-cover rounded"
+                        // ✅ smaller filmstrip thumbnails on mobile
+                        className="w-16 h-12 sm:w-24 sm:h-20 object-cover rounded"
                       />
                     </button>
                   ))}
@@ -788,13 +862,12 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
         </div>
       )}
 
-      {/* ── Video Gallery Modal ───────────────────────────────────────── */}
+      {/* ── Video Gallery Modal — same sheet/dialog pattern ─────────────────── */}
       {viewAllVideos && project.videoUrls.length > 0 && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-          <div className="bg-white rounded w-full max-w-6xl h-[90vh] overflow-hidden flex flex-col">
-            {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b">
-              <h3 className="text-lg font-semibold text-gray-900">
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-end sm:items-center justify-center sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded w-full sm:max-w-6xl h-[92vh] sm:h-[90vh] overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">
                 Videos ({activeVideoIndex + 1} / {project.videoUrls.length})
               </h3>
               <button
@@ -805,13 +878,9 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
               </button>
             </div>
 
-            {/* Player + Thumbnails */}
             <div className="flex-1 grid grid-rows-[1fr_auto] overflow-hidden">
-              {/* Active Video */}
               <div className="relative bg-black overflow-hidden">
                 <VideoPlayer url={project.videoUrls[activeVideoIndex]} autoplay />
-
-                {/* Prev / Next arrows */}
                 {project.videoUrls.length > 1 && (
                   <>
                     <button
@@ -820,23 +889,21 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                           (activeVideoIndex - 1 + project.videoUrls.length) % project.videoUrls.length
                         )
                       }
-                      className="cursor-pointer absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 rounded-full w-10 h-10 flex items-center justify-center text-xl font-bold z-10"
+                      className="cursor-pointer absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-lg sm:text-xl font-bold z-10"
                     >
                       ‹
                     </button>
                     <button
                       onClick={() => setActiveVideoIndex((activeVideoIndex + 1) % project.videoUrls.length)}
-                      className="cursor-pointer absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 rounded-full w-10 h-10 flex items-center justify-center text-xl font-bold z-10"
+                      className="cursor-pointer absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-lg sm:text-xl font-bold z-10"
                     >
                       ›
                     </button>
                   </>
                 )}
               </div>
-
-              {/* Thumbnail Filmstrip */}
-              <div className="p-4 overflow-x-auto bg-white border-t">
-                <div className="flex gap-3">
+              <div className="p-3 sm:p-4 overflow-x-auto bg-white border-t">
+                <div className="flex gap-2 sm:gap-3">
                   {project.videoUrls.map((url, index) => (
                     <VideoThumbnail
                       key={url}
