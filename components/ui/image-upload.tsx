@@ -261,39 +261,42 @@ export default function ImageUpload({
       {/* Image Previews */}
       {currentImages.length > 0 && (
         <div className={`grid gap-3 ${multiple ? 'grid-cols-3' : 'grid-cols-1'}`}>
-          {currentImages.map((url) => (
-            <div
-              key={url}
-              className="relative group rounded overflow-hidden border border-gray-200 bg-gray-100"
-              style={{ aspectRatio: '16/9' }}
-            >
-              <Image
-                src={url}
-                alt="Uploaded"
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 33vw"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-              />
-              {/* Remove Button */}
-              {!disabled && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeImage(url);
+          {currentImages.map((url) => {
+            const isExternal = url.startsWith('http');
+            return (
+              <div
+                key={url}
+                className="relative group rounded overflow-hidden border border-gray-200 bg-gray-100"
+                style={{ aspectRatio: '16/9' }}
+              >
+                <Image
+                  src={url}
+                  alt="Uploaded"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  unoptimized={isExternal}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
                   }}
-                  className="absolute top-1.5 right-1.5 bg-red-500 text-white rounded-full w-6 h-6
-                    flex items-center justify-center opacity-0 group-hover:opacity-100
-                    transition-opacity text-xs font-bold hover:bg-red-600"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-          ))}
+                />
+                {!disabled && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeImage(url);
+                    }}
+                    className="absolute top-1.5 right-1.5 bg-red-500 text-white rounded-full w-6 h-6
+                      flex items-center justify-center opacity-0 group-hover:opacity-100
+                      transition-opacity text-xs font-bold hover:bg-red-600"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
