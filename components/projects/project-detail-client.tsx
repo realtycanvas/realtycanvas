@@ -239,7 +239,6 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
   const [viewAllVideos, setViewAllVideos] = useState(false);
   const [toast, setToast] = useState('');
   const [user, setUser] = useState<User | null>(null);
-  const [youtubeOrigin, setYoutubeOrigin] = useState<string | null>(null);
 
   const pathname = usePathname();
 
@@ -295,9 +294,15 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
     checkAuth();
   }, []);
 
-  useEffect(() => {
-    setYoutubeOrigin(window.location.origin);
-  }, []);
+  const youtubeOrigin = (() => {
+    const raw = process.env.NEXT_PUBLIC_BASE_URL;
+    if (!raw) return null;
+    try {
+      return new URL(raw).origin;
+    } catch {
+      return null;
+    }
+  })();
 
   const handleShare = async () => {
     const shareData = {

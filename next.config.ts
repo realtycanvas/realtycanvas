@@ -94,6 +94,31 @@ const nextConfig: NextConfig = {
         hostname: '187.127.128.90',  // no port, nginx handles it on 80
         pathname: '/uploads/**',
       },
+      {
+        protocol: 'http',
+        hostname: 'cdn.realtycanvas.in',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.realtycanvas.in',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '187.127.128.90',
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'realtycanvas.in',
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.realtycanvas.in',
+        pathname: '/uploads/**',
+      },
     ],
     // Optimize image loading to reduce transformation requests
     formats: ['image/webp', 'image/avif'],
