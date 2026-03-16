@@ -919,13 +919,11 @@ function CreateProjectPage() {
                     <Input name="reraId" value={f.reraId} onChange={change} placeholder="RC/REP/HARERA/GGM/..." />
                   </div>
                   <div>
-                    <Label>Developer Logo URL</Label>
-                    <Input
-                      type="url"
-                      name="developerLogo"
+                    <ImageUpload
+                      label="Developer Logo"
                       value={f.developerLogo}
-                      onChange={change}
-                      placeholder="https://example.com/logo.png"
+                      onChange={(url) => setF({ ...f, developerLogo: url as string })}
+                      maxSize={10}
                     />
                   </div>
                   <div />
@@ -1261,28 +1259,12 @@ function CreateProjectPage() {
                         </div>
                         <div className="md:col-span-2">
                           <Label>Image</Label>
-                          <div className="flex gap-2 items-start">
-                            <div className="flex-1">
-                              <Input
-                                type="url"
-                                value={fp.imageUrl}
-                                onChange={(e) => updRow(setFloorPlans, i, 'imageUrl', e.target.value)}
-                                placeholder="https://..."
-                              />
-                              {fp.imageUrl && (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img
-                                  src={fp.imageUrl}
-                                  alt=""
-                                  className="mt-1.5 w-32 h-20 object-cover rounded border"
-                                  onError={(e) => (e.currentTarget.style.display = 'none')}
-                                />
-                              )}
-                            </div>
-                          </div>
-                          <p className="text-xs text-gray-500 mt-1">
-                            Or use the URL input tab in the dedicated image upload section above
-                          </p>
+                          <ImageUpload
+                            label=""
+                            value={fp.imageUrl}
+                            onChange={(url) => updRow(setFloorPlans, i, 'imageUrl', url as string)}
+                            maxSize={10}
+                          />
                         </div>
                         <div className="md:col-span-2">
                           <Label>Details</Label>
