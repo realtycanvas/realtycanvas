@@ -10,13 +10,10 @@ export function getUploadDir(): string {
 }
 
 export function getFileUrl(fileName: string): string {
-  const isDev = process.env.NODE_ENV === 'development';
-  if (isDev) return `/uploads/${fileName}`;
-  const rawBase = (process.env.UPLOAD_BASE_URL || '').trim().replace(/^`|`$/g, '');
-  const base = rawBase.replace(/\/+$/, '');
-  if (!base) return `/uploads/${fileName}`;
-  if (base.endsWith('/uploads')) return `${base}/${fileName}`;
-  return `${base}/uploads/${fileName}`;
+  const isProd = process.env.NODE_ENV === 'production';
+  const base = (process.env.UPLOAD_BASE_URL || '').trim().replace(/\/+$/, '');
+  if (isProd) return `${base}/${fileName}`;
+  return `/uploads/${fileName}`;
 }
 
 export async function ensureUploadDir() {
