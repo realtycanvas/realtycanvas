@@ -76,14 +76,11 @@ const seoData = {
   localHeading: 'Location Advantage – Sector 14, Gurugram',
   localContent: `SPJ Vedatam enjoys one of the most strategically located commercial addresses in Gurugram.
 
-🚗 Connectivity & Accessibility:
-- Situated on Old Delhi Road / Delhi–Gurgaon Expressway — offering high frontage and maximum visibility.
-
-- Minutes from HUDA City Centre & IFFCO Chowk Metro Stations, ensuring strong public transport access for customers and tenants.
-
-- Quick access to NH-48, MG Road, Dwarka Expressway, Cyber City, and other major commercial hubs across Gurugram.
-
-- Approximately 15–20 minutes from IGI Airport via major highways, making it accessible for business travelers and guests.
+Connectivity & Accessibility:
+• Situated on Old Delhi Road / Delhi–Gurgaon Expressway — offering high frontage and maximum visibility.
+• Minutes from HUDA City Centre & IFFCO Chowk Metro Stations, ensuring strong public transport access for customers and tenants.
+• Quick access to NH-48, MG Road, Dwarka Expressway, Cyber City, and other major commercial hubs across Gurugram.
+• Approximately 15–20 minutes from IGI Airport via major highways, making it accessible for business travelers and guests.
 
 Surrounding dense residential sectors and established neighborhoods provide a steady, consistent stream of customers and tenants — positioning SPJ Vedatam as a top choice for retail brands, F&B businesses, entertainment venues, and investors.`,
   longFormTitle: 'Who Should Consider SPJ Vedatam?',
@@ -182,7 +179,7 @@ This multi-level hub offers:
     'Multiplex & entertainment hub Gurgaon',
     'Commercial investment Gurgaon',
   ],
-  isTrending: true,
+  projectTags: ['FEATURED', 'TRENDING'],
 };
 
 // ─── HIGHLIGHTS ──────────────────────────────────────────────────────────────

@@ -2,881 +2,1485 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { PROJECT_TAGS } from '@/lib/project-tags';
+import ImageUpload from '@/components/ui/image-upload';
 
-interface User {
-  email: string;
-  role: string;
-}
+// ─── Constants ─────────────────────────────────────────────────────────────────
+
+const CATEGORIES = ['COMMERCIAL', 'RESIDENTIAL'] as const;
+const STATUSES = ['UNDER_CONSTRUCTION', 'READY'] as const;
+const NEARBY_TYPES = ['METRO', 'ROAD', 'AIRPORT', 'MALL', 'HOTEL', 'SCHOOL', 'HOSPITAL', 'OFFICE_HUB', 'PARK'] as const;
+
+const priceRanges = [
+  { label: 'Any Price', min: 0, max: 0 },
+  { label: '₹50L - ₹1Cr', min: 5000000, max: 10000000 },
+  { label: '₹1Cr - ₹5Cr', min: 10000000, max: 50000000 },
+  { label: '₹5Cr - ₹10Cr', min: 50000000, max: 100000000 },
+  { label: '₹10Cr - ₹25Cr', min: 100000000, max: 250000000 },
+  { label: '₹25Cr+', min: 250000000, max: 1000000000 },
+];
+
+const TABS = [
+  { id: 'basic', label: '1. Basic' },
+  { id: 'pricing', label: '2. Pricing' },
+  { id: 'media', label: '3. Media' },
+  { id: 'content', label: '4. Content' },
+  { id: 'details', label: '5. Details' },
+  { id: 'seo', label: '6. SEO' },
+] as const;
+
+type TabId = (typeof TABS)[number]['id'];
+
+// ─── Helpers ───────────────────────────────────────────────────────────────────
+
+const slugify = (s: string) =>
+  s
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+
+const fmtLabel = (s: string) => s.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+
+const rupeeHint = (val: string) => {
+  const n = parseInt(val);
+  if (!n) return '';
+  if (n >= 10000000) return `≈ ₹${(n / 10000000).toFixed(2)} Cr`;
+  if (n >= 100000) return `≈ ₹${(n / 100000).toFixed(1)} L`;
+  return `₹${n.toLocaleString('en-IN')}`;
+};
+
+// ─── Tiny UI Atoms ─────────────────────────────────────────────────────────────
+
+const Label = ({ children, req }: { children: React.ReactNode; req?: boolean }) => (
+  <label className="block text-xs font-medium text-gray-600 mb-1">
+    {children}
+    {req && <span className="text-red-500 ml-0.5">*</span>}
+  </label>
+);
+
+const Input = ({ cls = '', ...p }: React.InputHTMLAttributes<HTMLInputElement> & { cls?: string }) => (
+  <input
+    {...p}
+    className={`w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none transition ${cls}`}
+  />
+);
+
+const Textarea = ({ cls = '', ...p }: React.TextareaHTMLAttributes<HTMLTextAreaElement> & { cls?: string }) => (
+  <textarea
+    {...p}
+    className={`w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none transition resize-y ${cls}`}
+  />
+);
+
+const Select = ({ cls = '', ...p }: React.SelectHTMLAttributes<HTMLSelectElement> & { cls?: string }) => (
+  <select
+    {...p}
+    className={`w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-yellow-400 focus:border-transparent outline-none bg-white transition ${cls}`}
+  />
+);
+
+const AddBtn = ({ onClick, label = 'Add Row' }: { onClick: () => void; label?: string }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className="mt-3 flex items-center gap-1 text-xs font-semibold text-yellow-700 hover:text-yellow-900 transition"
+  >
+    <span className="text-base leading-none">＋</span> {label}
+  </button>
+);
+
+const DelBtn = ({ onClick }: { onClick: () => void }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    title="Remove"
+    className="shrink-0 w-7 h-7 flex items-center justify-center rounded-full text-red-400 hover:bg-red-50 hover:text-red-600 transition text-base leading-none"
+  >
+    ×
+  </button>
+);
+
+const Card = ({ title, desc, children }: { title: string; desc?: string; children: React.ReactNode }) => (
+  <div className="bg-white rounded border border-gray-200 overflow-hidden">
+    <div className="px-5 py-3 bg-gray-50 border-b border-gray-200">
+      <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">{title}</h3>
+      {desc && <p className="text-xs text-gray-400 mt-0.5">{desc}</p>}
+    </div>
+    <div className="p-5">{children}</div>
+  </div>
+);
+
+const G2 = ({ children }: { children: React.ReactNode }) => (
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{children}</div>
+);
+const G3 = ({ children }: { children: React.ReactNode }) => (
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">{children}</div>
+);
+const G4 = ({ children }: { children: React.ReactNode }) => (
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">{children}</div>
+);
+
+const RowBox = ({ children, onDel }: { children: React.ReactNode; onDel: () => void }) => (
+  <div className="relative p-4 bg-gray-50 rounded border border-gray-100">
+    <div className="absolute top-2 right-2">
+      <DelBtn onClick={onDel} />
+    </div>
+    {children}
+  </div>
+);
+
+// ─── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function CreateProjectPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [formLoading, setFormLoading] = useState(false);
+
+  const [tab, setTab] = useState<TabId>('basic');
+  const [pageLoading, setPageLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [user, setUser] = useState<User | null>(null);
-  const [formData, setFormData] = useState({
+  const [success, setSuccess] = useState('');
+  const [slugLocked, setSlugLocked] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  // ── Flat core fields ───────────────────────────────────────────────────────
+  const [f, setF] = useState({
+    // Identity
     title: '',
     subtitle: '',
     slug: '',
     description: '',
     category: 'COMMERCIAL',
     status: 'PLANNED',
+    // Location
     address: '',
     locality: '',
     city: '',
     state: '',
+    latitude: '',
+    longitude: '',
+    currency: 'INR',
+    // Developer
     developerName: '',
+    developerLogo: '',
     reraId: '',
+    possessionDate: '',
+    launchDate: '',
+    // Pricing display
     basePrice: '',
     priceRange: '',
     priceMin: '',
     priceMax: '',
-    featuredImage: '',
-    landArea: '',
-    totalUnits: '',
-    soldUnits: '',
-    availableUnits: '',
-    numberOfTowers: '',
-    numberOfFloors: '',
     minRatePsf: '',
     maxRatePsf: '',
     minUnitArea: '',
     maxUnitArea: '',
+    // Unit stats
+    landArea: '',
+    numberOfTowers: '',
+    numberOfFloors: '',
+    totalUnits: '',
+    soldUnits: '',
+    availableUnits: '',
+    numberOfApartments: '',
+    // Media
+    featuredImage: '',
+    sitePlanImage: '',
+    // Banner
     bannerTitle: '',
     bannerSubtitle: '',
     bannerDescription: '',
+    // About
     aboutTitle: '',
     aboutDescription: '',
+    // Site plan text
     sitePlanTitle: '',
-    sitePlanImage: '',
     sitePlanDescription: '',
-    seoTitle: '',
-    seoDescription: '',
-    seoKeywords: '',
+    // SEO
+    seoMetaTitle: '',
+    seoMetaDesc: '',
+    seoMetaKeywords: '',
+    seoH1: '',
+    seoFeaturedImgAlt: '',
+    seoLocalHeading: '',
+    seoLocalContent: '',
+    seoLongTitle: '',
+    seoLongContent: '',
   });
 
-  // Check authentication and redirect if not logged in
+  // ── Array states ───────────────────────────────────────────────────────────
+  const [gallery, setGallery] = useState<string[]>(['']);
+  const [videos, setVideos] = useState<string[]>(['']);
+  const [highlights, setHighlights] = useState([{ label: '', icon: '' }]);
+  const [amenities, setAmenities] = useState([{ category: '', name: '', details: '' }]);
+  const [offerings, setOfferings] = useState([{ icon: '', title: '', description: '' }]);
+  const [pricing, setPricing] = useState([
+    {
+      type: '',
+      reraArea: '',
+      price: '',
+      pricePerSqft: '',
+      availableUnits: '',
+      floorNumbers: '',
+    },
+  ]);
+  const [nearby, setNearby] = useState([
+    {
+      type: 'METRO',
+      name: '',
+      distanceKm: '',
+      travelTimeMin: '',
+    },
+  ]);
+  const [floorPlans, setFloorPlans] = useState([
+    {
+      level: '',
+      title: '',
+      imageUrl: '',
+      details: '',
+    },
+  ]);
+  const [faqs, setFaqs] = useState([{ question: '', answer: '' }]);
+
+  // ── Auth check ─────────────────────────────────────────────────────────────
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await fetch('/api/auth/me');
-        const data = await res.json();
-        if (data.user) {
-          setUser(data.user);
-        } else {
-          router.push('/projects');
-        }
-      } catch {
-        router.push('/projects');
-      } finally {
-        setLoading(false);
-      }
-    };
-    checkAuth();
+    fetch('/api/auth/me')
+      .then((r) => r.json())
+      .then((d) => {
+        if (!d.user) router.push('/projects');
+      })
+      .catch(() => router.push('/projects'))
+      .finally(() => setPageLoading(false));
   }, [router]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setFormLoading(true);
-    setError('');
-
-    try {
-      // Validate required fields
-      if (!formData.title.trim()) {
-        setError('Project title is required');
-        setFormLoading(false);
-        return;
-      }
-
-      if (!formData.slug.trim()) {
-        setError('URL slug is required');
-        setFormLoading(false);
-        return;
-      }
-
-      if (!formData.address.trim()) {
-        setError('Address is required');
-        setFormLoading(false);
-        return;
-      }
-
-      if (!formData.featuredImage.trim()) {
-        setError('Featured image URL is required');
-        setFormLoading(false);
-        return;
-      }
-
-      // Prepare data with proper types
-      const payload = {
-        title: formData.title.trim(),
-        subtitle: formData.subtitle?.trim() || null,
-        slug: formData.slug.toLowerCase().trim(), // Normalize slug
-        description: formData.description.trim(),
-        category: formData.category,
-        status: formData.status,
-        address: formData.address.trim(),
-        locality: formData.locality?.trim() || null,
-        city: formData.city?.trim() || null,
-        state: formData.state?.trim() || null,
-        developerName: formData.developerName?.trim() || null,
-        reraId: formData.reraId?.trim() || null,
-        basePrice: formData.basePrice?.trim() || null,
-        priceRange: formData.priceRange?.trim() || null,
-        priceMin: formData.priceMin ? parseInt(formData.priceMin) : null,
-        priceMax: formData.priceMax ? parseInt(formData.priceMax) : null,
-        featuredImage: formData.featuredImage.trim(),
-        landArea: formData.landArea?.trim() || null,
-        totalUnits: formData.totalUnits ? parseInt(formData.totalUnits) : null,
-        soldUnits: formData.soldUnits ? parseInt(formData.soldUnits) : null,
-        availableUnits: formData.availableUnits ? parseInt(formData.availableUnits) : null,
-        numberOfTowers: formData.numberOfTowers ? parseInt(formData.numberOfTowers) : null,
-        numberOfFloors: formData.numberOfFloors ? parseInt(formData.numberOfFloors) : null,
-        minRatePsf: formData.minRatePsf?.trim() || null,
-        maxRatePsf: formData.maxRatePsf?.trim() || null,
-        minUnitArea: formData.minUnitArea ? parseInt(formData.minUnitArea) : null,
-        maxUnitArea: formData.maxUnitArea ? parseInt(formData.maxUnitArea) : null,
-        bannerTitle: formData.bannerTitle?.trim() || null,
-        bannerSubtitle: formData.bannerSubtitle?.trim() || null,
-        bannerDescription: formData.bannerDescription?.trim() || null,
-        aboutTitle: formData.aboutTitle?.trim() || null,
-        aboutDescription: formData.aboutDescription?.trim() || null,
-        sitePlanTitle: formData.sitePlanTitle?.trim() || null,
-        sitePlanImage: formData.sitePlanImage?.trim() || null,
-        sitePlanDescription: formData.sitePlanDescription?.trim() || null,
-        seoTitle: formData.seoTitle?.trim() || null,
-        seoDescription: formData.seoDescription?.trim() || null,
-        seoKeywords: formData.seoKeywords
-          ? formData.seoKeywords
-              .split(',')
-              .map((k) => k.trim())
-              .filter((k) => k)
-          : [],
-      };
-
-      const response = await fetch('/api/projects', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create project');
-      }
-
-      const result = await response.json();
-      // Redirect to projects page or the new project
-      router.push(`/projects`);
-      router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
-      console.error('Error creating project:', err);
-    } finally {
-      setFormLoading(false);
+  // ── Handlers ───────────────────────────────────────────────────────────────
+  const change = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    const val = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
+    if (name === 'title' && !slugLocked) {
+      setF((p) => ({ ...p, title: value, slug: slugify(value) }));
+    } else {
+      setF((p) => ({ ...p, [name]: val }));
     }
   };
 
+  const changeSlug = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSlugLocked(true);
+    setF((p) => ({ ...p, slug: e.target.value }));
+  };
+
+  const selectPriceRange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const r = priceRanges.find((x) => x.label === e.target.value);
+    if (r) setF((p) => ({ ...p, priceMin: String(r.min), priceMax: String(r.max) }));
+  };
+
+  // ── Generic array helpers ──────────────────────────────────────────────────
+  const addStr = (set: React.Dispatch<React.SetStateAction<string[]>>) => set((p) => [...p, '']);
+  const delStr = (set: React.Dispatch<React.SetStateAction<string[]>>, i: number) =>
+    set((p) => p.filter((_, j) => j !== i));
+  const updStr = (set: React.Dispatch<React.SetStateAction<string[]>>, i: number, v: string) =>
+    set((p) => p.map((x, j) => (j === i ? v : x)));
+
+  function addRow<T>(set: React.Dispatch<React.SetStateAction<T[]>>, empty: T) {
+    set((p) => [...p, { ...empty }]);
+  }
+  function delRow<T>(set: React.Dispatch<React.SetStateAction<T[]>>, i: number) {
+    set((p) => p.filter((_, j) => j !== i));
+  }
+  function updRow<T extends Record<string, unknown>>(
+    set: React.Dispatch<React.SetStateAction<T[]>>,
+    i: number,
+    key: keyof T,
+    val: string
+  ) {
+    set((p) => p.map((row, j) => (j === i ? { ...row, [key]: val } : row)));
+  }
+
+  const toggleTag = (value: string) => {
+    setSelectedTags((prev) => (prev.includes(value) ? prev.filter((t) => t !== value) : [...prev, value]));
+  };
+
+  // ── Submit ─────────────────────────────────────────────────────────────────
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (!f.title.trim()) return setError('Project title is required');
+    if (!f.slug.trim()) return setError('URL slug is required');
+    if (!f.address.trim()) return setError('Address is required');
+    if (!f.featuredImage.trim()) return setError('Featured image URL is required');
+
+    setSaving(true);
+
+    const {
+      seoMetaTitle,
+      seoMetaDesc,
+      seoMetaKeywords,
+      seoH1,
+      seoFeaturedImgAlt,
+      seoLocalHeading,
+      seoLocalContent,
+      seoLongTitle,
+      seoLongContent,
+      priceMin,
+      priceMax,
+      ...core
+    } = f;
+
+    const payload = {
+      ...core,
+      projectTags: selectedTags,
+      latitude: core.latitude ? parseFloat(core.latitude) : null,
+      longitude: core.longitude ? parseFloat(core.longitude) : null,
+      priceMin: priceMin ? parseInt(priceMin) : null,
+      priceMax: priceMax ? parseInt(priceMax) : null,
+      minUnitArea: core.minUnitArea ? parseInt(core.minUnitArea) : null,
+      maxUnitArea: core.maxUnitArea ? parseInt(core.maxUnitArea) : null,
+      totalUnits: core.totalUnits ? parseInt(core.totalUnits) : null,
+      soldUnits: core.soldUnits ? parseInt(core.soldUnits) : null,
+      availableUnits: core.availableUnits ? parseInt(core.availableUnits) : null,
+      numberOfApartments: core.numberOfApartments ? parseInt(core.numberOfApartments) : null,
+      numberOfTowers: core.numberOfTowers ? parseInt(core.numberOfTowers) : null,
+      numberOfFloors: core.numberOfFloors ? parseInt(core.numberOfFloors) : null,
+      possessionDate: core.possessionDate ? new Date(core.possessionDate).toISOString() : null,
+      launchDate: core.launchDate ? new Date(core.launchDate).toISOString() : null,
+
+      galleryImages: gallery.filter(Boolean),
+      videoUrls: videos.filter(Boolean),
+
+      highlights: highlights.filter((h) => h.label.trim()).map((h, i) => ({ ...h, sortOrder: i + 1 })),
+
+      amenities: amenities.filter((a) => a.name.trim()).map((a, i) => ({ ...a, sortOrder: i + 1 })),
+
+      offerings: offerings.filter((o) => o.title.trim()).map((o, i) => ({ ...o, sortOrder: i + 1 })),
+
+      pricingTable: pricing
+        .filter((p) => p.type.trim())
+        .map((p) => ({
+          ...p,
+          availableUnits: p.availableUnits ? parseInt(p.availableUnits) : null,
+        })),
+
+      nearbyPoints: nearby
+        .filter((n) => n.name.trim())
+        .map((n) => ({
+          ...n,
+          distanceKm: n.distanceKm ? parseFloat(n.distanceKm) : null,
+          travelTimeMin: n.travelTimeMin ? parseInt(n.travelTimeMin) : null,
+        })),
+
+      floorPlans: floorPlans.filter((fp) => fp.level.trim()).map((fp, i) => ({ ...fp, sortOrder: i + 1 })),
+
+      faqs: faqs.filter((fq) => fq.question.trim()).map((fq, i) => ({ ...fq, sortOrder: i + 1 })),
+
+      seo: {
+        h1Tag: seoH1 || null,
+        featuredImgAlt: seoFeaturedImgAlt || null,
+        localHeading: seoLocalHeading || null,
+        localContent: seoLocalContent || null,
+        longFormTitle: seoLongTitle || null,
+        longFormContent: seoLongContent || null,
+        metaTitle: seoMetaTitle || null,
+        metaDescription: seoMetaDesc || null,
+        metaKeywords: seoMetaKeywords
+          ? seoMetaKeywords
+              .split(',')
+              .map((k) => k.trim())
+              .filter(Boolean)
+          : [],
+        h2Tags: [],
+        imageAltMap: {},
+        isIndexable: true,
+        sitemapPriority: 0.8,
+      },
+    };
+
+    try {
+      const res = await fetch('/api/admin/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to create project');
+      setSuccess('Project created successfully! Redirecting…');
+      setTimeout(() => router.push(`/projects/${data.slug}`), 1500);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Something went wrong');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // ── Loading screen ─────────────────────────────────────────────────────────
+  if (pageLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="w-8 h-8 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        {/* Loading state while checking auth */}
-        {loading && (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
-          </div>
-        )}
-
-        {!loading && (
-          <>
-            {/* Header */}
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">Create New Project</h1>
-              <p className="mt-2 text-gray-600">
-                Fill in the details below to create a new real estate project listing
-              </p>
+    <div className="min-h-screen bg-gray-50 mt-20">
+      {/* ── Form Body ──────────────────────────────────────────────────────── */}
+      <form id="project-form" onSubmit={submit}>
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 space-y-5">
+          {/* Alerts */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded">{error}</div>
+          )}
+          {success && (
+            <div className="bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded">
+              {success}
             </div>
+          )}
 
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-8 space-y-8">
-              {error && <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">{error}</div>}
-
-              {/* Basic Information */}
-              <section>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Basic Information</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* ──────────────────────────────────────────────────────────────────
+              TAB 1 — BASIC INFO
+          ────────────────────────────────────────────────────────────────── */}
+          {tab === 'basic' && (
+            <div className="space-y-5">
+              <Card title="Project Identity">
+                <div className="space-y-4">
                   <div>
-                    <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-                      Project Title *
-                    </label>
-                    <input
-                      type="text"
-                      id="title"
+                    <Label req>Project Title</Label>
+                    <Input
                       name="title"
-                      value={formData.title}
-                      onChange={handleInputChange}
+                      value={f.title}
+                      onChange={change}
                       required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="e.g. Luxury Towers Downtown"
+                      placeholder="e.g. SPJ Vedatam – Premier Commercial Hub in Sector 14, Gurugram"
                     />
                   </div>
-
+                  <G2>
+                    <div>
+                      <Label>Subtitle</Label>
+                      <Input
+                        name="subtitle"
+                        value={f.subtitle}
+                        onChange={change}
+                        placeholder="Short tagline for the project"
+                      />
+                    </div>
+                    <div>
+                      <Label req>URL Slug</Label>
+                      <Input
+                        name="slug"
+                        value={f.slug}
+                        onChange={changeSlug}
+                        placeholder="auto-generated from title"
+                        required
+                      />
+                      <p className="text-xs text-gray-400 mt-1">
+                        /projects/<strong className="text-gray-600">{f.slug || 'your-slug-here'}</strong>
+                      </p>
+                    </div>
+                    <div>
+                      <Label req>Category</Label>
+                      <Select name="category" value={f.category} onChange={change}>
+                        {CATEGORIES.map((c) => (
+                          <option key={c} value={c}>
+                            {fmtLabel(c)}
+                          </option>
+                        ))}
+                      </Select>
+                    </div>
+                    <div>
+                      <Label req>Status</Label>
+                      <Select name="status" value={f.status} onChange={change}>
+                        {STATUSES.map((s) => (
+                          <option key={s} value={s}>
+                            {fmtLabel(s)}
+                          </option>
+                        ))}
+                      </Select>
+                    </div>
+                  </G2>
                   <div>
-                    <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-2">
-                      URL Slug *
-                    </label>
-                    <input
-                      type="text"
-                      id="slug"
-                      name="slug"
-                      value={formData.slug}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="e.g. luxury-towers-downtown"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="subtitle" className="block text-sm font-medium text-gray-700 mb-2">
-                      Subtitle
-                    </label>
-                    <input
-                      type="text"
-                      id="subtitle"
-                      name="subtitle"
-                      value={formData.subtitle}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="e.g. Premium Residential Complex"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="developerName" className="block text-sm font-medium text-gray-700 mb-2">
-                      Developer Name
-                    </label>
-                    <input
-                      type="text"
-                      id="developerName"
-                      name="developerName"
-                      value={formData.developerName}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="e.g. ABC Developers"
-                    />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                      Description *
-                    </label>
-                    <textarea
-                      id="description"
+                    <Label req>Short Description</Label>
+                    <Textarea
                       name="description"
-                      value={formData.description}
-                      onChange={handleInputChange}
-                      required
+                      value={f.description}
+                      onChange={change}
                       rows={4}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="Detailed description of the project..."
-                    />
-                  </div>
-                </div>
-              </section>
-
-              {/* Category & Status */}
-              <section>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Project Type & Status</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-                      Category *
-                    </label>
-                    <select
-                      id="category"
-                      name="category"
-                      value={formData.category}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                    >
-                      <option value="COMMERCIAL">Commercial</option>
-                      <option value="RETAIL_ONLY">Retail Only</option>
-                      <option value="MIXED_USE">Mixed Use</option>
-                      <option value="RESIDENTIAL">Residential</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-2">
-                      Status *
-                    </label>
-                    <select
-                      id="status"
-                      name="status"
-                      value={formData.status}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                    >
-                      <option value="PLANNED">Planned</option>
-                      <option value="UNDER_CONSTRUCTION">Under Construction</option>
-                      <option value="READY">Ready</option>
-                    </select>
-                  </div>
-                </div>
-              </section>
-
-              {/* Location */}
-              <section>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Location Details</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="md:col-span-2">
-                    <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
-                      Address *
-                    </label>
-                    <input
-                      type="text"
-                      id="address"
-                      name="address"
-                      value={formData.address}
-                      onChange={handleInputChange}
+                      placeholder="2-3 sentence overview shown at the top of detail page"
                       required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="Street address"
+                      className=""
                     />
                   </div>
-
+                  {/* Project Tags */}
                   <div>
-                    <label htmlFor="locality" className="block text-sm font-medium text-gray-700 mb-2">
-                      Locality
-                    </label>
-                    <input
-                      type="text"
-                      id="locality"
-                      name="locality"
-                      value={formData.locality}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="e.g. Downtown, Marina"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-2">
-                      City
-                    </label>
-                    <input
-                      type="text"
-                      id="city"
-                      name="city"
-                      value={formData.city}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="e.g. Mumbai"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-2">
-                      State
-                    </label>
-                    <input
-                      type="text"
-                      id="state"
-                      name="state"
-                      value={formData.state}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="e.g. Maharashtra"
-                    />
+                    <Label>Project Tags</Label>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {PROJECT_TAGS.map((tag) => {
+                        const active = selectedTags.includes(tag.value);
+                        return (
+                          <button
+                            key={tag.value}
+                            type="button"
+                            onClick={() => toggleTag(tag.value)}
+                            className={`
+                              flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold
+                              border-2 transition select-none cursor-pointer
+                              ${
+                                active
+                                  ? `${tag.color} border-current shadow-sm scale-105`
+                                  : 'bg-white text-gray-400 border-gray-200 hover:border-gray-400'
+                              }
+                            `}
+                          >
+                            <span>{tag.emoji}</span>
+                            {tag.label}
+                            {active && <span className="ml-0.5 text-[10px]">✓</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {selectedTags.length > 0 && (
+                      <p className="text-xs text-gray-400 mt-2">
+                        Selected: {selectedTags.map((t) => PROJECT_TAGS.find((p) => p.value === t)?.label).join(', ')}
+                      </p>
+                    )}
                   </div>
                 </div>
-              </section>
+              </Card>
 
-              {/* Pricing */}
-              <section>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Pricing</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card title="Location">
+                <div className="space-y-4">
                   <div>
-                    <label htmlFor="basePrice" className="block text-sm font-medium text-gray-700 mb-2">
-                      Base Price
-                    </label>
-                    <input
-                      type="text"
-                      id="basePrice"
+                    <Label req>Street Address</Label>
+                    <Input
+                      name="address"
+                      value={f.address}
+                      onChange={change}
+                      placeholder="e.g. Old Delhi Road"
+                      required
+                    />
+                  </div>
+                  <G3>
+                    <div>
+                      <Label>Locality / Sector</Label>
+                      <Input name="locality" value={f.locality} onChange={change} placeholder="e.g. Sector 14" />
+                    </div>
+                    <div>
+                      <Label>City</Label>
+                      <Input name="city" value={f.city} onChange={change} placeholder="e.g. Gurugram" />
+                    </div>
+                    <div>
+                      <Label>State</Label>
+                      <Input name="state" value={f.state} onChange={change} placeholder="e.g. Haryana" />
+                    </div>
+                    <div>
+                      <Label>Latitude</Label>
+                      <Input
+                        type="number"
+                        step="any"
+                        name="latitude"
+                        value={f.latitude}
+                        onChange={change}
+                        placeholder="e.g. 28.4595"
+                      />
+                    </div>
+                    <div>
+                      <Label>Longitude</Label>
+                      <Input
+                        type="number"
+                        step="any"
+                        name="longitude"
+                        value={f.longitude}
+                        onChange={change}
+                        placeholder="e.g. 77.0266"
+                      />
+                    </div>
+                    <div>
+                      <Label>Currency</Label>
+                      <Select name="currency" value={f.currency} onChange={change}>
+                        <option value="INR">INR (₹)</option>
+                        <option value="USD">USD ($)</option>
+                      </Select>
+                    </div>
+                  </G3>
+                </div>
+              </Card>
+
+              <Card title="Developer Info">
+                <G2>
+                  <div>
+                    <Label>Developer Name</Label>
+                    <Input
+                      name="developerName"
+                      value={f.developerName}
+                      onChange={change}
+                      placeholder="e.g. SPJ Group"
+                    />
+                  </div>
+                  <div>
+                    <Label>RERA ID</Label>
+                    <Input name="reraId" value={f.reraId} onChange={change} placeholder="RC/REP/HARERA/GGM/..." />
+                  </div>
+                  <div>
+                    <Label>Developer Logo URL</Label>
+                    <Input
+                      type="url"
+                      name="developerLogo"
+                      value={f.developerLogo}
+                      onChange={change}
+                      placeholder="https://example.com/logo.png"
+                    />
+                  </div>
+                  <div />
+                  <div>
+                    <Label>Launch Date</Label>
+                    <Input type="date" name="launchDate" value={f.launchDate} onChange={change} />
+                  </div>
+                  <div>
+                    <Label>Possession Date</Label>
+                    <Input type="date" name="possessionDate" value={f.possessionDate} onChange={change} />
+                  </div>
+                </G2>
+              </Card>
+            </div>
+          )}
+
+          {/* ──────────────────────────────────────────────────────────────────
+              TAB 2 — PRICING
+          ────────────────────────────────────────────────────────────────── */}
+          {tab === 'pricing' && (
+            <div className="space-y-5">
+              <Card title="Price Display" desc="These strings are shown as-is on the detail page.">
+                <G2>
+                  <div>
+                    <Label>Base Price (text)</Label>
+                    <Input
                       name="basePrice"
-                      value={formData.basePrice}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="e.g. 50 Lakhs"
+                      value={f.basePrice}
+                      onChange={change}
+                      placeholder="e.g. ₹50 Lakhs onwards"
                     />
                   </div>
-
                   <div>
-                    <label htmlFor="priceMin" className="block text-sm font-medium text-gray-700 mb-2">
-                      Min Price
-                    </label>
-                    <input
-                      type="number"
-                      id="priceMin"
-                      name="priceMin"
-                      value={formData.priceMin}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="e.g. 5000000"
+                    <Label>Price Range (text)</Label>
+                    <Input
+                      name="priceRange"
+                      value={f.priceRange}
+                      onChange={change}
+                      placeholder="e.g. ₹50 Lakhs – ₹5.5 Cr+"
                     />
                   </div>
+                </G2>
+              </Card>
 
+              <Card title="Numeric Price Band" desc="Used for filtering on the projects listing page.">
+                <div className="space-y-4">
                   <div>
-                    <label htmlFor="priceMax" className="block text-sm font-medium text-gray-700 mb-2">
-                      Max Price
-                    </label>
-                    <input
-                      type="number"
-                      id="priceMax"
-                      name="priceMax"
-                      value={formData.priceMax}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="e.g. 10000000"
-                    />
+                    <Label>Quick Select</Label>
+                    <Select onChange={selectPriceRange} defaultValue="">
+                      <option value="" disabled>
+                        Select a range to auto-fill…
+                      </option>
+                      {priceRanges.map((r) => (
+                        <option key={r.label} value={r.label}>
+                          {r.label}
+                        </option>
+                      ))}
+                    </Select>
+                    <p className="text-xs text-gray-400 mt-1">
+                      Selecting auto-fills Min/Max below. You can still edit manually.
+                    </p>
                   </div>
+                  <G2>
+                    <div>
+                      <Label>Price Min (₹ numeric)</Label>
+                      <Input
+                        type="number"
+                        name="priceMin"
+                        value={f.priceMin}
+                        onChange={change}
+                        placeholder="e.g. 5000000"
+                      />
+                      {f.priceMin && (
+                        <p className="text-xs text-yellow-600 mt-1 font-medium">{rupeeHint(f.priceMin)}</p>
+                      )}
+                    </div>
+                    <div>
+                      <Label>Price Max (₹ numeric)</Label>
+                      <Input
+                        type="number"
+                        name="priceMax"
+                        value={f.priceMax}
+                        onChange={change}
+                        placeholder="e.g. 55000000"
+                      />
+                      {f.priceMax && (
+                        <p className="text-xs text-yellow-600 mt-1 font-medium">{rupeeHint(f.priceMax)}</p>
+                      )}
+                    </div>
+                    <div>
+                      <Label>Min Rate PSF</Label>
+                      <Input name="minRatePsf" value={f.minRatePsf} onChange={change} placeholder="e.g. ₹16,500" />
+                    </div>
+                    <div>
+                      <Label>Max Rate PSF</Label>
+                      <Input name="maxRatePsf" value={f.maxRatePsf} onChange={change} placeholder="e.g. ₹23,500" />
+                    </div>
+                    <div>
+                      <Label>Min Unit Area (sq.ft)</Label>
+                      <Input
+                        type="number"
+                        name="minUnitArea"
+                        value={f.minUnitArea}
+                        onChange={change}
+                        placeholder="e.g. 300"
+                      />
+                    </div>
+                    <div>
+                      <Label>Max Unit Area (sq.ft)</Label>
+                      <Input
+                        type="number"
+                        name="maxUnitArea"
+                        value={f.maxUnitArea}
+                        onChange={change}
+                        placeholder="e.g. 2400"
+                      />
+                    </div>
+                  </G2>
                 </div>
-              </section>
+              </Card>
 
-              {/* Project Details */}
-              <section>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Project Details</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card title="Unit Statistics" desc="Shown in the sidebar price card.">
+                <G4>
                   <div>
-                    <label htmlFor="reraId" className="block text-sm font-medium text-gray-700 mb-2">
-                      RERA ID
-                    </label>
-                    <input
-                      type="text"
-                      id="reraId"
-                      name="reraId"
-                      value={formData.reraId}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="RERA Registration ID"
-                    />
+                    <Label>Land Area</Label>
+                    <Input name="landArea" value={f.landArea} onChange={change} placeholder="e.g. 4.15 Acres" />
                   </div>
-
                   <div>
-                    <label htmlFor="numberOfTowers" className="block text-sm font-medium text-gray-700 mb-2">
-                      Number of Towers
-                    </label>
-                    <input
+                    <Label>Towers</Label>
+                    <Input
                       type="number"
-                      id="numberOfTowers"
                       name="numberOfTowers"
-                      value={formData.numberOfTowers}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="e.g. 3"
+                      value={f.numberOfTowers}
+                      onChange={change}
+                      placeholder="1"
                     />
                   </div>
-
                   <div>
-                    <label htmlFor="numberOfFloors" className="block text-sm font-medium text-gray-700 mb-2">
-                      Number of Floors
-                    </label>
-                    <input
+                    <Label>Floors</Label>
+                    <Input
                       type="number"
-                      id="numberOfFloors"
                       name="numberOfFloors"
-                      value={formData.numberOfFloors}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="e.g. 25"
+                      value={f.numberOfFloors}
+                      onChange={change}
+                      placeholder="9"
                     />
                   </div>
-
                   <div>
-                    <label htmlFor="totalUnits" className="block text-sm font-medium text-gray-700 mb-2">
-                      Total Units
-                    </label>
-                    <input
+                    <Label>Apartments</Label>
+                    <Input
                       type="number"
-                      id="totalUnits"
-                      name="totalUnits"
-                      value={formData.totalUnits}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="e.g. 200"
+                      name="numberOfApartments"
+                      value={f.numberOfApartments}
+                      onChange={change}
+                      placeholder="48"
                     />
                   </div>
-
                   <div>
-                    <label htmlFor="soldUnits" className="block text-sm font-medium text-gray-700 mb-2">
-                      Sold Units
-                    </label>
-                    <input
-                      type="number"
-                      id="soldUnits"
-                      name="soldUnits"
-                      value={formData.soldUnits}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="e.g. 50"
-                    />
+                    <Label>Total Units</Label>
+                    <Input type="number" name="totalUnits" value={f.totalUnits} onChange={change} placeholder="320" />
                   </div>
-
                   <div>
-                    <label htmlFor="availableUnits" className="block text-sm font-medium text-gray-700 mb-2">
-                      Available Units
-                    </label>
-                    <input
+                    <Label>Sold Units</Label>
+                    <Input type="number" name="soldUnits" value={f.soldUnits} onChange={change} placeholder="87" />
+                  </div>
+                  <div>
+                    <Label>Available Units</Label>
+                    <Input
                       type="number"
-                      id="availableUnits"
                       name="availableUnits"
-                      value={formData.availableUnits}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="e.g. 150"
+                      value={f.availableUnits}
+                      onChange={change}
+                      placeholder="233"
                     />
                   </div>
-                </div>
-              </section>
+                </G4>
+              </Card>
 
-              {/* Media */}
-              <section>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Media</h2>
-                <div>
-                  <label htmlFor="featuredImage" className="block text-sm font-medium text-gray-700 mb-2">
-                    Featured Image URL *
-                  </label>
-                  <input
-                    type="url"
-                    id="featuredImage"
-                    name="featuredImage"
-                    value={formData.featuredImage}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                    placeholder="https://example.com/image.jpg"
+              <Card title="Pricing Table" desc='Rows shown in "Price & Unit Size Overview" table.'>
+                <div className="space-y-4">
+                  {pricing.map((row, i) => (
+                    <RowBox key={i} onDel={() => delRow(setPricing, i)}>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pr-8">
+                        <div>
+                          <Label>Property Type</Label>
+                          <Input
+                            value={row.type}
+                            onChange={(e) => updRow(setPricing, i, 'type', e.target.value)}
+                            placeholder="e.g. Retail Shops"
+                          />
+                        </div>
+                        <div>
+                          <Label>RERA Area</Label>
+                          <Input
+                            value={row.reraArea}
+                            onChange={(e) => updRow(setPricing, i, 'reraArea', e.target.value)}
+                            placeholder="e.g. 300 – 1,465 Sq.ft"
+                          />
+                        </div>
+                        <div>
+                          <Label>Indicative Price</Label>
+                          <Input
+                            value={row.price}
+                            onChange={(e) => updRow(setPricing, i, 'price', e.target.value)}
+                            placeholder="e.g. ₹50 Lakhs – ₹2.9 Cr+"
+                          />
+                        </div>
+                        <div>
+                          <Label>Price / Sq.ft</Label>
+                          <Input
+                            value={row.pricePerSqft}
+                            onChange={(e) => updRow(setPricing, i, 'pricePerSqft', e.target.value)}
+                            placeholder="e.g. ₹16,500 – ₹19,800"
+                          />
+                        </div>
+                        <div>
+                          <Label>Available Units</Label>
+                          <Input
+                            type="number"
+                            value={row.availableUnits}
+                            onChange={(e) => updRow(setPricing, i, 'availableUnits', e.target.value)}
+                            placeholder="e.g. 142"
+                          />
+                        </div>
+                        <div>
+                          <Label>Floor Numbers</Label>
+                          <Input
+                            value={row.floorNumbers}
+                            onChange={(e) => updRow(setPricing, i, 'floorNumbers', e.target.value)}
+                            placeholder="e.g. Ground – 3rd Floor"
+                          />
+                        </div>
+                      </div>
+                    </RowBox>
+                  ))}
+                  <AddBtn
+                    onClick={() =>
+                      addRow(setPricing, {
+                        type: '',
+                        reraArea: '',
+                        price: '',
+                        pricePerSqft: '',
+                        availableUnits: '',
+                        floorNumbers: '',
+                      })
+                    }
+                    label="Add Pricing Row"
                   />
                 </div>
-              </section>
+              </Card>
+            </div>
+          )}
 
-              {/* SEO */}
-              <section>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">SEO Information</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="md:col-span-2">
-                    <label htmlFor="seoTitle" className="block text-sm font-medium text-gray-700 mb-2">
-                      SEO Title
-                    </label>
-                    <input
-                      type="text"
-                      id="seoTitle"
-                      name="seoTitle"
-                      value={formData.seoTitle}
-                      onChange={handleInputChange}
-                      maxLength={60}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="SEO title (max 60 chars)"
+          {/* ──────────────────────────────────────────────────────────────────
+              TAB 3 — MEDIA
+          ────────────────────────────────────────────────────────────────── */}
+          {tab === 'media' && (
+            <div className="space-y-5">
+              <Card title="Featured & Site Plan Images">
+                <G2>
+                  <div>
+                    <ImageUpload
+                      label="Featured Image"
+                      value={f.featuredImage}
+                      onChange={(url) => setF({ ...f, featuredImage: url as string })}
+                      maxSize={10}
                     />
                   </div>
+                  <div>
+                    <ImageUpload
+                      label="Site Plan Image"
+                      value={f.sitePlanImage}
+                      onChange={(url) => setF({ ...f, sitePlanImage: url as string })}
+                      maxSize={10}
+                    />
+                  </div>
+                </G2>
+              </Card>
 
-                  <div className="md:col-span-2">
-                    <label htmlFor="seoDescription" className="block text-sm font-medium text-gray-700 mb-2">
-                      SEO Description
-                    </label>
-                    <textarea
-                      id="seoDescription"
-                      name="seoDescription"
-                      value={formData.seoDescription}
-                      onChange={handleInputChange}
+              <Card title="Gallery Images" desc="Additional images shown in the gallery slider.">
+                <ImageUpload
+                  label="Gallery Images"
+                  value={gallery.filter(Boolean)}
+                  onChange={(urls) => {
+                    const urlArray = Array.isArray(urls) ? urls : [urls];
+                    const updated = [...gallery];
+                    // Clear existing and add new ones
+                    updated.splice(0, updated.length, ...urlArray, '');
+                    setGallery(updated);
+                  }}
+                  multiple={true}
+                  maxSize={10}
+                />
+              </Card>
+
+              <Card title="Video URLs" desc="Supports YouTube (watch/short/embed/shorts) and direct .mp4 links.">
+                <div className="space-y-2">
+                  {videos.map((url, i) => (
+                    <div key={i} className="flex gap-2 items-center">
+                      <Input
+                        type="url"
+                        value={url}
+                        onChange={(e) => updStr(setVideos, i, e.target.value)}
+                        placeholder={`Video ${i + 1} — YouTube or direct URL`}
+                      />
+                      <DelBtn onClick={() => delStr(setVideos, i)} />
+                    </div>
+                  ))}
+                  <AddBtn onClick={() => addStr(setVideos)} label="Add Video URL" />
+                </div>
+              </Card>
+
+              <Card title="Floor Plan Images" desc="Shown in the Floor Plans & Layouts section.">
+                <div className="space-y-4">
+                  {floorPlans.map((fp, i) => (
+                    <RowBox key={i} onDel={() => delRow(setFloorPlans, i)}>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pr-8">
+                        <div>
+                          <Label>Floor Level</Label>
+                          <Input
+                            value={fp.level}
+                            onChange={(e) => updRow(setFloorPlans, i, 'level', e.target.value)}
+                            placeholder="e.g. Ground Floor"
+                          />
+                        </div>
+                        <div>
+                          <Label>Title</Label>
+                          <Input
+                            value={fp.title}
+                            onChange={(e) => updRow(setFloorPlans, i, 'title', e.target.value)}
+                            placeholder="e.g. High-Street Retail Zone"
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <Label>Image</Label>
+                          <div className="flex gap-2 items-start">
+                            <div className="flex-1">
+                              <Input
+                                type="url"
+                                value={fp.imageUrl}
+                                onChange={(e) => updRow(setFloorPlans, i, 'imageUrl', e.target.value)}
+                                placeholder="https://..."
+                              />
+                              {fp.imageUrl && (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  src={fp.imageUrl}
+                                  alt=""
+                                  className="mt-1.5 w-32 h-20 object-cover rounded border"
+                                  onError={(e) => (e.currentTarget.style.display = 'none')}
+                                />
+                              )}
+                            </div>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Or use the URL input tab in the dedicated image upload section above
+                          </p>
+                        </div>
+                        <div className="md:col-span-2">
+                          <Label>Details</Label>
+                          <Input
+                            value={fp.details}
+                            onChange={(e) => updRow(setFloorPlans, i, 'details', e.target.value)}
+                            placeholder="e.g. 42,000 sq.ft · 68 units"
+                          />
+                        </div>
+                      </div>
+                    </RowBox>
+                  ))}
+                  <AddBtn
+                    onClick={() => addRow(setFloorPlans, { level: '', title: '', imageUrl: '', details: '' })}
+                    label="Add Floor Plan"
+                  />
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {/* ──────────────────────────────────────────────────────────────────
+              TAB 4 — CONTENT
+          ────────────────────────────────────────────────────────────────── */}
+          {tab === 'content' && (
+            <div className="space-y-5">
+              {/* Banner */}
+              <Card title="Banner" desc="Hero banner title/subtitle shown at the top.">
+                <div className="space-y-3">
+                  <div>
+                    <Label>Banner Title</Label>
+                    <Input
+                      name="bannerTitle"
+                      value={f.bannerTitle}
+                      onChange={change}
+                      placeholder="e.g. SPJ Vedatam – Premier Commercial Hub"
+                    />
+                  </div>
+                  <div>
+                    <Label>Banner Subtitle</Label>
+                    <Input
+                      name="bannerSubtitle"
+                      value={f.bannerSubtitle}
+                      onChange={change}
+                      placeholder="e.g. Premium high-street retail, dining, entertainment"
+                    />
+                  </div>
+                  <div>
+                    <Label>Banner Description</Label>
+                    <Textarea
+                      name="bannerDescription"
+                      value={f.bannerDescription}
+                      onChange={change}
+                      rows={2}
+                      placeholder="Short sentence below the subtitle"
+                    />
+                  </div>
+                </div>
+              </Card>
+
+              {/* About / Overview */}
+              <Card title="Project Overview" desc='Section 1 on the detail page — "About the project".'>
+                <div className="space-y-3">
+                  <div>
+                    <Label>Section Heading</Label>
+                    <Input
+                      name="aboutTitle"
+                      value={f.aboutTitle}
+                      onChange={change}
+                      placeholder="e.g. Project Overview – SPJ Vedatam Gurugram"
+                    />
+                  </div>
+                  <div>
+                    <Label>Section Body</Label>
+                    <Textarea
+                      name="aboutDescription"
+                      value={f.aboutDescription}
+                      onChange={change}
+                      rows={6}
+                      placeholder="Detailed project description with bullet points..."
+                    />
+                  </div>
+                </div>
+              </Card>
+
+              {/* Site Plan text */}
+              <Card title="Site Plan Content" desc="Text shown alongside the site plan image.">
+                <div className="space-y-3">
+                  <div>
+                    <Label>Site Plan Title</Label>
+                    <Input
+                      name="sitePlanTitle"
+                      value={f.sitePlanTitle}
+                      onChange={change}
+                      placeholder="e.g. Location & Site Plan – SPJ Vedatam"
+                    />
+                  </div>
+                  <div>
+                    <Label>Site Plan Description</Label>
+                    <Textarea
+                      name="sitePlanDescription"
+                      value={f.sitePlanDescription}
+                      onChange={change}
+                      rows={2}
+                      placeholder="Brief description of the site layout..."
+                    />
+                  </div>
+                </div>
+              </Card>
+
+              {/* Highlights */}
+              <Card
+                title="Highlights / Why Invest"
+                desc='Shown in the "Why Invest" section and the sidebar Key Highlights.'
+              >
+                <div className="space-y-3">
+                  {highlights.map((h, i) => (
+                    <div key={i} className="flex gap-2 items-center">
+                      <Input
+                        value={h.icon}
+                        onChange={(e) => updRow(setHighlights, i, 'icon', e.target.value)}
+                        placeholder="Icon 📌"
+                        cls="w-16 shrink-0 text-center"
+                      />
+                      <Input
+                        value={h.label}
+                        onChange={(e) => updRow(setHighlights, i, 'label', e.target.value)}
+                        placeholder="Highlight text — e.g. RERA approved project"
+                      />
+                      <DelBtn onClick={() => delRow(setHighlights, i)} />
+                    </div>
+                  ))}
+                  <AddBtn onClick={() => addRow(setHighlights, { label: '', icon: '' })} label="Add Highlight" />
+                </div>
+              </Card>
+
+              {/* Offerings */}
+              <Card title="Offerings / Space Types" desc="Cards shown in the Retail, F&B & Commercial Spaces section.">
+                <div className="space-y-4">
+                  {offerings.map((o, i) => (
+                    <RowBox key={i} onDel={() => delRow(setOfferings, i)}>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pr-8">
+                        <div>
+                          <Label>Icon (emoji)</Label>
+                          <Input
+                            value={o.icon}
+                            onChange={(e) => updRow(setOfferings, i, 'icon', e.target.value)}
+                            placeholder="🛍"
+                          />
+                        </div>
+                        <div>
+                          <Label>Title</Label>
+                          <Input
+                            value={o.title}
+                            onChange={(e) => updRow(setOfferings, i, 'title', e.target.value)}
+                            placeholder="e.g. High-Street Retail Shops"
+                          />
+                        </div>
+                        <div className="md:col-span-3">
+                          <Label>Description</Label>
+                          <Textarea
+                            value={o.description}
+                            onChange={(e) => updRow(setOfferings, i, 'description', e.target.value)}
+                            rows={2}
+                            placeholder="Short description of this space type..."
+                          />
+                        </div>
+                      </div>
+                    </RowBox>
+                  ))}
+                  <AddBtn
+                    onClick={() => addRow(setOfferings, { icon: '', title: '', description: '' })}
+                    label="Add Offering"
+                  />
+                </div>
+              </Card>
+
+              {/* Amenities */}
+              <Card title="Amenities & Features" desc="Grouped by category in the Amenities section.">
+                <div className="space-y-3">
+                  {amenities.map((a, i) => (
+                    <div key={i} className="flex gap-2 items-start">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 flex-1">
+                        <Input
+                          value={a.category}
+                          onChange={(e) => updRow(setAmenities, i, 'category', e.target.value)}
+                          placeholder="Category (e.g. Parking)"
+                        />
+                        <Input
+                          value={a.name}
+                          onChange={(e) => updRow(setAmenities, i, 'name', e.target.value)}
+                          placeholder="Amenity name"
+                        />
+                        <Input
+                          value={a.details}
+                          onChange={(e) => updRow(setAmenities, i, 'details', e.target.value)}
+                          placeholder="Details (optional)"
+                        />
+                      </div>
+                      <DelBtn onClick={() => delRow(setAmenities, i)} />
+                    </div>
+                  ))}
+                  <AddBtn
+                    onClick={() => addRow(setAmenities, { category: '', name: '', details: '' })}
+                    label="Add Amenity"
+                  />
+                </div>
+              </Card>
+
+              {/* Nearby Points */}
+              <Card title="Nearby Points" desc="Distance table shown under Location Advantage.">
+                <div className="space-y-3">
+                  {nearby.map((n, i) => (
+                    <div key={i} className="flex gap-2 items-start">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 flex-1">
+                        <Select value={n.type} onChange={(e) => updRow(setNearby, i, 'type', e.target.value)}>
+                          {NEARBY_TYPES.map((t) => (
+                            <option key={t} value={t}>
+                              {fmtLabel(t)}
+                            </option>
+                          ))}
+                        </Select>
+                        <Input
+                          value={n.name}
+                          onChange={(e) => updRow(setNearby, i, 'name', e.target.value)}
+                          placeholder="Place name"
+                        />
+                        <Input
+                          type="number"
+                          step="0.1"
+                          value={n.distanceKm}
+                          onChange={(e) => updRow(setNearby, i, 'distanceKm', e.target.value)}
+                          placeholder="Distance km"
+                        />
+                        <Input
+                          type="number"
+                          value={n.travelTimeMin}
+                          onChange={(e) => updRow(setNearby, i, 'travelTimeMin', e.target.value)}
+                          placeholder="Travel min"
+                        />
+                      </div>
+                      <DelBtn onClick={() => delRow(setNearby, i)} />
+                    </div>
+                  ))}
+                  <AddBtn
+                    onClick={() => addRow(setNearby, { type: 'METRO', name: '', distanceKm: '', travelTimeMin: '' })}
+                    label="Add Nearby Point"
+                  />
+                </div>
+              </Card>
+
+              {/* FAQs */}
+              <Card title="FAQs" desc="Shown in the Frequently Asked Questions accordion.">
+                <div className="space-y-4">
+                  {faqs.map((fq, i) => (
+                    <RowBox key={i} onDel={() => delRow(setFaqs, i)}>
+                      <div className="space-y-2 pr-8">
+                        <div>
+                          <Label>Question</Label>
+                          <Input
+                            value={fq.question}
+                            onChange={(e) => updRow(setFaqs, i, 'question', e.target.value)}
+                            placeholder="e.g. Where is the project located?"
+                          />
+                        </div>
+                        <div>
+                          <Label>Answer</Label>
+                          <Textarea
+                            value={fq.answer}
+                            onChange={(e) => updRow(setFaqs, i, 'answer', e.target.value)}
+                            rows={2}
+                            placeholder="Detailed answer..."
+                          />
+                        </div>
+                      </div>
+                    </RowBox>
+                  ))}
+                  <AddBtn onClick={() => addRow(setFaqs, { question: '', answer: '' })} label="Add FAQ" />
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {/* ──────────────────────────────────────────────────────────────────
+              TAB 5 — DETAILS (extra meta)
+          ────────────────────────────────────────────────────────────────── */}
+          {tab === 'details' && (
+            <div className="space-y-5">
+              <Card title="Project Branding">
+                <p className="text-xs text-gray-400 mb-4">
+                  These fields are optional — fill only what's needed for your listing.
+                </p>
+                <div className="space-y-4">
+                  <G2>
+                    <div>
+                      <Label>minRatePSF (display text)</Label>
+                      <Input name="minRatePsf" value={f.minRatePsf} onChange={change} placeholder="e.g. ₹16,500" />
+                    </div>
+                    <div>
+                      <Label>maxRatePSF (display text)</Label>
+                      <Input name="maxRatePsf" value={f.maxRatePsf} onChange={change} placeholder="e.g. ₹23,500" />
+                    </div>
+                  </G2>
+                </div>
+              </Card>
+
+              <Card title="Quick Review" desc="Summary of all entered data — check before publishing.">
+                <div className="text-xs text-gray-600 space-y-2">
+                  {[
+                    ['Title', f.title || '—'],
+                    ['Slug', f.slug || '—'],
+                    ['Category', f.category],
+                    ['Tags', selectedTags.length ? selectedTags.join(', ') : 'None'],
+                    ['Status', f.status],
+                    ['Address', [f.address, f.locality, f.city, f.state].filter(Boolean).join(', ') || '—'],
+                    ['Price Range', f.priceRange || '—'],
+                    ['Price Min', f.priceMin ? rupeeHint(f.priceMin) : '—'],
+                    ['Price Max', f.priceMax ? rupeeHint(f.priceMax) : '—'],
+                    ['Featured Image', f.featuredImage ? '✅ Set' : '❌ Missing'],
+                    ['Gallery', `${gallery.filter(Boolean).length} image(s)`],
+                    ['Videos', `${videos.filter(Boolean).length} video(s)`],
+                    ['Highlights', `${highlights.filter((h) => h.label).length} row(s)`],
+                    ['Amenities', `${amenities.filter((a) => a.name).length} row(s)`],
+                    ['Offerings', `${offerings.filter((o) => o.title).length} row(s)`],
+                    ['Pricing Table', `${pricing.filter((p) => p.type).length} row(s)`],
+                    ['Nearby Points', `${nearby.filter((n) => n.name).length} row(s)`],
+                    ['Floor Plans', `${floorPlans.filter((fp) => fp.level).length} row(s)`],
+                    ['FAQs', `${faqs.filter((fq) => fq.question).length} row(s)`],
+                    ['SEO H1', f.seoH1 || '—'],
+                    ['Meta Title', f.seoMetaTitle || '—'],
+                  ].map(([k, v]) => (
+                    <div key={k} className="flex justify-between py-1.5 border-b border-gray-100 last:border-0">
+                      <span className="font-medium text-gray-500 w-36 shrink-0">{k}</span>
+                      <span className="text-gray-700 text-right truncate max-w-xs">{v}</span>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {/* ──────────────────────────────────────────────────────────────────
+              TAB 6 — SEO
+          ────────────────────────────────────────────────────────────────── */}
+          {tab === 'seo' && (
+            <div className="space-y-5">
+              <Card title="Meta Tags" desc="Shown in Google search results.">
+                <div className="space-y-4">
+                  <div>
+                    <Label>
+                      Meta Title <span className="text-gray-400 font-normal">(max 60 chars)</span>
+                    </Label>
+                    <Input
+                      name="seoMetaTitle"
+                      value={f.seoMetaTitle}
+                      onChange={change}
+                      maxLength={60}
+                      placeholder="SPJ Vedatam Sector 14 Gurugram – Premium Commercial Property"
+                    />
+                    <p className="text-xs text-gray-400 mt-1">{f.seoMetaTitle.length}/60 characters</p>
+                  </div>
+                  <div>
+                    <Label>
+                      Meta Description <span className="text-gray-400 font-normal">(max 160 chars)</span>
+                    </Label>
+                    <Textarea
+                      name="seoMetaDesc"
+                      value={f.seoMetaDesc}
+                      onChange={change}
                       maxLength={160}
                       rows={3}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="SEO description (max 160 chars)"
+                      placeholder="Explore SPJ Vedatam – a 4.15-acre commercial hub in Sector 14 Gurugram..."
                     />
+                    <p className="text-xs text-gray-400 mt-1">{f.seoMetaDesc.length}/160 characters</p>
                   </div>
-
-                  <div className="md:col-span-2">
-                    <label htmlFor="seoKeywords" className="block text-sm font-medium text-gray-700 mb-2">
-                      SEO Keywords (comma separated)
-                    </label>
-                    <input
-                      type="text"
-                      id="seoKeywords"
-                      name="seoKeywords"
-                      value={formData.seoKeywords}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="e.g. commercial property, retail space, Sector 14"
+                  <div>
+                    <Label>
+                      Meta Keywords <span className="text-gray-400 font-normal">(comma-separated)</span>
+                    </Label>
+                    <Input
+                      name="seoMetaKeywords"
+                      value={f.seoMetaKeywords}
+                      onChange={change}
+                      placeholder="commercial property Gurugram, retail space Sector 14, SPJ Vedatam"
                     />
                   </div>
                 </div>
-              </section>
+              </Card>
 
-              {/* Banner Section */}
-              <section>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Banner Content</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="md:col-span-2">
-                    <label htmlFor="bannerTitle" className="block text-sm font-medium text-gray-700 mb-2">
-                      Banner Title
-                    </label>
-                    <input
-                      type="text"
-                      id="bannerTitle"
-                      name="bannerTitle"
-                      value={formData.bannerTitle}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="Main banner title"
+              <Card title="On-Page SEO" desc="Controls the H1 tag and image alt text on the detail page.">
+                <G2>
+                  <div>
+                    <Label>H1 Tag</Label>
+                    <Input
+                      name="seoH1"
+                      value={f.seoH1}
+                      onChange={change}
+                      placeholder="e.g. SPJ Vedatam – Commercial Spaces in Sector 14 Gurugram"
+                    />
+                    <p className="text-xs text-gray-400 mt-1">Falls back to project title if empty.</p>
+                  </div>
+                  <div>
+                    <Label>Featured Image Alt Text</Label>
+                    <Input
+                      name="seoFeaturedImgAlt"
+                      value={f.seoFeaturedImgAlt}
+                      onChange={change}
+                      placeholder="e.g. SPJ Vedatam Commercial Hub Sector 14 Gurugram"
                     />
                   </div>
+                </G2>
+              </Card>
 
-                  <div className="md:col-span-2">
-                    <label htmlFor="bannerSubtitle" className="block text-sm font-medium text-gray-700 mb-2">
-                      Banner Subtitle
-                    </label>
-                    <input
-                      type="text"
-                      id="bannerSubtitle"
-                      name="bannerSubtitle"
-                      value={formData.bannerSubtitle}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="Banner subtitle text"
+              <Card title="Location SEO Content" desc='Shown in the "Location Advantage" section.'>
+                <div className="space-y-3">
+                  <div>
+                    <Label>Section Heading</Label>
+                    <Input
+                      name="seoLocalHeading"
+                      value={f.seoLocalHeading}
+                      onChange={change}
+                      placeholder="e.g. Location Advantage – Sector 14, Gurugram"
                     />
                   </div>
-
-                  <div className="md:col-span-2">
-                    <label htmlFor="bannerDescription" className="block text-sm font-medium text-gray-700 mb-2">
-                      Banner Description
-                    </label>
-                    <textarea
-                      id="bannerDescription"
-                      name="bannerDescription"
-                      value={formData.bannerDescription}
-                      onChange={handleInputChange}
-                      rows={3}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="Detailed banner description"
+                  <div>
+                    <Label>Section Content</Label>
+                    <Textarea
+                      name="seoLocalContent"
+                      value={f.seoLocalContent}
+                      onChange={change}
+                      rows={8}
+                      placeholder="Describe the location advantages, connectivity, nearby landmarks, highway access etc..."
                     />
                   </div>
                 </div>
-              </section>
+              </Card>
 
-              {/* About Section */}
-              <section>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">About Project</h2>
-                <div className="grid grid-cols-1 gap-6">
+              <Card title="Long-form SEO Content" desc='"Who Should Consider" section — helps with organic rankings.'>
+                <div className="space-y-3">
                   <div>
-                    <label htmlFor="aboutTitle" className="block text-sm font-medium text-gray-700 mb-2">
-                      About Title
-                    </label>
-                    <input
-                      type="text"
-                      id="aboutTitle"
-                      name="aboutTitle"
-                      value={formData.aboutTitle}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="e.g. Project Overview"
+                    <Label>Section Title</Label>
+                    <Input
+                      name="seoLongTitle"
+                      value={f.seoLongTitle}
+                      onChange={change}
+                      placeholder="e.g. Who Should Consider SPJ Vedatam?"
                     />
                   </div>
-
                   <div>
-                    <label htmlFor="aboutDescription" className="block text-sm font-medium text-gray-700 mb-2">
-                      About Description
-                    </label>
-                    <textarea
-                      id="aboutDescription"
-                      name="aboutDescription"
-                      value={formData.aboutDescription}
-                      onChange={handleInputChange}
-                      rows={5}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="Comprehensive project overview and description"
+                    <Label>Section Content</Label>
+                    <Textarea
+                      name="seoLongContent"
+                      value={f.seoLongContent}
+                      onChange={change}
+                      rows={8}
+                      placeholder="Target audience, investment rationale, ideal buyer personas..."
                     />
                   </div>
                 </div>
-              </section>
+              </Card>
+            </div>
+          )}
 
-              {/* Site Plan Section */}
-              <section>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Site Plan</h2>
-                <div className="grid grid-cols-1 gap-6">
-                  <div>
-                    <label htmlFor="sitePlanTitle" className="block text-sm font-medium text-gray-700 mb-2">
-                      Site Plan Title
-                    </label>
-                    <input
-                      type="text"
-                      id="sitePlanTitle"
-                      name="sitePlanTitle"
-                      value={formData.sitePlanTitle}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="e.g. Site Plan & Layout"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="sitePlanImage" className="block text-sm font-medium text-gray-700 mb-2">
-                      Site Plan Image URL
-                    </label>
-                    <input
-                      type="url"
-                      id="sitePlanImage"
-                      name="sitePlanImage"
-                      value={formData.sitePlanImage}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="https://example.com/siteplan.jpg"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="sitePlanDescription" className="block text-sm font-medium text-gray-700 mb-2">
-                      Site Plan Description
-                    </label>
-                    <textarea
-                      id="sitePlanDescription"
-                      name="sitePlanDescription"
-                      value={formData.sitePlanDescription}
-                      onChange={handleInputChange}
-                      rows={3}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="Details about the site plan layout"
-                    />
-                  </div>
-                </div>
-              </section>
-
-              {/* Additional Pricing Details */}
-              <section>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Additional Pricing Details</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="priceRange" className="block text-sm font-medium text-gray-700 mb-2">
-                      Price Range Text
-                    </label>
-                    <input
-                      type="text"
-                      id="priceRange"
-                      name="priceRange"
-                      value={formData.priceRange}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="e.g. ₹50 Lakhs - ₹2.9 Cr"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="minRatePsf" className="block text-sm font-medium text-gray-700 mb-2">
-                      Min Rate (Per Sq.ft)
-                    </label>
-                    <input
-                      type="text"
-                      id="minRatePsf"
-                      name="minRatePsf"
-                      value={formData.minRatePsf}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="e.g. ₹15,000"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="maxRatePsf" className="block text-sm font-medium text-gray-700 mb-2">
-                      Max Rate (Per Sq.ft)
-                    </label>
-                    <input
-                      type="text"
-                      id="maxRatePsf"
-                      name="maxRatePsf"
-                      value={formData.maxRatePsf}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="e.g. ₹25,000"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="landArea" className="block text-sm font-medium text-gray-700 mb-2">
-                      Total Land Area
-                    </label>
-                    <input
-                      type="text"
-                      id="landArea"
-                      name="landArea"
-                      value={formData.landArea}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="e.g. 4.15 acres"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="minUnitArea" className="block text-sm font-medium text-gray-700 mb-2">
-                      Min Unit Area (Sq.ft)
-                    </label>
-                    <input
-                      type="number"
-                      id="minUnitArea"
-                      name="minUnitArea"
-                      value={formData.minUnitArea}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="e.g. 300"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="maxUnitArea" className="block text-sm font-medium text-gray-700 mb-2">
-                      Max Unit Area (Sq.ft)
-                    </label>
-                    <input
-                      type="number"
-                      id="maxUnitArea"
-                      name="maxUnitArea"
-                      value={formData.maxUnitArea}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      placeholder="e.g. 2400"
-                    />
-                  </div>
-                </div>
-              </section>
-
-              {/* Form Actions */}
-              <div className="flex gap-4 pt-6">
-                <button
-                  type="submit"
-                  disabled={formLoading}
-                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 disabled:bg-gray-400 text-white font-semibold py-3 rounded-lg transition"
-                >
-                  {formLoading ? 'Creating...' : 'Create Project'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => router.back()}
-                  className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-900 font-semibold py-3 rounded-lg transition"
-                >
-                  Cancel
-                </button>
+          {/* ── Sticky Bottom Submit Bar ──────────────────────────────────── */}
+          <div className="sticky bottom-4 z-30">
+            <div className="bg-white border border-gray-200 rounded shadow px-5 py-3 flex items-center justify-between gap-4">
+              <div className="flex gap-2 overflow-x-auto">
+                {TABS.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => setTab(t.id)}
+                    className={`cursor-pointer px-3 py-1.5 rounded text-xs font-semibold whitespace-nowrap transition ${
+                      tab === t.id ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
               </div>
-            </form>
-          </>
-        )}
-      </div>
+              <button
+                type="submit"
+                disabled={saving}
+                className="shrink-0 px-6 py-2 rounded bg-yellow-500 hover:bg-yellow-600 text-white font-semibold text-sm disabled:opacity-50 transition flex items-center gap-2"
+              >
+                {saving && (
+                  <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                )}
+                {saving ? 'Publishing…' : '✓ Publish'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
     </div>
   );
 }

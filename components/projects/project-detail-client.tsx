@@ -293,7 +293,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
     <div className="min-h-screen bg-gray-50 pb-20 lg:pb-0">
       {/* ── Toast — ✅ was missing in original ───────────────────────────── */}
       {toast && (
-        <div className="fixed bottom-24 lg:bottom-6 left-1/2 -translate-x-1/2 z-70 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm shadow-lg whitespace-nowrap pointer-events-none">
+        <div className="fixed bottom-24 lg:bottom-6 left-1/2 -translate-x-1/2 z-70 bg-gray-900 text-white px-4 py-2 rounded text-sm shadow-lg whitespace-nowrap pointer-events-none">
           {toast}
         </div>
       )}
@@ -400,11 +400,6 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                     RERA: RERA-APPROVED
                   </span>
                 )}
-                {project.reraId && (
-                  <span className="inline-block text-[11px] sm:text-[12px] bg-green-100 font-semibold text-green-800 px-2 py-1 rounded">
-                    RERA: {project.reraId}
-                  </span>
-                )}
                 <span className="inline-block text-[11px] sm:text-[12px] bg-brand-primary/50 font-semibold px-2 py-1 rounded">
                   {formatCategory(project.status)}
                 </span>
@@ -476,8 +471,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
             {/* 3. Retail, F&B & Commercial Spaces */}
             {project.offerings.length > 0 && (
               <Section title="Retail, F&B & Commercial Spaces">
-                {/* ✅ 1 col on mobile, 2 col on sm+ */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                <div className="flex flex-col gap-6">
                   {project.offerings.map((offering) => (
                     <div
                       key={offering.id}
@@ -521,7 +515,6 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                 )}
 
                 {project.pricingTable.length > 0 && (
-                  // ✅ -mx-4 pulls table edge-to-edge on mobile for full scroll width
                   <div className="overflow-x-auto -mx-4 sm:mx-0">
                     <div className="min-w-120 px-4 sm:px-0">
                       <table className="min-w-full text-sm">
@@ -587,7 +580,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                           .filter((a) => a.category === category)
                           .map((amenity) => (
                             <li key={amenity.id} className="text-gray-700 text-sm flex items-start gap-2">
-                              <span className="text-yellow-500 mt-0.5">•</span>
+                              <span className="text-yellow-500">•</span>
                               <span>{amenity.name}</span>
                             </li>
                           ))}
@@ -709,7 +702,6 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
 
           {/* ── Right Sticky Sidebar ───────────────────────────────────────── */}
           <div className="lg:col-span-1">
-            {/* ✅ top-20 on tablet, top-24 on desktop */}
             <div className="sticky top-20 lg:top-24 space-y-4 sm:space-y-6">
               {/* Price Card */}
               <div className="bg-white rounded shadow overflow-hidden">

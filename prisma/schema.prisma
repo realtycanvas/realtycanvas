@@ -59,7 +59,7 @@ model Project {
   seoTitle            String?
   seoDescription      String?
   seoKeywords         String[]        @default([])
-  isTrending          Boolean         @default(false)
+  projectTags         String[]        @default([])
   totalClicks         Int             @default(0)
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
@@ -82,7 +82,7 @@ model Project {
   @@index([status], map: "idx_project_status")
   @@index([category], map: "idx_project_category")
   @@index([status, updatedAt], map: "idx_project_status_updated")
-  @@index([isTrending], map: "idx_project_trending")
+  @@index([projectTags], map: "idx_project_tags")
   @@index([priceMin], map: "idx_project_price_min")
   @@index([priceMax], map: "idx_project_price_max")
   @@index([priceMin, priceMax], map: "idx_project_price_range")

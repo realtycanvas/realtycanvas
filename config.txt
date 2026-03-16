@@ -1,0 +1,5 @@
+Step 1: Set Up Upload Directory on VPS
+    - sudo mkdir -p /var/www/uploads
+    - sudo chown -R $USER:$USER /var/www/uploads
+    - sudo chmod 755 /var/www/uploads
+

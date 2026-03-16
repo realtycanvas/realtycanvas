@@ -18,6 +18,7 @@
 /out/
 
 /app/generated
+/public/uploads
 
 # production
 /build

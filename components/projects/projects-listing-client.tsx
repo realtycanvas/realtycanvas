@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState, useCallback, useRef } from 'react';
 
 interface Project {
   id: string;
@@ -180,10 +180,10 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
   };
 
   return (
-    <div className="min-h-screen pt-24 mt-4 md:mt-10 px-4">
+    <div className="min-h-screen pt-24 mt-4 md:mt-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Search */}
-        <div className="w-full flex justify-between items-center gap-4">
+        <div className="w-full flex flex-col md:flex-row md:justify-between md:items-center gap-4">
           <input
             type="text"
             placeholder="Search projects..."
@@ -194,7 +194,7 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
           {user && (
             <Link
               href="/projects/create"
-              className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-5 py-2 rounded transition"
+              className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-5 py-2 rounded transition w-fit"
             >
               Create Project
             </Link>

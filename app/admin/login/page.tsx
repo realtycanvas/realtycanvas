@@ -118,7 +118,7 @@ export default function AdminLoginPage() {
                     setForgotSuccess(false);
                     setForgotEmail('');
                   }}
-                  className="w-full bg-linear-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200"
+                  className="w-full bg-linear-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-white font-semibold py-3 px-4 rounded transition-all duration-200"
                 >
                   Back to Login
                 </button>
@@ -135,7 +135,7 @@ export default function AdminLoginPage() {
                       type="email"
                       value={forgotEmail}
                       onChange={(e) => setForgotEmail(e.target.value)}
-                      className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-transparent bg-white text-gray-900 placeholder-gray-500 transition-colors"
+                      className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-yellow-500 focus:border-transparent bg-white text-gray-900 placeholder-gray-500 transition-colors"
                       placeholder="admin@example.com"
                       required
                     />
@@ -145,7 +145,7 @@ export default function AdminLoginPage() {
                 <button
                   type="submit"
                   disabled={forgotLoading}
-                  className="w-full bg-linear-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 transform hover:scale-[1.02] disabled:scale-100 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                  className="w-full bg-linear-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-3 px-4 rounded transition-all duration-200 transform hover:scale-[1.02] disabled:scale-100 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                 >
                   {forgotLoading ? (
                     <>
@@ -202,13 +202,41 @@ export default function AdminLoginPage() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-yellow-50 to-white flex">
+      <div className="hidden lg:flex lg:w-1/2 bg-linear-to-br from-yellow-400 to-yellow-500 items-center justify-center p-8 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-10 left-10 w-20 h-20 bg-white rounded-full"></div>
+          <div className="absolute top-32 right-20 w-16 h-16 bg-white rounded-full"></div>
+          <div className="absolute bottom-20 left-20 w-12 h-12 bg-white rounded-full"></div>
+          <div className="absolute bottom-32 right-10 w-24 h-24 bg-white rounded-full"></div>
+        </div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2 }}
+          className="text-center text-white z-10"
+        >
+          <div className="relative mb-8">
+            <div className="w-96 h-80 flex items-center justify-center mx-auto backdrop-blur-sm">
+              <Image src="/admin/news.webp" alt="Admin Illustration" fill className="w-full h-full" />
+            </div>
+
+            <motion.div
+              animate={{ y: [-10, 10, -10] }}
+              transition={{ duration: 3, repeat: Infinity }}
+              className="absolute top-4 right-4 w-12 h-12 bg-white/30 rounded-full flex items-center justify-center"
+            >
+              <span className="text-2xl">⭐</span>
+            </motion.div>
+          </div>
+
+          <h2 className="text-3xl font-bold mb-4">Welcome Back!</h2>
+          <p className="text-yellow-100 text-lg max-w-md mx-auto">
+            Sign in to access your admin dashboard and manage your real estate projects with ease.
+          </p>
+        </motion.div>
+      </div>
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
         <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} className="w-full max-w-md">
-          <Link href="/" className="flex items-center text-gray-600 hover:text-yellow-600 mb-8 transition-colors">
-            <ArrowLeftIcon className="w-5 h-5 mr-2" />
-            Back to Home
-          </Link>
-
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-2">LOGIN</h1>
             <p className="text-gray-600">Admin Dashboard</p>
@@ -218,7 +246,7 @@ export default function AdminLoginPage() {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6"
+              className="bg-red-50 border border-red-200 rounded p-4 mb-6"
             >
               <p className="text-red-600 text-sm">{error}</p>
             </motion.div>
@@ -226,7 +254,7 @@ export default function AdminLoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Username</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Email ID</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <UserIcon className="h-5 w-5 text-gray-400" />
@@ -235,7 +263,7 @@ export default function AdminLoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-transparent bg-white text-gray-900 placeholder-gray-500 transition-colors"
+                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-yellow-500 focus:border-transparent bg-white text-gray-900 placeholder-gray-500 transition-colors"
                   placeholder="Enter your email"
                   required
                 />
@@ -252,7 +280,7 @@ export default function AdminLoginPage() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-transparent bg-white text-gray-900 placeholder-gray-500 transition-colors"
+                  className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded focus:ring-2 focus:ring-yellow-500 focus:border-transparent bg-white text-gray-900 placeholder-gray-500 transition-colors"
                   placeholder="Enter your password"
                   required
                 />
@@ -269,7 +297,7 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-linear-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 transform hover:scale-[1.02] disabled:scale-100 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+              className="w-full bg-linear-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-3 px-4 rounded transition-all duration-200 transform hover:scale-[1.02] disabled:scale-100 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
             >
               {loading ? (
                 <>
@@ -309,41 +337,6 @@ export default function AdminLoginPage() {
               Forgot your password?
             </button>
           </div>
-        </motion.div>
-      </div>
-
-      <div className="hidden lg:flex lg:w-1/2 bg-linear-to-br from-yellow-400 to-yellow-500 items-center justify-center p-8 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-10 w-20 h-20 bg-white rounded-full"></div>
-          <div className="absolute top-32 right-20 w-16 h-16 bg-white rounded-full"></div>
-          <div className="absolute bottom-20 left-20 w-12 h-12 bg-white rounded-full"></div>
-          <div className="absolute bottom-32 right-10 w-24 h-24 bg-white rounded-full"></div>
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2 }}
-          className="text-center text-white z-10"
-        >
-          <div className="relative mb-8">
-            <div className="w-96 h-80 flex items-center justify-center mx-auto backdrop-blur-sm">
-              <Image src="/admin/news.webp" alt="Admin Illustration" fill className="w-full h-full" />
-            </div>
-
-            <motion.div
-              animate={{ y: [-10, 10, -10] }}
-              transition={{ duration: 3, repeat: Infinity }}
-              className="absolute top-4 right-4 w-12 h-12 bg-white/30 rounded-full flex items-center justify-center"
-            >
-              <span className="text-2xl">⭐</span>
-            </motion.div>
-          </div>
-
-          <h2 className="text-3xl font-bold mb-4">Welcome Back!</h2>
-          <p className="text-yellow-100 text-lg max-w-md mx-auto">
-            Sign in to access your admin dashboard and manage your real estate projects with ease.
-          </p>
         </motion.div>
       </div>
     </div>
