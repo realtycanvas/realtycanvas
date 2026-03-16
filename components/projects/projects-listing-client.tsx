@@ -297,9 +297,7 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
                           >
                             {project.category.replace(/_/g, ' ')}
                           </span>
-                          <span
-                            className={`px-3 py-1 rounded text-xs font-medium ${getStatusColor(project.status)}`}
-                          >
+                          <span className={`px-3 py-1 rounded text-xs font-medium ${getStatusColor(project.status)}`}>
                             {project.status.replace(/_/g, ' ')}
                           </span>
                         </div>
@@ -308,9 +306,7 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
                       <div className="p-4">
                         <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">{project.title}</h3>
 
-                        {project.subtitle && (
-                          <p className="text-sm text-gray-600 mb-3">{project.subtitle}</p>
-                        )}
+                        {project.subtitle && <p className="text-sm text-gray-600 mb-3">{project.subtitle}</p>}
 
                         <div className="space-y-2 text-sm">
                           {project.address && (

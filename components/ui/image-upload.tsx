@@ -21,11 +21,15 @@ export interface ImageUploadProps {
   label?: string;
 }
 
+const MAX_OUTPUT_MB = 5;
+const MIN_QUALITY = 0.75;
+const MAX_DIMENSION = 2560;
+
 export default function ImageUpload({
   value,
   onChange,
   multiple = false,
-  maxSize = 5,
+  maxSize = 100,
   accept = 'image/*',
   className = '',
   disabled = false,
@@ -40,21 +44,86 @@ export default function ImageUpload({
 
   const currentImages = Array.isArray(value) ? value : value ? [value] : [];
 
+  const compressImage = async (file: File): Promise<File> => {
+    if (!file.type.startsWith('image/') || file.type === 'image/svg+xml') return file;
+
+    const targetBytes = MAX_OUTPUT_MB * 1024 * 1024;
+    if (file.size <= targetBytes) return file; // already under limit, skip compression
+
+    let objectUrl: string | null = null;
+
+    try {
+      objectUrl = URL.createObjectURL(file);
+      const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const el = document.createElement('img');
+        el.onload = () => resolve(el);
+        el.onerror = () => reject(new Error('Failed to load image'));
+        el.src = objectUrl as string;
+      });
+
+      // Step 1: Scale down dimensions if too large (quality neutral)
+      let { width, height } = img;
+      if (Math.max(width, height) > MAX_DIMENSION) {
+        const ratio = MAX_DIMENSION / Math.max(width, height);
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d')!;
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Step 2: Try reducing quality only (don't touch dimensions)
+      let blob: Blob | null = null;
+      for (let quality = 0.92; quality >= MIN_QUALITY; quality -= 0.04) {
+        blob = await new Promise<Blob | null>((resolve) => canvas.toBlob((b) => resolve(b), 'image/webp', quality));
+
+        if (blob && blob.size <= targetBytes) break;
+      }
+
+      // Step 3: If still over limit, scale dimensions as last resort
+      if (!blob || blob.size > targetBytes) {
+        for (let scale = 0.8; scale >= 0.4; scale -= 0.1) {
+          const scaledCanvas = document.createElement('canvas');
+          scaledCanvas.width = Math.round(width * scale);
+          scaledCanvas.height = Math.round(height * scale);
+          const sCtx = scaledCanvas.getContext('2d')!;
+          sCtx.drawImage(img, 0, 0, scaledCanvas.width, scaledCanvas.height);
+
+          blob = await new Promise<Blob | null>((resolve) =>
+            scaledCanvas.toBlob((b) => resolve(b), 'image/webp', MIN_QUALITY)
+          );
+
+          if (blob && blob.size <= targetBytes) break;
+        }
+      }
+
+      if (!blob) throw new Error('Compression failed');
+
+      const baseName = file.name.replace(/\.[^.]+$/, '');
+      return new File([blob], `${baseName}.webp`, { type: 'image/webp' });
+    } finally {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    }
+  };
+
   const uploadFile = async (file: File): Promise<UploadedFile | null> => {
-    // Validate file size
     if (file.size > maxSize * 1024 * 1024) {
       setError(`File "${file.name}" exceeds ${maxSize}MB limit`);
       return null;
     }
 
-    // Validate file type
     if (accept !== '*' && !file.type.match(accept.replace('*', '.*'))) {
       setError(`File "${file.name}" is not a valid type`);
       return null;
     }
 
+    const compressed = await compressImage(file);
+
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', compressed);
 
     const res = await fetch('/api/upload', {
       method: 'POST',
@@ -67,7 +136,12 @@ export default function ImageUpload({
     }
 
     const data = await res.json();
-    return { url: data.url, name: file.name, size: file.size, type: file.type };
+    return {
+      url: data.url,
+      name: compressed.name,
+      size: compressed.size,
+      type: compressed.type,
+    };
   };
 
   const handleFiles = useCallback(
@@ -85,15 +159,15 @@ export default function ImageUpload({
           const result = await uploadFile(files[0]);
           if (result) onChange(result.url);
         }
-      } catch (e: any) {
-        setError(e.message || 'Upload failed');
+      } catch (e: unknown) {
+        setError(e instanceof Error ? e.message : 'Upload failed');
       } finally {
         setUploading(false);
         // reset input so same file can be re-uploaded
         if (inputRef.current) inputRef.current.value = '';
       }
     },
-    [multiple, currentImages, onChange]
+    [multiple, currentImages, onChange, uploadFile]
   );
 
   const removeImage = (urlToRemove: string) => {

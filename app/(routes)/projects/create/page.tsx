@@ -923,7 +923,7 @@ function CreateProjectPage() {
                       label="Developer Logo"
                       value={f.developerLogo}
                       onChange={(url) => setF({ ...f, developerLogo: url as string })}
-                      maxSize={10}
+                      maxSize={100}
                     />
                   </div>
                   <div />
@@ -1189,7 +1189,7 @@ function CreateProjectPage() {
                       label="Featured Image"
                       value={f.featuredImage}
                       onChange={(url) => setF({ ...f, featuredImage: url as string })}
-                      maxSize={10}
+                      maxSize={100}
                     />
                   </div>
                   <div>
@@ -1197,7 +1197,7 @@ function CreateProjectPage() {
                       label="Site Plan Image"
                       value={f.sitePlanImage}
                       onChange={(url) => setF({ ...f, sitePlanImage: url as string })}
-                      maxSize={10}
+                      maxSize={100}
                     />
                   </div>
                 </G2>
@@ -1215,7 +1215,7 @@ function CreateProjectPage() {
                     setGallery(updated);
                   }}
                   multiple={true}
-                  maxSize={10}
+                  maxSize={100}
                 />
               </Card>
 
@@ -1263,7 +1263,7 @@ function CreateProjectPage() {
                             label=""
                             value={fp.imageUrl}
                             onChange={(url) => updRow(setFloorPlans, i, 'imageUrl', url as string)}
-                            maxSize={10}
+                            maxSize={100}
                           />
                         </div>
                         <div className="md:col-span-2">

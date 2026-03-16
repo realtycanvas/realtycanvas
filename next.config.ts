@@ -91,7 +91,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'http',
-        hostname: '187.127.128.90',  // no port, nginx handles it on 80
+        hostname: '187.127.128.90', // no port, nginx handles it on 80
         pathname: '/uploads/**',
       },
       {
