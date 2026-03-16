@@ -5,6 +5,7 @@ import LeadForm from './lead-form';
 import { MapPin } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { FaWhatsapp } from 'react-icons/fa';
+import Link from 'next/link';
 
 const EnquirySection = () => {
   return (
@@ -36,7 +37,7 @@ const EnquirySection = () => {
             </p>
 
             <div className="space-y-6">
-              <a
+              <Link
                 href="https://wa.me/919555562626"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -50,9 +51,9 @@ const EnquirySection = () => {
                   <p className="text-white/90 mt-1 font-medium">+91 9555562626</p>
                   <p className="text-white/80 text-sm">sales@realtycanvas.in</p>
                 </div>
-              </a>
+              </Link>
 
-              <a
+              <Link
                 href="https://www.google.com/maps/search/?api=1&query=Landmark+Cyber+Park+Sector+67+Gurugram"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -71,7 +72,7 @@ const EnquirySection = () => {
                     Haryana, India
                   </p>
                 </div>
-              </a>
+              </Link>
             </div>
           </motion.div>
 

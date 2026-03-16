@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 interface TOCItem {
@@ -99,7 +100,7 @@ export default function TableOfContents() {
           {headings.map((item) => {
             const isActive = activeId === item.id;
             return (
-              <a
+              <Link
                 key={item.id}
                 href={`#${item.id}`}
                 onClick={(e) => {
@@ -121,7 +122,7 @@ export default function TableOfContents() {
                 }}
               >
                 {item.text}
-              </a>
+              </Link>
             );
           })}
         </nav>

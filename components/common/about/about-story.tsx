@@ -5,6 +5,7 @@ import { useInView } from 'framer-motion';
 import { useRef } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function AboutStory() {
   const ref = useRef(null);
@@ -172,14 +173,14 @@ export default function AboutStory() {
                     sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
                   />
                   <div className="px-4 py-3 flex justify-between items-center">
-                    <a
+                    <Link
                       href={url}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-pink-600 hover:text-pink-800 text-sm font-medium"
                     >
                       View on Instagram
-                    </a>
+                    </Link>
                   </div>
                 </div>
               ))}

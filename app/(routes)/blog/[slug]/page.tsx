@@ -123,14 +123,14 @@ const portableTextComponents = {
   },
   marks: {
     link: ({ children, value }: any) => (
-      <a
+      <Link
         href={value.href}
         target="_blank"
         rel="noopener noreferrer"
         className="text-brand-primary hover:text-brand-secondary underline transition-colors"
       >
         {children}
-      </a>
+      </Link>
     ),
     strong: ({ children }: any) => <strong className="font-semibold text-gray-900 dark:text-white">{children}</strong>,
   },

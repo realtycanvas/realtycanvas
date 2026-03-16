@@ -218,8 +218,6 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
                 <option value="ALL">All Categories</option>
                 <option value="COMMERCIAL">Commercial</option>
                 <option value="RESIDENTIAL">Residential</option>
-                <option value="MIXED_USE">Mixed Use</option>
-                <option value="RETAIL_ONLY">Retail Only</option>
               </select>
             </div>
 

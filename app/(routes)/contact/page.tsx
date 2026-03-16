@@ -231,7 +231,7 @@ export default function ContactPage() {
 
             {/* Directions */}
             <div className="mt-6 flex flex-wrap gap-4">
-              <a
+              <Link
                 href="https://maps.google.com/?q=Landmark+Cyber+Park+Sector+67+Gurugram"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -239,14 +239,14 @@ export default function ContactPage() {
               >
                 <MapPinIcon className="w-4 h-4 mr-2" />
                 Get Directions
-              </a>
-              <a
+              </Link>
+              <Link
                 href="tel:+91 9555562626"
                 className="inline-flex items-center px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded transition-colors shadow-md hover:shadow-lg"
               >
                 <PhoneIcon className="w-4 h-4 mr-2" />
                 Call Now
-              </a>
+              </Link>
             </div>
           </div>
         </div>

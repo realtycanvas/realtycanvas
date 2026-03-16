@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function NotFound() {
   return (
     <div className="mt-20 bg-white dark:bg-gray-900 text-gray-900 dark:text-white relative overflow-hidden">
@@ -19,18 +21,18 @@ export default function NotFound() {
           </p>
 
           <div className="mt-8 flex flex-col sm:flex-row gap-3">
-            <a
+            <Link
               href="/"
               className="inline-flex items-center justify-center rounded px-6 py-3 text-sm font-semibold bg-[#FBB70F] text-[#112D48] hover:bg-[#e5a60d] transition-colors shadow-lg"
             >
               Go to Home
-            </a>
-            <a
+            </Link>
+            <Link
               href="/projects"
               className="inline-flex items-center justify-center rounded px-6 py-3 text-sm font-semibold bg-[#112D48] text-white hover:bg-[#091a30] transition-colors shadow-lg"
             >
               Explore Projects
-            </a>
+            </Link>
           </div>
 
           <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-gray-600 dark:text-gray-300">
