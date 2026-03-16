@@ -69,7 +69,6 @@ const portableTextComponents = {
       );
     },
     projectSnapshot: ({ value }: any) => {
-      // console.log('projectSnapshot value:', JSON.stringify(value, null, 2))
       const title = value.title || 'Project Snapshot';
       let rows: any[] = [];
 
@@ -77,16 +76,14 @@ const portableTextComponents = {
       try {
         if (value.jsonData) {
           rows = JSON.parse(value.jsonData);
-          // console.log('Parsed rows:', rows)
         } else {
-          // console.log('No jsonData found in value')
+          console.error('No jsonData found in value');
         }
       } catch (e) {
         console.error('Failed to parse projectSnapshot JSON:', e);
       }
 
       if (rows.length === 0) {
-        // console.log('No rows to render, returning null')
         return null;
       }
       return (

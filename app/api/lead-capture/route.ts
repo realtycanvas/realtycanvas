@@ -64,7 +64,6 @@ export async function POST(request: NextRequest) {
           status: 'NEW',
         },
       });
-      console.log('Lead saved to database:', savedLead.id);
     } catch (dbError) {
       console.error('Failed to save lead to database:', dbError);
       // Continue to try sending email even if DB fails
@@ -155,7 +154,6 @@ ${cleanData.projectTitle ? `- Property: ${cleanData.projectTitle}\n` : ''}${clea
       };
 
       await transporter.sendMail(mailOptions);
-      console.log('Lead email sent successfully');
     } catch (emailError) {
       console.error('Failed to send lead email:', emailError);
       // If DB save was successful, we can still return success but log the email failure

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { MapPin } from 'lucide-react';
@@ -44,6 +44,7 @@ type ProjectSeo = {
   longFormTitle: string | null;
   longFormContent: string | null;
 };
+type User = { email: string; role: string };
 type Project = {
   id: string;
   slug: string;
@@ -226,6 +227,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
   const [activeVideoIndex, setActiveVideoIndex] = useState(0);
   const [viewAllVideos, setViewAllVideos] = useState(false);
   const [toast, setToast] = useState('');
+  const [user, setUser] = useState<User | null>(null);
 
   const pathname = usePathname();
 
@@ -263,6 +265,23 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
     setToast(message);
     window.setTimeout(() => setToast(''), 2500);
   };
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await fetch('/api/auth/me');
+        const data = await res.json();
+        if (data.user) {
+          setUser(data.user);
+        } else {
+          setUser(null);
+        }
+      } catch {
+        setUser(null);
+      }
+    };
+    checkAuth();
+  }, []);
 
   const handleShare = async () => {
     const shareData = {
@@ -319,6 +338,14 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
             >
               Enquire Now
             </button>
+            {user && (
+              <Link
+                href={`/projects/create?slug=${project.slug}`}
+                className="px-3 py-1.5 sm:px-4 sm:py-2 rounded bg-gray-900 hover:bg-gray-800 text-white font-semibold text-sm sm:text-base"
+              >
+                Edit Project
+              </Link>
+            )}
             <Link
               href="tel:9555562626"
               className="px-3 py-1.5 sm:px-4 sm:py-2 rounded bg-green-600 hover:bg-green-700 text-white font-semibold text-sm sm:text-base"

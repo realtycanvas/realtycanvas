@@ -38,19 +38,16 @@ export default function SmartImage({
   const [imageError, setImageError] = useState(false);
 
   const handleOptimizationError = useCallback(() => {
-    // console.log('🔄 Image optimization failed, falling back to regular img tag:', src);
     setUseOptimization(false);
     onError?.();
   }, [src, onError]);
 
   const handleImageError = useCallback(() => {
-    // console.log('❌ Image failed to load:', src);
     setImageError(true);
     onError?.();
   }, [src, onError]);
 
   const handleImageLoad = useCallback(() => {
-    // console.log('✅ Image loaded successfully:', src);
     setImageError(false);
     onLoad?.();
   }, [src, onLoad]);

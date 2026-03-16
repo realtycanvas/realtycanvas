@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
+import { Prisma, ProjectCategory, ProjectStatus } from '@/app/generated/prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
-import { unstable_cache, revalidatePath } from 'next/cache';
+import { unstable_cache, revalidatePath, revalidateTag } from 'next/cache';
 
 // ─── Cache Tag ────────────────────────────────────────────────────────────────
 const PROJECTS_TAG = 'projects-list';
@@ -19,7 +20,7 @@ function getProjectsFromDB(filters: {
       const { page, limit, search, category, status, city } = filters;
       const skip = (page - 1) * limit;
 
-      const where: any = {};
+      const where: Prisma.ProjectWhereInput = {};
 
       if (search.length >= 2) {
         where.OR = [
@@ -30,8 +31,8 @@ function getProjectsFromDB(filters: {
         ];
       }
 
-      if (category !== 'ALL') where.category = category;
-      if (status !== 'ALL') where.status = status;
+      if (category !== 'ALL') where.category = category as ProjectCategory;
+      if (status !== 'ALL') where.status = status as ProjectStatus;
       if (city) where.city = { contains: city, mode: 'insensitive' };
 
       const [projects, totalCount] = await Promise.all([
@@ -159,12 +160,47 @@ export async function POST(request: NextRequest) {
     }
 
     const slug = body.slug.toLowerCase().trim();
-    console.log(`[Projects API] Creating project with slug: "${slug}"`);
 
     const existingProject = await prisma.project.findUnique({ where: { slug } });
     if (existingProject) {
       return NextResponse.json({ error: 'Project with this slug already exists' }, { status: 409 });
     }
+
+    const parseJsonValue = (value: unknown) => {
+      if (!value) return null;
+      if (typeof value === 'string') {
+        try {
+          return JSON.parse(value);
+        } catch {
+          return value;
+        }
+      }
+      return value;
+    };
+
+    const seoPayload = body.seo
+      ? {
+          metaTitle: body.seo.metaTitle || null,
+          metaDescription: body.seo.metaDescription || null,
+          metaKeywords: body.seo.metaKeywords || [],
+          canonicalUrl: body.seo.canonicalUrl || null,
+          ogTitle: body.seo.ogTitle || null,
+          ogDescription: body.seo.ogDescription || null,
+          ogImage: body.seo.ogImage || null,
+          twitterCard: body.seo.twitterCard || 'summary_large_image',
+          schemaMarkup: body.seo.schemaMarkup || null,
+          h1Tag: body.seo.h1Tag || null,
+          h2Tags: body.seo.h2Tags || [],
+          featuredImgAlt: body.seo.featuredImgAlt || null,
+          imageAltMap: body.seo.imageAltMap || {},
+          localHeading: body.seo.localHeading || null,
+          localContent: body.seo.localContent || null,
+          longFormTitle: body.seo.longFormTitle || null,
+          longFormContent: body.seo.longFormContent || null,
+          isIndexable: body.seo.isIndexable ?? true,
+          sitemapPriority: body.seo.sitemapPriority ?? 0.8,
+        }
+      : null;
 
     const project = await prisma.project.create({
       data: {
@@ -178,23 +214,30 @@ export async function POST(request: NextRequest) {
         locality: body.locality?.trim() || null,
         city: body.city?.trim() || null,
         state: body.state?.trim() || null,
+        latitude: body.latitude ?? null,
+        longitude: body.longitude ?? null,
+        currency: body.currency || 'INR',
         developerName: body.developerName?.trim() || null,
+        developerLogo: body.developerLogo?.trim() || null,
         reraId: body.reraId?.trim() || null,
+        possessionDate: body.possessionDate ? new Date(body.possessionDate) : null,
+        launchDate: body.launchDate ? new Date(body.launchDate) : null,
         basePrice: body.basePrice?.trim() || null,
         priceRange: body.priceRange?.trim() || null,
-        priceMin: body.priceMin || null,
-        priceMax: body.priceMax || null,
+        priceMin: body.priceMin ?? null,
+        priceMax: body.priceMax ?? null,
         featuredImage: body.featuredImage.trim(),
         landArea: body.landArea?.trim() || null,
-        totalUnits: body.totalUnits || null,
-        soldUnits: body.soldUnits || null,
-        availableUnits: body.availableUnits || null,
-        numberOfTowers: body.numberOfTowers || null,
-        numberOfFloors: body.numberOfFloors || null,
+        totalUnits: body.totalUnits ?? null,
+        soldUnits: body.soldUnits ?? null,
+        availableUnits: body.availableUnits ?? null,
+        numberOfTowers: body.numberOfTowers ?? null,
+        numberOfFloors: body.numberOfFloors ?? null,
+        numberOfApartments: body.numberOfApartments ?? null,
         minRatePsf: body.minRatePsf?.trim() || null,
         maxRatePsf: body.maxRatePsf?.trim() || null,
-        minUnitArea: body.minUnitArea || null,
-        maxUnitArea: body.maxUnitArea || null,
+        minUnitArea: body.minUnitArea ?? null,
+        maxUnitArea: body.maxUnitArea ?? null,
         bannerTitle: body.bannerTitle?.trim() || null,
         bannerSubtitle: body.bannerSubtitle?.trim() || null,
         bannerDescription: body.bannerDescription?.trim() || null,
@@ -203,15 +246,101 @@ export async function POST(request: NextRequest) {
         sitePlanTitle: body.sitePlanTitle?.trim() || null,
         sitePlanImage: body.sitePlanImage?.trim() || null,
         sitePlanDescription: body.sitePlanDescription?.trim() || null,
-        seoTitle: body.seoTitle?.trim() || null,
-        seoDescription: body.seoDescription?.trim() || null,
-        seoKeywords: body.seoKeywords || [],
+        seoTitle: seoPayload?.metaTitle || body.seoTitle?.trim() || null,
+        seoDescription: seoPayload?.metaDescription || body.seoDescription?.trim() || null,
+        seoKeywords: seoPayload?.metaKeywords || body.seoKeywords || [],
+        galleryImages: body.galleryImages || [],
+        videoUrls: body.videoUrls || [],
+        projectTags: body.projectTags || [],
+        highlights: {
+          create: (body.highlights || []).map(
+            (h: { label?: string; icon?: string; sortOrder?: number }, i: number) => ({
+              label: h.label?.trim() || '',
+              icon: h.icon?.trim() || null,
+              sortOrder: h.sortOrder ?? i + 1,
+            })
+          ),
+        },
+        amenities: {
+          create: (body.amenities || []).map(
+            (a: { category?: string; name?: string; details?: string; sortOrder?: number }, i: number) => ({
+              category: a.category?.trim() || '',
+              name: a.name?.trim() || '',
+              details: a.details?.trim() || null,
+              sortOrder: a.sortOrder ?? i + 1,
+            })
+          ),
+        },
+        offerings: {
+          create: (body.offerings || []).map(
+            (o: { icon?: string; title?: string; description?: string; sortOrder?: number }, i: number) => ({
+              icon: o.icon?.trim() || null,
+              title: o.title?.trim() || '',
+              description: o.description?.trim() || '',
+              sortOrder: o.sortOrder ?? i + 1,
+            })
+          ),
+        },
+        pricingTable: {
+          create: (body.pricingTable || []).map(
+            (p: {
+              type?: string;
+              reraArea?: string;
+              price?: string;
+              pricePerSqft?: string;
+              availableUnits?: number | null;
+              floorNumbers?: string;
+              features?: unknown;
+            }) => ({
+              type: p.type?.trim() || '',
+              reraArea: p.reraArea?.trim() || '',
+              price: p.price?.trim() || '',
+              pricePerSqft: p.pricePerSqft?.trim() || null,
+              availableUnits: p.availableUnits ?? null,
+              floorNumbers: p.floorNumbers?.trim() || null,
+              features: p.features ?? null,
+            })
+          ),
+        },
+        nearbyPoints: {
+          create: (body.nearbyPoints || []).map(
+            (n: { type: string; name?: string; distanceKm?: number | null; travelTimeMin?: number | null }) => ({
+              type: n.type,
+              name: n.name?.trim() || '',
+              distanceKm: n.distanceKm ?? null,
+              travelTimeMin: n.travelTimeMin ?? null,
+            })
+          ),
+        },
+        floorPlans: {
+          create: (body.floorPlans || []).map(
+            (
+              fp: { level?: string; title?: string; imageUrl?: string; details?: unknown; sortOrder?: number },
+              i: number
+            ) => ({
+              level: fp.level?.trim() || '',
+              title: fp.title?.trim() || null,
+              imageUrl: fp.imageUrl?.trim() || '',
+              details: parseJsonValue(fp.details),
+              sortOrder: fp.sortOrder ?? i + 1,
+            })
+          ),
+        },
+        faqs: {
+          create: (body.faqs || []).map(
+            (fq: { question?: string; answer?: string; sortOrder?: number }, i: number) => ({
+              question: fq.question?.trim() || '',
+              answer: fq.answer?.trim() || '',
+              sortOrder: fq.sortOrder ?? i + 1,
+            })
+          ),
+        },
+        seo: seoPayload ? { create: seoPayload } : undefined,
       },
     });
 
-    console.log(`[Projects API] Project created: ${project.id} (slug: ${project.slug})`);
-
     revalidatePath('/projects');
+    revalidatePath(`/projects/${project.slug}`);
 
     return NextResponse.json(project, { status: 201 });
   } catch (error) {

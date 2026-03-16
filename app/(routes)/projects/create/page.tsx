@@ -1,7 +1,7 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useState, useEffect } from 'react';
 import { PROJECT_TAGS } from '@/lib/project-tags';
 import ImageUpload from '@/components/ui/image-upload';
 
@@ -30,6 +30,81 @@ const TABS = [
 ] as const;
 
 type TabId = (typeof TABS)[number]['id'];
+
+type ProjectSeoData = {
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  metaKeywords?: string[];
+  h1Tag?: string | null;
+  featuredImgAlt?: string | null;
+  localHeading?: string | null;
+  localContent?: string | null;
+  longFormTitle?: string | null;
+  longFormContent?: string | null;
+};
+
+type ProjectResponse = {
+  slug: string;
+  title: string;
+  subtitle?: string | null;
+  description: string;
+  category: string;
+  status: string;
+  address: string;
+  locality?: string | null;
+  city?: string | null;
+  state?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  currency?: string | null;
+  developerName?: string | null;
+  developerLogo?: string | null;
+  reraId?: string | null;
+  possessionDate?: string | null;
+  launchDate?: string | null;
+  basePrice?: string | null;
+  priceRange?: string | null;
+  priceMin?: number | null;
+  priceMax?: number | null;
+  minRatePsf?: string | null;
+  maxRatePsf?: string | null;
+  minUnitArea?: number | null;
+  maxUnitArea?: number | null;
+  landArea?: string | null;
+  numberOfTowers?: number | null;
+  numberOfFloors?: number | null;
+  totalUnits?: number | null;
+  soldUnits?: number | null;
+  availableUnits?: number | null;
+  numberOfApartments?: number | null;
+  featuredImage?: string | null;
+  sitePlanImage?: string | null;
+  bannerTitle?: string | null;
+  bannerSubtitle?: string | null;
+  bannerDescription?: string | null;
+  aboutTitle?: string | null;
+  aboutDescription?: string | null;
+  sitePlanTitle?: string | null;
+  sitePlanDescription?: string | null;
+  projectTags?: string[];
+  galleryImages?: string[];
+  videoUrls?: string[];
+  highlights?: { label: string; icon: string | null }[];
+  amenities?: { category: string; name: string; details: string | null }[];
+  offerings?: { icon: string | null; title: string; description: string }[];
+  pricingTable?: {
+    type: string;
+    reraArea: string;
+    price: string;
+    pricePerSqft?: string | null;
+    availableUnits?: number | null;
+    floorNumbers?: string | null;
+  }[];
+  nearbyPoints?: { type: string; name: string; distanceKm?: number | null; travelTimeMin?: number | null }[];
+  floorPlans?: { level: string; title?: string | null; imageUrl: string; details?: unknown }[];
+  faqs?: { question: string; answer?: string | null }[];
+  seo?: ProjectSeoData | null;
+};
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -133,16 +208,21 @@ const RowBox = ({ children, onDel }: { children: React.ReactNode; onDel: () => v
 
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 
-export default function CreateProjectPage() {
+function CreateProjectPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const editSlug = searchParams.get('slug')?.trim() || '';
 
   const [tab, setTab] = useState<TabId>('basic');
   const [pageLoading, setPageLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [slugLocked, setSlugLocked] = useState(false);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [initialSlug, setInitialSlug] = useState('');
 
   // ── Flat core fields ───────────────────────────────────────────────────────
   const [f, setF] = useState({
@@ -245,14 +325,206 @@ export default function CreateProjectPage() {
 
   // ── Auth check ─────────────────────────────────────────────────────────────
   useEffect(() => {
-    fetch('/api/auth/me')
-      .then((r) => r.json())
-      .then((d) => {
-        if (!d.user) router.push('/projects');
-      })
-      .catch(() => router.push('/projects'))
-      .finally(() => setPageLoading(false));
-  }, [router]);
+    let active = true;
+    const run = async () => {
+      try {
+        const authRes = await fetch('/api/auth/me');
+        const authData = await authRes.json();
+        if (!authData.user) {
+          router.push('/projects');
+          return;
+        }
+      } catch {
+        router.push('/projects');
+        return;
+      }
+
+      if (editSlug) {
+        setIsEditing(true);
+        setSlugLocked(true);
+        try {
+          const res = await fetch(`/api/projects/${encodeURIComponent(editSlug)}`);
+          const data = await res.json();
+          if (!res.ok) {
+            const message = typeof data?.error === 'string' ? data.error : 'Failed to load project';
+            throw new Error(message);
+          }
+          const project = data as ProjectResponse;
+          if (!active) return;
+
+          const toStr = (value: number | string | null | undefined) => (value == null ? '' : String(value));
+          const toDate = (value: string | Date | null | undefined) => {
+            if (!value) return '';
+            const d = typeof value === 'string' ? new Date(value) : value;
+            return Number.isNaN(d.getTime()) ? '' : d.toISOString().split('T')[0];
+          };
+          const toDetails = (value: unknown) => {
+            if (!value) return '';
+            if (typeof value === 'string') return value;
+            try {
+              return JSON.stringify(value);
+            } catch {
+              return '';
+            }
+          };
+
+          setInitialSlug(project.slug || editSlug);
+          setSelectedTags(project.projectTags || []);
+          setF({
+            title: project.title || '',
+            subtitle: project.subtitle || '',
+            slug: project.slug || '',
+            description: project.description || '',
+            category: project.category || 'COMMERCIAL',
+            status: project.status || 'PLANNED',
+            address: project.address || '',
+            locality: project.locality || '',
+            city: project.city || '',
+            state: project.state || '',
+            latitude: toStr(project.latitude),
+            longitude: toStr(project.longitude),
+            currency: project.currency || 'INR',
+            developerName: project.developerName || '',
+            developerLogo: project.developerLogo || '',
+            reraId: project.reraId || '',
+            possessionDate: toDate(project.possessionDate),
+            launchDate: toDate(project.launchDate),
+            basePrice: project.basePrice || '',
+            priceRange: project.priceRange || '',
+            priceMin: toStr(project.priceMin),
+            priceMax: toStr(project.priceMax),
+            minRatePsf: project.minRatePsf || '',
+            maxRatePsf: project.maxRatePsf || '',
+            minUnitArea: toStr(project.minUnitArea),
+            maxUnitArea: toStr(project.maxUnitArea),
+            landArea: project.landArea || '',
+            numberOfTowers: toStr(project.numberOfTowers),
+            numberOfFloors: toStr(project.numberOfFloors),
+            totalUnits: toStr(project.totalUnits),
+            soldUnits: toStr(project.soldUnits),
+            availableUnits: toStr(project.availableUnits),
+            numberOfApartments: toStr(project.numberOfApartments),
+            featuredImage: project.featuredImage || '',
+            sitePlanImage: project.sitePlanImage || '',
+            bannerTitle: project.bannerTitle || '',
+            bannerSubtitle: project.bannerSubtitle || '',
+            bannerDescription: project.bannerDescription || '',
+            aboutTitle: project.aboutTitle || '',
+            aboutDescription: project.aboutDescription || '',
+            sitePlanTitle: project.sitePlanTitle || '',
+            sitePlanDescription: project.sitePlanDescription || '',
+            seoMetaTitle: project.seo?.metaTitle || '',
+            seoMetaDesc: project.seo?.metaDescription || '',
+            seoMetaKeywords: project.seo?.metaKeywords?.join(', ') || '',
+            seoH1: project.seo?.h1Tag || '',
+            seoFeaturedImgAlt: project.seo?.featuredImgAlt || '',
+            seoLocalHeading: project.seo?.localHeading || '',
+            seoLocalContent: project.seo?.localContent || '',
+            seoLongTitle: project.seo?.longFormTitle || '',
+            seoLongContent: project.seo?.longFormContent || '',
+          });
+
+          setGallery(project.galleryImages?.length ? [...project.galleryImages, ''] : ['']);
+          setVideos(project.videoUrls?.length ? [...project.videoUrls, ''] : ['']);
+          setHighlights(
+            project.highlights?.length
+              ? project.highlights.map((h) => ({ label: h.label || '', icon: h.icon || '' }))
+              : [{ label: '', icon: '' }]
+          );
+          setAmenities(
+            project.amenities?.length
+              ? project.amenities.map((a) => ({
+                  category: a.category || '',
+                  name: a.name || '',
+                  details: a.details || '',
+                }))
+              : [{ category: '', name: '', details: '' }]
+          );
+          setOfferings(
+            project.offerings?.length
+              ? project.offerings.map((o) => ({
+                  icon: o.icon || '',
+                  title: o.title || '',
+                  description: o.description || '',
+                }))
+              : [{ icon: '', title: '', description: '' }]
+          );
+          setPricing(
+            project.pricingTable?.length
+              ? project.pricingTable.map((p) => ({
+                  type: p.type || '',
+                  reraArea: p.reraArea || '',
+                  price: p.price || '',
+                  pricePerSqft: p.pricePerSqft || '',
+                  availableUnits: toStr(p.availableUnits),
+                  floorNumbers: p.floorNumbers || '',
+                }))
+              : [
+                  {
+                    type: '',
+                    reraArea: '',
+                    price: '',
+                    pricePerSqft: '',
+                    availableUnits: '',
+                    floorNumbers: '',
+                  },
+                ]
+          );
+          setNearby(
+            project.nearbyPoints?.length
+              ? project.nearbyPoints.map((n) => ({
+                  type: n.type || 'METRO',
+                  name: n.name || '',
+                  distanceKm: toStr(n.distanceKm),
+                  travelTimeMin: toStr(n.travelTimeMin),
+                }))
+              : [
+                  {
+                    type: 'METRO',
+                    name: '',
+                    distanceKm: '',
+                    travelTimeMin: '',
+                  },
+                ]
+          );
+          setFloorPlans(
+            project.floorPlans?.length
+              ? project.floorPlans.map((fp) => ({
+                  level: fp.level || '',
+                  title: fp.title || '',
+                  imageUrl: fp.imageUrl || '',
+                  details: toDetails(fp.details),
+                }))
+              : [
+                  {
+                    level: '',
+                    title: '',
+                    imageUrl: '',
+                    details: '',
+                  },
+                ]
+          );
+          setFaqs(
+            project.faqs?.length
+              ? project.faqs.map((fq) => ({ question: fq.question || '', answer: fq.answer || '' }))
+              : [{ question: '', answer: '' }]
+          );
+        } catch (err: unknown) {
+          if (!active) return;
+          setError(err instanceof Error ? err.message : 'Failed to load project');
+        }
+      } else {
+        setIsEditing(false);
+        setInitialSlug('');
+      }
+
+      if (active) setPageLoading(false);
+    };
+    run();
+    return () => {
+      active = false;
+    };
+  }, [router, editSlug]);
 
   // ── Handlers ───────────────────────────────────────────────────────────────
   const change = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -302,6 +574,25 @@ export default function CreateProjectPage() {
   };
 
   // ── Submit ─────────────────────────────────────────────────────────────────
+  const handleDelete = async () => {
+    if (!isEditing || !initialSlug) return;
+    const confirmed = window.confirm('Delete this project? This cannot be undone.');
+    if (!confirmed) return;
+    setError('');
+    setSuccess('');
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/projects/${encodeURIComponent(initialSlug)}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to delete project');
+      router.push('/projects');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Something went wrong');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -398,15 +689,20 @@ export default function CreateProjectPage() {
     };
 
     try {
-      const res = await fetch('/api/admin/projects', {
-        method: 'POST',
+      const endpoint = isEditing ? `/api/projects/${encodeURIComponent(initialSlug || f.slug)}` : '/api/projects';
+      const method = isEditing ? 'PUT' : 'POST';
+      const res = await fetch(endpoint, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Failed to create project');
-      setSuccess('Project created successfully! Redirecting…');
-      setTimeout(() => router.push(`/projects/${data.slug}`), 1500);
+      if (!res.ok) throw new Error(data.error || 'Failed to save project');
+      setSuccess(
+        isEditing ? 'Project updated successfully! Redirecting…' : 'Project created successfully! Redirecting…'
+      );
+      const nextSlug = data.slug || f.slug;
+      setTimeout(() => router.push(`/projects/${nextSlug}`), 1500);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
@@ -1277,7 +1573,7 @@ export default function CreateProjectPage() {
             <div className="space-y-5">
               <Card title="Project Branding">
                 <p className="text-xs text-gray-400 mb-4">
-                  These fields are optional — fill only what's needed for your listing.
+                  These fields are optional — fill only what is needed for your listing.
                 </p>
                 <div className="space-y-4">
                   <G2>
@@ -1467,20 +1763,46 @@ export default function CreateProjectPage() {
                   </button>
                 ))}
               </div>
-              <button
-                type="submit"
-                disabled={saving}
-                className="shrink-0 px-6 py-2 rounded bg-yellow-500 hover:bg-yellow-600 text-white font-semibold text-sm disabled:opacity-50 transition flex items-center gap-2"
-              >
-                {saving && (
-                  <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <div className="flex items-center gap-3">
+                {isEditing && (
+                  <button
+                    type="button"
+                    onClick={handleDelete}
+                    disabled={deleting}
+                    className="px-4 py-2 rounded border border-red-200 text-red-600 hover:bg-red-50 font-semibold text-sm disabled:opacity-50 transition"
+                  >
+                    {deleting ? 'Deleting…' : 'Delete'}
+                  </button>
                 )}
-                {saving ? 'Publishing…' : '✓ Publish'}
-              </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="shrink-0 px-6 py-2 rounded bg-yellow-500 hover:bg-yellow-600 text-white font-semibold text-sm disabled:opacity-50 transition flex items-center gap-2"
+                >
+                  {saving && (
+                    <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  )}
+                  {saving ? (isEditing ? 'Updating…' : 'Publishing…') : isEditing ? '✓ Update' : '✓ Publish'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </form>
     </div>
+  );
+}
+
+export default function CreateProjectPageWrapper() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="w-8 h-8 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <CreateProjectPage />
+    </Suspense>
   );
 }
