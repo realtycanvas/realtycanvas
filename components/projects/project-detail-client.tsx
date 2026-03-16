@@ -143,25 +143,36 @@ const isYouTubeUrl = (url: string) => getYouTubeId(url) !== null;
 
 // ─── Video Player (unchanged) ──────────────────────────────────────────────────
 
+const getYouTubeEmbedUrl = (videoId: string, autoplay: boolean, origin?: string | null) => {
+  const params = new URLSearchParams();
+  params.set('rel', '0');
+  if (autoplay) params.set('autoplay', '1');
+  if (origin) params.set('origin', origin);
+  return `https://www.youtube-nocookie.com/embed/${videoId}?${params.toString()}`;
+};
+
 const VideoPlayer = ({
   url,
   autoplay = false,
   className = '',
+  origin,
 }: {
   url: string;
   autoplay?: boolean;
   className?: string;
+  origin?: string | null;
 }) => {
   const youtubeId = getYouTubeId(url);
 
   if (youtubeId) {
-    const src = `https://www.youtube.com/embed/${youtubeId}?rel=0${autoplay ? '&autoplay=1' : ''}`;
+    const src = getYouTubeEmbedUrl(youtubeId, autoplay, origin);
     return (
       <iframe
         src={src}
         title="Project video"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowFullScreen
+        referrerPolicy="strict-origin-when-cross-origin"
         className={`w-full h-full border-0 ${className}`}
       />
     );
@@ -228,6 +239,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
   const [viewAllVideos, setViewAllVideos] = useState(false);
   const [toast, setToast] = useState('');
   const [user, setUser] = useState<User | null>(null);
+  const [youtubeOrigin, setYoutubeOrigin] = useState<string | null>(null);
 
   const pathname = usePathname();
 
@@ -281,6 +293,10 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
       }
     };
     checkAuth();
+  }, []);
+
+  useEffect(() => {
+    setYoutubeOrigin(window.location.origin);
   }, []);
 
   const handleShare = async () => {
@@ -676,7 +692,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
             {project.videoUrls.length > 0 && (
               <Section title="Project Videos">
                 <div className="relative aspect-video rounded overflow-hidden bg-black">
-                  <VideoPlayer url={project.videoUrls[activeVideoIndex]} />
+                  <VideoPlayer url={project.videoUrls[activeVideoIndex]} origin={youtubeOrigin} />
                 </div>
 
                 {project.videoUrls.length > 1 && (
@@ -899,7 +915,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
 
             <div className="flex-1 grid grid-rows-[1fr_auto] overflow-hidden">
               <div className="relative bg-black overflow-hidden">
-                <VideoPlayer url={project.videoUrls[activeVideoIndex]} autoplay />
+                <VideoPlayer url={project.videoUrls[activeVideoIndex]} autoplay origin={youtubeOrigin} />
                 {project.videoUrls.length > 1 && (
                   <>
                     <button

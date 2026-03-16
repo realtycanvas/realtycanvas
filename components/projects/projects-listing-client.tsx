@@ -279,7 +279,7 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
                     <Link
                       key={project.id}
                       href={`/projects/${project.slug}`}
-                      className="bg-white rounded shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300"
+                      className="bg-white rounded shadow-sm border overflow-hidden hover:shadow-md transition-shadow duration-300"
                     >
                       <div className="relative h-48 bg-gray-200">
                         {project.featuredImage && (
@@ -291,14 +291,14 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           />
                         )}
-                        <div className="absolute top-4 left-4 flex gap-2">
+                        <div className="absolute top-2 left-2 flex gap-2">
                           <span
-                            className={`px-3 py-1 rounded-full text-xs font-medium ${getCategoryColor(project.category)}`}
+                            className={`px-3 py-1 rounded text-xs font-medium ${getCategoryColor(project.category)}`}
                           >
                             {project.category.replace(/_/g, ' ')}
                           </span>
                           <span
-                            className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(project.status)}`}
+                            className={`px-3 py-1 rounded text-xs font-medium ${getStatusColor(project.status)}`}
                           >
                             {project.status.replace(/_/g, ' ')}
                           </span>
@@ -309,28 +309,23 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
                         <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">{project.title}</h3>
 
                         {project.subtitle && (
-                          <p className="text-sm text-gray-600 mb-3 line-clamp-1">{project.subtitle}</p>
+                          <p className="text-sm text-gray-600 mb-3">{project.subtitle}</p>
                         )}
 
                         <div className="space-y-2 text-sm">
                           {project.address && (
                             <p className="text-gray-700">
-                              <span className="font-medium">Address:</span> {project.address}
-                            </p>
-                          )}
-                          {project.city && (
-                            <p className="text-gray-700">
-                              <span className="font-medium">City:</span> {project.city}
+                              <span className="font-bold">Address:</span> {project.address}, {project.city}
                             </p>
                           )}
                           {project.developerName && (
                             <p className="text-gray-700">
-                              <span className="font-medium">Developer:</span> {project.developerName}
+                              <span className="font-bold">Developed By:</span> {project.developerName}
                             </p>
                           )}
                           {project.basePrice && (
                             <p className="text-yellow-600 font-semibold">
-                              <span className="font-medium">Price:</span> {project.basePrice}
+                              <span className="font-bold">Base Price:</span> {project.basePrice}
                             </p>
                           )}
                         </div>
