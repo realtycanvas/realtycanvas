@@ -89,6 +89,11 @@ const nextConfig: NextConfig = {
         hostname: 'cdn.sanity.io',
         pathname: '/**',
       },
+      {
+        protocol: 'http',
+        hostname: '187.127.128.90',  // no port, nginx handles it on 80
+        pathname: '/uploads/**',
+      },
     ],
     // Optimize image loading to reduce transformation requests
     formats: ['image/webp', 'image/avif'],
