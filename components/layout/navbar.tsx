@@ -159,7 +159,7 @@ const Navbar = ({
             {user && (
               <button
                 onClick={() => setShowLogoutModal(true)}
-                className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-full transition-all duration-300 transform hover:scale-105"
+                className="cursor-pointer flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-full transition-all duration-300 transform hover:scale-105"
               >
                 Logout
               </button>
@@ -193,7 +193,7 @@ const Navbar = ({
               <div className="px-3 py-2">
                 <Link
                   href={telHref}
-                  className="flex items-center justify-center gap-2 bg-[#FBB70F] hover:bg-[#e5a60d] text-[#112D48] font-medium py-3 rounded text-center w-full mb-2 transition-all duration-300 transform hover:scale-105 animate-pulse hover:animate-none shadow-lg"
+                  className="flex items-center justify-center gap-2 bg-[#FBB70F] hover:bg-[#e5a60d] text-[#112D48] font-medium py-3 rounded text-center w-full mb-2 transition-all duration-300 transform hover:scale-105 call-now-pulse hover:animate-none shadow-lg"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   <PhoneIcon className="h-5 w-5" />
