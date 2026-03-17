@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { BrandButton } from '@/components/ui/BrandButton';
 import { BanknoteIcon, BuildingIcon, ChevronDown, MagnifyIcon } from '../ui/icon';
 
@@ -20,6 +21,18 @@ type ProjectSearchBarProps = {
 };
 
 type DropdownOption = { value: string; label: string };
+type ProjectSuggestion = {
+  id: string;
+  slug: string;
+  title: string;
+  subtitle: string | null;
+  city: string | null;
+  state: string | null;
+  featuredImage: string;
+  category: string;
+  status: string;
+  developerName: string | null;
+};
 
 const projectCategories = ['All Categories', 'COMMERCIAL', 'RESIDENTIAL'];
 
@@ -164,9 +177,15 @@ function CustomDropdown({
 }
 
 export default function ProjectSearchBar({ onSearch, className = '', compact = false }: ProjectSearchBarProps) {
+  const router = useRouter();
   const [projectCategory, setProjectCategory] = useState('All Categories');
   const [projectStatus, setProjectStatus] = useState('All Status');
   const [selectedPriceRange, setSelectedPriceRange] = useState(priceRanges[0]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<ProjectSuggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
+  const suggestionRef = useRef<HTMLDivElement>(null);
 
   const handleSearch = () => {
     const filters: SearchFilters = {
@@ -178,7 +197,62 @@ export default function ProjectSearchBar({ onSearch, className = '', compact = f
       },
     };
     onSearch?.(filters);
+    const params = new URLSearchParams();
+    if (searchQuery.trim()) params.set('search', searchQuery.trim());
+    if (projectCategory !== 'All Categories') params.set('category', projectCategory);
+    if (projectStatus !== 'All Status') params.set('status', projectStatus);
+    router.push(`/projects${params.toString() ? `?${params.toString()}` : ''}`);
   };
+
+  useEffect(() => {
+    if (compact) return;
+    if (searchQuery.trim().length < 2) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      try {
+        setIsFetching(true);
+        const params = new URLSearchParams({
+          page: '1',
+          search: searchQuery.trim(),
+          category: 'ALL',
+          status: 'ALL',
+        });
+        const res = await fetch(`/api/projects?${params}`, { signal: controller.signal });
+        if (!res.ok) return;
+        const data = await res.json();
+        const items = Array.isArray(data?.data) ? data.data.slice(0, 4) : [];
+        setSuggestions(items);
+        setShowSuggestions(items.length > 0);
+      } catch (error: unknown) {
+        const isAbort = error instanceof DOMException && error.name === 'AbortError';
+        if (!isAbort) {
+          setSuggestions([]);
+          setShowSuggestions(false);
+        }
+      } finally {
+        setIsFetching(false);
+      }
+    }, 300);
+    return () => {
+      controller.abort();
+      clearTimeout(timer);
+    };
+  }, [compact, searchQuery]);
+
+  useEffect(() => {
+    if (compact) return;
+    const handleOutside = (e: MouseEvent) => {
+      if (suggestionRef.current && !suggestionRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutside);
+    return () => document.removeEventListener('mousedown', handleOutside);
+  }, [compact]);
 
   if (compact) {
     return (
@@ -234,7 +308,7 @@ export default function ProjectSearchBar({ onSearch, className = '', compact = f
 
   return (
     <div className={`bg-white/20 backdrop-blur-md rounded shadow p-3 sm:p-4 border border-white/30 ${className}`}>
-      <div className="grid grid-cols-1 sm:grid-cols-[2fr_1fr_1fr_auto] gap-2 sm:gap-3 items-end">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
         <div className="space-y-1 sm:space-y-2">
           <label className="text-xs font-semibold text-white">Category</label>
           <CustomDropdown
@@ -267,8 +341,56 @@ export default function ProjectSearchBar({ onSearch, className = '', compact = f
             icon={<BanknoteIcon className="w-4 sm:w-5 h-4 sm:h-5 text-gray-400" />}
           />
         </div>
-
-        <div className="flex self-end">
+      </div>
+      <div className="mt-3 sm:mt-4 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 sm:gap-3 items-start" ref={suggestionRef}>
+        <div className="relative">
+          <label className="text-xs font-semibold text-white">Search</label>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={() => {
+              if (suggestions.length > 0) setShowSuggestions(true);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleSearch();
+            }}
+            placeholder="Search by project name, location, or developer..."
+            className="mt-1 w-full h-10 px-3 rounded border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#FBB70F] bg-white text-sm"
+          />
+          {showSuggestions ? (
+            <div className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden">
+              {suggestions.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    setShowSuggestions(false);
+                    router.push(`/projects/${item.slug}`);
+                  }}
+                  className="w-full text-left flex items-center gap-3 px-3 py-2 hover:bg-gray-50 transition-colors"
+                >
+                  <span className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 shrink-0">
+                    <img src={item.featuredImage} alt={item.title} className="w-full h-full object-cover" />
+                  </span>
+                  <span className="flex-1 min-w-0">
+                    <span className="block text-sm font-semibold text-gray-900 truncate">{item.title}</span>
+                    <span className="block text-xs text-gray-500 truncate">
+                      {item.subtitle || item.developerName || item.city || item.state || ''}
+                    </span>
+                  </span>
+                  <span className="text-[10px] px-2 py-1 rounded bg-gray-100 text-gray-600 uppercase">
+                    {item.status.replace(/_/g, ' ')}
+                  </span>
+                </button>
+              ))}
+              {isFetching ? (
+                <div className="px-3 py-2 text-xs text-gray-500">Searching...</div>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+        <div className="flex sm:items-end">
           <BrandButton
             variant="primary"
             onClick={handleSearch}

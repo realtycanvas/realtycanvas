@@ -1,93 +1,85 @@
 'use client';
 
-import Image from 'next/image';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { BrandButton } from '@/components/ui/BrandButton';
+import Image from 'next/image';
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import ProjectSearchBar from './project-search';
+import { banners } from '@/data/banners';
 
 type HeroSectionProps = {
   className?: string;
   onSearch?: (filters: { category: string; status: string; priceRange: { min: number; max: number } }) => void;
-  headingStart?: string;
-  headingAccent?: string;
-  description?: string;
-  exploreHref?: string;
-  contactHref?: string;
-  backgroundDesktopSrc?: string;
-  backgroundMobileSrc?: string;
 };
 
 const HeroSection = ({
   className = '',
   onSearch,
-  headingStart = 'Find Your',
-  headingAccent = 'Dream Project',
-  description = 'Discover premium residential homes and commercial spaces across Gurgaon with India’s most trusted real estate consultant.',
-  exploreHref = '/projects',
-  contactHref = '/contact',
-  backgroundDesktopSrc = '/home/homepage.webp',
-  backgroundMobileSrc = '/home/home-mobile.webp',
 }: HeroSectionProps) => {
+  const slides = useMemo(() => [...banners].sort((a, b) => a.sortOrder - b.sortOrder), []);
+
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    if (slides.length <= 1) return;
+    const timer = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % slides.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, [slides.length]);
+
+  const goPrev = () => {
+    setActiveIndex((prev) => (prev - 1 + slides.length) % slides.length);
+  };
+
+  const goNext = () => {
+    setActiveIndex((prev) => (prev + 1) % slides.length);
+  };
+
   return (
-    <section className={`relative pb-10 flex items-center justify-center min-h-screen ${className}`}>
-      <Image
-        src={backgroundDesktopSrc}
-        alt="Hero Background"
-        width={100000}
-        height={100000}
-        className="hidden sm:block absolute inset-0 w-full h-full object-cover object-center"
-      />
-      <Image
-        src={backgroundMobileSrc}
-        alt="Hero Background Mobile"
-        width={100000}
-        height={100000}
-        className="block sm:hidden absolute inset-0 w-full h-full object-cover object-center"
-      />
-
-      <div className="absolute inset-0 bg-black/20 -z-10" />
-      <div className="hidden lg:block absolute inset-0 bg-linear-to-r from-black/50 via-[#112D48]/20 to-transparent z-10" />
-      <div className="block lg:hidden absolute inset-0 bg-linear-to-b from-black/50 via-[#112D48]/20 to-transparent z-10" />
-
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col items-center lg:items-start justify-center h-full mt-20">
-        <div className="flex flex-col items-center lg:items-start justify-center text-center lg:text-left space-y-6 sm:space-y-8 lg:space-y-10 w-full lg:w-[60%]">
-          <div className="space-y-3 sm:space-y-5 max-w-4xl mx-auto lg:mx-0 lg:mr-auto">
-            <div className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-2 sm:gap-0 flex-wrap">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-tight text-white drop-shadow-lg text-center lg:text-left">
-                {headingStart}
-              </h1>
-              <span className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold -mt-5 leading-tight bg-linear-to-r from-[#FBB70F] to-[#FBB70F] bg-clip-text text-transparent drop-shadow-sm text-center lg:text-left">
-                {headingAccent}
-              </span>
+    <section className={`relative ${className}`}>
+      <div className="w-full">
+        <div className="relative w-full">
+          <div className="relative h-[75vh] w-full overflow-hidden">
+            <div
+              className="flex h-full transition-transform duration-700 ease-out"
+              style={{ transform: `translateX(-${activeIndex * 100}%)` }}
+            >
+              {slides.map((slide) => (
+                <div key={slide.id} className="min-w-full h-full relative">
+                  <Link href={slide.link} className="block w-full h-full relative">
+                    <Image src={slide.bannerImage} alt="Hero Banner" fill sizes="100vw" className="object-cover hover:scale-105 transition-transform duration-500" />
+                  </Link>
+                </div>
+              ))}
             </div>
 
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl font-medium text-gray-100 leading-tight max-w-xs sm:max-w-xl md:max-w-2xl lg:max-w-3xl mx-auto lg:mx-0 lg:mr-auto drop-shadow-md text-center lg:text-left">
-              {description}
-            </p>
+            {slides.length > 1 ? (
+              <>
+                <button
+                  type="button"
+                  onClick={goPrev}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors flex items-center justify-center"
+                  aria-label="Previous banner"
+                >
+                  <ChevronLeftIcon className="w-5 h-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={goNext}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors flex items-center justify-center"
+                  aria-label="Next banner"
+                >
+                  <ChevronRightIcon className="w-5 h-5" />
+                </button>
+              </>
+            ) : null}
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start items-center w-full max-w-xs sm:max-w-md md:max-w-lg mx-auto lg:mx-0 lg:mr-auto">
-            <Link href={exploreHref} className="w-full sm:w-auto">
-              <BrandButton
-                variant="primary"
-                size="lg"
-                className="rounded text-sm sm:text-base px-6 py-3 sm:py-4 w-full sm:w-auto min-w-40 shadow-lg hover:scale-105 transition-transform"
-              >
-                Explore Projects
-              </BrandButton>
-            </Link>
-            <Link href={contactHref} className="w-full sm:w-auto">
-              <BrandButton
-                variant="secondary"
-                size="lg"
-                className="rounded text-sm sm:text-base px-6 py-3 sm:py-4 w-full sm:w-auto min-w-40 bg-[#112D48]! text-white! hover:bg-[#091a30]! shadow-lg hover:scale-105 transition-transform"
-              >
-                Get In Touch
-              </BrandButton>
-            </Link>
-          </div>
+        </div>
 
-          <div className="w-full max-w-sm sm:max-w-xl md:max-w-3xl lg:max-w-4xl mx-auto lg:mx-0 lg:mr-auto mt-4 sm:mt-8 px-2 sm:px-0">
+        <div className="absolute left-1/2 top-[75vh] -translate-x-1/2 -translate-y-1/2 w-full max-w-sm sm:max-w-xl md:max-w-3xl lg:max-w-4xl px-2 sm:px-0">
+          <div className="rounded-2xl shadow-xl bg-white">
             <ProjectSearchBar onSearch={onSearch} />
           </div>
         </div>
