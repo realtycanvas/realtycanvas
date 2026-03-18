@@ -12,10 +12,7 @@ type HeroSectionProps = {
   onSearch?: (filters: { category: string; status: string; priceRange: { min: number; max: number } }) => void;
 };
 
-const HeroSection = ({
-  className = '',
-  onSearch,
-}: HeroSectionProps) => {
+const HeroSection = ({ className = '', onSearch }: HeroSectionProps) => {
   const slides = useMemo(() => [...banners].sort((a, b) => a.sortOrder - b.sortOrder), []);
 
   const [activeIndex, setActiveIndex] = useState(0);
@@ -48,7 +45,13 @@ const HeroSection = ({
               {slides.map((slide) => (
                 <div key={slide.id} className="min-w-full h-full relative">
                   <Link href={slide.link} className="block w-full h-full relative">
-                    <Image src={slide.bannerImage} alt="Hero Banner" fill sizes="100vw" className="object-cover hover:scale-105 transition-transform duration-500" />
+                    <Image
+                      src={slide.bannerImage}
+                      alt="Hero Banner"
+                      fill
+                      sizes="100vw"
+                      className="object-cover hover:scale-105 transition-transform duration-500"
+                    />
                   </Link>
                 </div>
               ))}
@@ -75,7 +78,6 @@ const HeroSection = ({
               </>
             ) : null}
           </div>
-
         </div>
 
         <div className="absolute left-1/2 top-[75vh] -translate-x-1/2 -translate-y-1/2 w-full max-w-sm sm:max-w-xl md:max-w-3xl lg:max-w-4xl px-2 sm:px-0">

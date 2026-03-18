@@ -310,7 +310,7 @@ export default function ProjectSearchBar({ onSearch, className = '', compact = f
     <div className={`bg-white/20 backdrop-blur-md rounded shadow p-3 sm:p-4 border border-white/30 ${className}`}>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
         <div className="space-y-1 sm:space-y-2">
-          <label className="text-xs font-semibold text-white">Category</label>
+          {/* <label className="text-xs font-semibold text-white">Category</label> */}
           <CustomDropdown
             options={categoryOptions}
             value={projectCategory}
@@ -320,7 +320,7 @@ export default function ProjectSearchBar({ onSearch, className = '', compact = f
         </div>
 
         <div className="space-y-1 sm:space-y-2">
-          <label className="text-xs font-semibold text-white">Status</label>
+          {/* <label className="text-xs font-semibold text-white">Status</label> */}
           <CustomDropdown
             options={statusOptions}
             value={projectStatus}
@@ -330,7 +330,7 @@ export default function ProjectSearchBar({ onSearch, className = '', compact = f
         </div>
 
         <div className="space-y-1 sm:space-y-2">
-          <label className="text-xs font-semibold text-white">Budget</label>
+          {/* <label className="text-xs font-semibold text-white">Budget</label> */}
           <CustomDropdown
             options={budgetOptions}
             value={selectedPriceRange.label}
@@ -342,9 +342,12 @@ export default function ProjectSearchBar({ onSearch, className = '', compact = f
           />
         </div>
       </div>
-      <div className="mt-3 sm:mt-4 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 sm:gap-3 items-start" ref={suggestionRef}>
+      <div
+        className="mt-3 sm:mt-4 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2 sm:gap-3 items-start"
+        ref={suggestionRef}
+      >
         <div className="relative">
-          <label className="text-xs font-semibold text-white">Search</label>
+          {/* <label className="text-xs font-semibold text-white">Search</label>   */}
           <input
             type="text"
             value={searchQuery}
@@ -356,7 +359,7 @@ export default function ProjectSearchBar({ onSearch, className = '', compact = f
               if (e.key === 'Enter') handleSearch();
             }}
             placeholder="Search by project name, location, or developer..."
-            className="mt-1 w-full h-10 px-3 rounded border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#FBB70F] bg-white text-sm"
+            className="w-full h-10 px-3 rounded border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#FBB70F] bg-white text-sm"
           />
           {showSuggestions ? (
             <div className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden">
@@ -384,9 +387,7 @@ export default function ProjectSearchBar({ onSearch, className = '', compact = f
                   </span>
                 </button>
               ))}
-              {isFetching ? (
-                <div className="px-3 py-2 text-xs text-gray-500">Searching...</div>
-              ) : null}
+              {isFetching ? <div className="px-3 py-2 text-xs text-gray-500">Searching...</div> : null}
             </div>
           ) : null}
         </div>
@@ -394,11 +395,11 @@ export default function ProjectSearchBar({ onSearch, className = '', compact = f
           <BrandButton
             variant="primary"
             onClick={handleSearch}
-            className="w-full rounded text-xs border-0 h-10 px-4 py-0"
+            className="w-full rounded border-0 h-10 px-4 py-0 hover:scale-none"
             shimmerDuration="2s"
           >
-            <MagnifyIcon className="w-4 h-4 mr-2 inline-block -mt-0.5" />
-            Search Projects
+            <MagnifyIcon className="w-5 h-5 mr-2 inline-block -mt-0.5" />
+            Search
           </BrandButton>
         </div>
       </div>
