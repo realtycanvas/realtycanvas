@@ -103,13 +103,16 @@ const formatCategory = (value: string) =>
     .toLowerCase()
     .replace(/\b\w/g, (c) => c.toUpperCase());
 
+const shortProjectTitle = (title: string) =>
+  (title.split(/[–-]/)[0] || title).trim().replace(/\s+/g, ' ').split(' ').slice(0, 3).join(' ');
+
 const getStatusStyle = (status: string) => {
   if (status === 'READY') return 'bg-green-100 text-green-800';
   if (status === 'UNDER_CONSTRUCTION') return 'bg-yellow-100 text-yellow-800';
   return 'bg-brand-primary text-black';
 };
 
-// ✅ FIXED: explicit locale prevents SSR hydration mismatch
+// Explicit locale prevents SSR hydration mismatch
 const formatNumber = (value: number | null) => (value != null ? value.toLocaleString('en-IN') : null);
 
 // ─── Section Wrapper — responsive padding & heading ────────────────────────────
@@ -257,6 +260,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
   const defaultAlt = project.seo?.featuredImgAlt || project.title;
   const primaryHeading = project.seo?.h1Tag || project.title;
   const getImageAlt = (src: string) => imageAltMap[src] || defaultAlt;
+  const investTitle = shortProjectTitle(project.title);
 
   const amenityCategories = useMemo(
     () => Array.from(new Set(project.amenities.map((a) => a.category))),
@@ -641,7 +645,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
 
             {/* 6. Why Invest */}
             {project.highlights.length > 0 && (
-              <Section title="Why Invest in SPJ Vedatam, Gurgaon?">
+              <Section title={`Why Invest in ${investTitle}?`}>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   {project.highlights.map((highlight) => (
                     <div
