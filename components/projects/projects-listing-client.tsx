@@ -48,9 +48,10 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [pagination, setPagination] = useState<Pagination>({
     page: 1,
-    limit: 6,
+    limit: 10,
     totalCount: 0,
     totalPages: 0,
     hasMore: false,
@@ -67,14 +68,19 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const fetchProjects = useCallback(
-    async (page: number = 1) => {
+    async (page: number = 1, append: boolean = false) => {
       try {
         abortControllerRef.current?.abort();
         abortControllerRef.current = new AbortController();
 
-        setLoading(true);
+        if (append) {
+          setLoadingMore(true);
+        } else {
+          setLoading(true);
+        }
         const params = new URLSearchParams({
           page: page.toString(),
+          limit: pagination.limit.toString(),
           search: filters.search,
           category: filters.category,
           status: filters.status,
@@ -88,17 +94,22 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
         if (!response.ok) throw new Error('Failed to fetch');
 
         const result = await response.json();
-        setProjects(result.data);
+        setProjects((prev) => (append ? [...prev, ...result.data] : result.data));
         setPagination(result.pagination);
-      } catch (error: any) {
-        if (error.name !== 'AbortError') {
+      } catch (error: unknown) {
+        const errorName = error instanceof Error ? error.name : '';
+        if (errorName !== 'AbortError') {
           console.error('Error fetching projects:', error);
         }
       } finally {
-        setLoading(false);
+        if (append) {
+          setLoadingMore(false);
+        } else {
+          setLoading(false);
+        }
       }
     },
-    [filters]
+    [filters, pagination.limit]
   );
 
   useEffect(() => {
@@ -109,9 +120,10 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handlePageChange = (newPage: number) => {
-    fetchProjects(newPage);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const handleLoadMore = () => {
+    if (pagination.hasMore && !loadingMore) {
+      fetchProjects(pagination.page + 1, true);
+    }
   };
 
   const getCategoryColor = (category: string) => {
@@ -131,52 +143,6 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
       READY: 'bg-green-100 text-green-800',
     };
     return colors[status] || 'bg-gray-100 text-gray-800';
-  };
-
-  const renderPagination = () => {
-    const current = pagination.page;
-    const total = pagination.totalPages;
-
-    return (
-      <div className="flex justify-center items-center gap-2 mb-8">
-        {/* Prev */}
-        <button
-          onClick={() => handlePageChange(current - 1)}
-          disabled={!pagination.hasPrevious}
-          className="w-9 h-9 flex items-center justify-center border border-gray-300 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
-        >
-          <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-
-        {/* Page Numbers */}
-        {Array.from({ length: total }, (_, i) => i + 1).map((page) => (
-          <button
-            key={page}
-            onClick={() => handlePageChange(page)}
-            className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${
-              page === current
-                ? 'bg-yellow-500 text-white shadow-sm'
-                : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            {page}
-          </button>
-        ))}
-
-        {/* Next */}
-        <button
-          onClick={() => handlePageChange(current + 1)}
-          disabled={!pagination.hasMore}
-          className="w-9 h-9 flex items-center justify-center border border-gray-300 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
-        >
-          <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      </div>
-    );
   };
 
   return (
@@ -328,8 +294,20 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
                   ))}
                 </div>
 
-                {/* Pagination */}
-                {pagination.totalPages > 1 && renderPagination()}
+                {pagination.hasMore && (
+                  <div className="flex justify-center mb-10">
+                    <button
+                      onClick={handleLoadMore}
+                      disabled={loadingMore}
+                      className="flex items-center gap-2 px-6 py-2 rounded border border-gray-300 text-gray-800 hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      {loadingMore && (
+                        <span className="w-4 h-4 border-2 border-gray-300 border-t-yellow-500 rounded-full animate-spin" />
+                      )}
+                      {loadingMore ? 'Loading...' : 'Load More'}
+                    </button>
+                  </div>
+                )}
               </>
             ) : (
               <div className="text-center pb-12 pt-20 md:pt-32">

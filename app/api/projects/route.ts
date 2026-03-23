@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
 
     const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
-    const limit = 6;
+    const limit = Math.max(1, parseInt(searchParams.get('limit') || '10'));
     const search = searchParams.get('search')?.trim() || '';
     const category = searchParams.get('category') || 'ALL';
     const status = searchParams.get('status') || 'ALL';
