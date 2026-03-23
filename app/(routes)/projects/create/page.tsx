@@ -1382,19 +1382,16 @@ function CreateProjectPage() {
               >
                 <div className="space-y-3">
                   {highlights.map((h, i) => (
-                    <div key={i} className="flex gap-2 items-center">
-                      <Input
-                        value={h.icon}
-                        onChange={(e) => updRow(setHighlights, i, 'icon', e.target.value)}
-                        placeholder="Icon 📌"
-                        cls="w-16 shrink-0 text-center"
-                      />
+                    <div key={i} className="flex flex-col sm:flex-row gap-2 sm:items-center">
                       <Input
                         value={h.label}
                         onChange={(e) => updRow(setHighlights, i, 'label', e.target.value)}
                         placeholder="Highlight text — e.g. RERA approved project"
+                        className="w-full"
                       />
-                      <DelBtn onClick={() => delRow(setHighlights, i)} />
+                      <div className="sm:self-center">
+                        <DelBtn onClick={() => delRow(setHighlights, i)} />
+                      </div>
                     </div>
                   ))}
                   <AddBtn onClick={() => addRow(setHighlights, { label: '', icon: '' })} label="Add Highlight" />

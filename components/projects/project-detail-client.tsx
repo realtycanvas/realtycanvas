@@ -652,8 +652,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                       key={highlight.id}
                       className="flex items-start gap-3 p-3 sm:p-4 bg-yellow-50 border border-yellow-100 rounded"
                     >
-                      <span className="text-lg sm:text-xl shrink-0">{highlight.icon || '📌'}</span>
-                      <p className="text-gray-700 text-sm leading-relaxed">{highlight.label}</p>
+                      <p className="leading-relaxed font-medium">{highlight.label}</p>
                     </div>
                   ))}
                 </div>
