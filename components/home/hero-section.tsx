@@ -166,7 +166,7 @@ const HeroSection = ({ className = '', onSearch }: HeroSectionProps) => {
             <ProjectSearchBar onSearch={handleSearch} />
           </div>
         </div>
-        <div className="md:hidden mt-12 px-4">
+        <div className="md:hidden pt-12 px-4 bg-gray-200">
           <div className="rounded-2xl shadow-xl bg-white">
             <ProjectSearchBar onSearch={handleSearch} />
           </div>

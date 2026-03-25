@@ -12,7 +12,7 @@ const page = () => {
     <div className="">
       <HeroSection />
       <ProjectTagSection
-        className="bg-white"
+        className="md:pt-28"
         tag="RECOMMENDED"
         title={
           <h2>
