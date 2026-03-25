@@ -340,6 +340,15 @@ export async function DELETE(request: NextRequest, { params }: Props) {
       return NextResponse.json({ error: 'Slug is required' }, { status: 400 });
     }
     const normalizedSlug = decodeURIComponent(slug).toLowerCase().trim();
+    let permanent = request.nextUrl.searchParams.get('permanent') !== '0';
+    try {
+      const body = await request.json();
+      if (typeof body?.permanent === 'boolean') {
+        permanent = body.permanent;
+      }
+    } catch {
+      permanent = permanent || false;
+    }
 
     const project = await prisma.project.findUnique({
       where: { slug: normalizedSlug },
@@ -353,6 +362,18 @@ export async function DELETE(request: NextRequest, { params }: Props) {
 
     if (!project) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+
+    if (!permanent) {
+      await prisma.project.update({
+        where: { slug: normalizedSlug },
+        data: { isActive: false },
+      });
+      revalidatePath('/projects');
+      revalidatePath(`/projects/${normalizedSlug}`);
+      revalidatePath('/admin/projects');
+      revalidateTag(PROJECTS_TAG, 'default');
+      return NextResponse.json({ ok: true, mode: 'soft' });
     }
 
     const urls: (string | null | undefined)[] = [
@@ -372,8 +393,9 @@ export async function DELETE(request: NextRequest, { params }: Props) {
 
     revalidatePath('/projects');
     revalidatePath(`/projects/${normalizedSlug}`);
+    revalidatePath('/admin/projects');
     revalidateTag(PROJECTS_TAG, 'default');
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, mode: 'hard' });
   } catch (error) {
     console.error('Project delete error:', error);
     return NextResponse.json({ error: 'Failed to delete project' }, { status: 500 });

@@ -28,7 +28,7 @@ export default function AdminLoginPage() {
         const data = await res.json();
         if (data.user) {
           // Already logged in, redirect to projects
-          router.push('/projects');
+          router.push('/admin/dashboard');
         }
       } catch {
         // Not logged in, continue
@@ -61,7 +61,7 @@ export default function AdminLoginPage() {
       if (!res.ok) {
         setError(data?.error || 'Failed to sign in');
       } else {
-        router.push('/projects');
+        router.push('/admin/dashboard');
       }
     } catch {
       setError('Network error');
