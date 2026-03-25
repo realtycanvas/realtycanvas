@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Preloader from '@/components/common/Preloader';
+import { Toaster } from 'react-hot-toast';
 
 interface ClientLayoutProps {
   children: React.ReactNode;
@@ -36,6 +37,31 @@ const ClientLayout: React.FC<ClientLayoutProps> = ({ children }) => {
   return (
     <>
       <Preloader isLoading={isLoading} onComplete={() => setIsLoading(false)} />
+      <Toaster
+        position="bottom-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#111827',
+            color: '#ffffff',
+            borderRadius: '10px',
+            padding: '12px 14px',
+            fontSize: '14px',
+          },
+          success: {
+            style: {
+              background: '#065f46',
+              color: '#ffffff',
+            },
+          },
+          error: {
+            style: {
+              background: '#7f1d1d',
+              color: '#ffffff',
+            },
+          },
+        }}
+      />
       <div className={isLoading ? 'opacity-0' : 'opacity-100 transition-opacity duration-500'}>{children}</div>
     </>
   );

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import toast from 'react-hot-toast';
 
 interface FormData {
   name: string;
@@ -64,7 +65,7 @@ export default function LeadForm({ onSuccess, onCancel, showCancelButton = true,
       const result = await response.json();
 
       if (response.ok) {
-        alert(result.message || 'Thank you! We will contact you soon.');
+        toast.success(result.message || 'Thank you! We will contact you soon.');
         setFormData({
           name: '',
           phone: '',
@@ -79,11 +80,11 @@ export default function LeadForm({ onSuccess, onCancel, showCancelButton = true,
         });
         if (onSuccess) onSuccess();
       } else {
-        alert(result.message || 'Something went wrong. Please try again.');
+        toast.error(result.message || 'Something went wrong. Please try again.');
       }
     } catch (error) {
       console.error('Error submitting form:', error);
-      alert('Network error. Please check your connection and try again.');
+      toast.error('Network error. Please check your connection and try again.');
     } finally {
       setIsSubmitting(false);
     }

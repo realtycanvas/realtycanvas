@@ -23,7 +23,11 @@ export default async function AdminDynamicPage({ params }: PageProps) {
 
   if (end_point === 'projects') {
     return (
-      <AdminShell title="Project Management" description="Create, edit, and delete projects from one place.">
+      <AdminShell
+        title="Project Management"
+        description="Create, edit, and delete projects from one place."
+        contentScrollable={false}
+      >
         <AdminProjectsPage />
       </AdminShell>
     );
@@ -31,7 +35,11 @@ export default async function AdminDynamicPage({ params }: PageProps) {
 
   if (end_point === 'lead') {
     return (
-      <AdminShell title="Lead Management" description="Track and review all captured lead enquiries.">
+      <AdminShell
+        title="Lead Management"
+        description="Track and review all captured lead enquiries."
+        contentScrollable={false}
+      >
         <AdminLeadsPage />
       </AdminShell>
     );

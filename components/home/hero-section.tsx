@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import ProjectSearchBar from './project-search';
 import { banners } from '@/data/banners';
-import { BrandButton } from '@/components/ui/BrandButton';
 
 type HeroSectionProps = {
   className?: string;
@@ -134,27 +133,6 @@ const HeroSection = ({ className = '', onSearch }: HeroSectionProps) => {
                     Discover premium residential homes and commercial spaces across Gurgaon with India&apos;s most
                     trusted real estate consultant.
                   </p>
-                </div>
-
-                <div className="mx-auto flex w-full max-w-xs flex-col items-center justify-center gap-3 sm:max-w-md sm:flex-row sm:gap-4 md:max-w-lg">
-                  <Link href="/projects" className="w-full sm:w-auto">
-                    <BrandButton
-                      variant="primary"
-                      size="lg"
-                      className="rounded-xl text-sm sm:text-base px-6 py-3 sm:py-4 w-full sm:w-auto min-w-40 shadow-lg hover:scale-105 transition-transform"
-                    >
-                      Explore Projects
-                    </BrandButton>
-                  </Link>
-                  <Link href="/contact" className="w-full sm:w-auto">
-                    <BrandButton
-                      variant="secondary"
-                      size="lg"
-                      className="rounded-xl text-sm sm:text-base px-6 py-3 sm:py-4 w-full sm:w-auto min-w-40 bg-[#112D48]! text-white! hover:bg-[#091a30]! shadow-lg hover:scale-105 transition-transform"
-                    >
-                      Get In Touch
-                    </BrandButton>
-                  </Link>
                 </div>
               </div>
             </div>

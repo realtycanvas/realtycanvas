@@ -181,7 +181,7 @@ export default function AdminProjectsPage() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 h-full flex flex-col min-h-0">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-lg font-bold text-gray-900">Projects</h2>
         <div className="flex items-center gap-2">
@@ -236,7 +236,7 @@ export default function AdminProjectsPage() {
           <div className="w-8 h-8 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin" />
         </div>
       ) : (
-        <div className="overflow-x-auto rounded border border-gray-200">
+        <div className="overflow-auto rounded border border-gray-200 flex-1 min-h-[320px]">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>

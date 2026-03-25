@@ -8,6 +8,7 @@ type AdminShellProps = {
   title: string;
   description: string;
   children: React.ReactNode;
+  contentScrollable?: boolean;
 };
 
 type User = {
@@ -15,7 +16,7 @@ type User = {
   role: string;
 };
 
-export default function AdminShell({ title, description, children }: AdminShellProps) {
+export default function AdminShell({ title, description, children, contentScrollable = true }: AdminShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -79,7 +80,11 @@ export default function AdminShell({ title, description, children }: AdminShellP
               ))}
             </nav>
           </aside>
-          <main className="w-full lg:basis-4/5 lg:max-w-[80%] rounded border border-gray-200 bg-white p-4 sm:p-6 lg:overflow-y-auto overflow-x-auto lg:h-full">
+          <main
+            className={`w-full lg:basis-4/5 lg:max-w-[80%] rounded border border-gray-200 bg-white p-4 sm:p-6 overflow-x-auto lg:h-full ${
+              contentScrollable ? 'lg:overflow-y-auto' : 'lg:overflow-y-hidden'
+            }`}
+          >
             <div className="mb-5">
               <h1 className="text-xl font-bold text-gray-900">{title}</h1>
               <p className="mt-1 text-sm text-gray-600">{description}</p>
