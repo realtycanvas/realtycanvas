@@ -4,6 +4,13 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { BrandButton } from '@/components/ui/BrandButton';
 import { BanknoteIcon, BuildingIcon, ChevronDown, MagnifyIcon } from '../ui/icon';
+import {
+  categoryDisplayNames,
+  priceRanges,
+  projectCategories,
+  projectStatuses,
+  statusDisplayNames,
+} from '@/lib/project-search-config';
 
 type SearchFilters = {
   category: string;
@@ -33,31 +40,6 @@ type ProjectSuggestion = {
   status: string;
   developerName: string | null;
 };
-
-const projectCategories = ['All Categories', 'COMMERCIAL', 'RESIDENTIAL'];
-
-const projectStatuses = ['All Status', 'UNDER_CONSTRUCTION', 'READY'];
-
-const categoryDisplayNames: Record<string, string> = {
-  'All Categories': 'All Categories',
-  COMMERCIAL: 'Commercial',
-  RESIDENTIAL: 'Residential',
-};
-
-const statusDisplayNames: Record<string, string> = {
-  'All Status': 'All Status',
-  UNDER_CONSTRUCTION: 'Under Construction',
-  READY: 'Ready',
-};
-
-const priceRanges = [
-  { label: 'Any Price', min: 0, max: 0 },
-  { label: '₹50L - ₹1Cr', min: 5000000, max: 10000000 },
-  { label: '₹1Cr - ₹5Cr', min: 10000000, max: 50000000 },
-  { label: '₹5Cr - ₹10Cr', min: 50000000, max: 100000000 },
-  { label: '₹10Cr - ₹25Cr', min: 100000000, max: 250000000 },
-  { label: '₹25Cr+', min: 250000000, max: 1000000000 },
-];
 
 const categoryOptions: DropdownOption[] = projectCategories.map((c) => ({
   value: c,
@@ -201,6 +183,8 @@ export default function ProjectSearchBar({ onSearch, className = '', compact = f
     if (searchQuery.trim()) params.set('search', searchQuery.trim());
     if (projectCategory !== 'All Categories') params.set('category', projectCategory);
     if (projectStatus !== 'All Status') params.set('status', projectStatus);
+    if (selectedPriceRange.min > 0) params.set('minPrice', String(selectedPriceRange.min));
+    if (selectedPriceRange.max > 0) params.set('maxPrice', String(selectedPriceRange.max));
     router.push(`/projects${params.toString() ? `?${params.toString()}` : ''}`);
   };
 

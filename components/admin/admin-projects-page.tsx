@@ -181,7 +181,7 @@ export default function AdminProjectsPage() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 h-full flex flex-col min-h-0">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-lg font-bold text-gray-900">Projects</h2>
         <div className="flex items-center gap-2">
@@ -236,10 +236,13 @@ export default function AdminProjectsPage() {
           <div className="w-8 h-8 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin" />
         </div>
       ) : (
-        <div className="overflow-x-auto rounded border border-gray-200">
+        <div className="overflow-auto rounded border border-gray-200 flex-1 min-h-[320px]">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                  S.No
+                </th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
                   Name
                 </th>
@@ -263,13 +266,16 @@ export default function AdminProjectsPage() {
             <tbody className="divide-y divide-gray-200 bg-white">
               {projects.length === 0 ? (
                 <tr>
-                  <td className="px-4 py-10 text-center text-sm text-gray-500" colSpan={6}>
+                  <td className="px-4 py-10 text-center text-sm text-gray-500" colSpan={7}>
                     No projects found
                   </td>
                 </tr>
               ) : (
-                projects.map((project) => (
+                projects.map((project, index) => (
                   <tr key={project.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-sm text-gray-700">
+                      {(pagination.page - 1) * pagination.limit + index + 1}
+                    </td>
                     <td className="px-4 py-3">
                       <p className="text-sm font-semibold text-gray-900">{project.title}</p>
                       <p className="text-xs text-gray-500">{project.category.replaceAll('_', ' ')}</p>
