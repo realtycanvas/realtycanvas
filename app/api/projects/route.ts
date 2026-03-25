@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { Prisma, ProjectCategory, ProjectStatus } from '@/app/generated/prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
 import { unstable_cache, revalidatePath, revalidateTag } from 'next/cache';
+import { PROJECT_TAGS, getTagMeta } from '@/lib/project-tags';
 
 // ─── Cache Tag ────────────────────────────────────────────────────────────────
 const PROJECTS_TAG = 'projects-list';
@@ -14,10 +15,11 @@ function getProjectsFromDB(filters: {
   category: string;
   status: string;
   city: string;
+  projectTag?: string;
 }) {
   return unstable_cache(
     async () => {
-      const { page, limit, search, category, status, city } = filters;
+      const { page, limit, search, category, status, city, projectTag } = filters;
       const skip = (page - 1) * limit;
 
       const where: Prisma.ProjectWhereInput = {};
@@ -34,6 +36,7 @@ function getProjectsFromDB(filters: {
       if (category !== 'ALL') where.category = category as ProjectCategory;
       if (status !== 'ALL') where.status = status as ProjectStatus;
       if (city) where.city = { contains: city, mode: 'insensitive' };
+      if (projectTag) where.projectTags = { has: projectTag };
 
       const [projects, totalCount] = await Promise.all([
         prisma.project.findMany({
@@ -101,6 +104,81 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status') || 'ALL';
     const city = searchParams.get('city')?.trim() || '';
     const slug = searchParams.get('slug')?.trim() || '';
+    const projectTag = searchParams.get('projectTag')?.trim() || '';
+    const groupByTags = searchParams.get('groupByTags') === '1';
+    const tagLimit = Math.min(12, Math.max(1, parseInt(searchParams.get('tagLimit') || '6')));
+
+    if (groupByTags) {
+      const tagRows = await prisma.project.findMany({
+        select: { projectTags: true },
+      });
+      const existingTags = tagRows.flatMap((row) => row.projectTags || []);
+      const knownTags = PROJECT_TAGS.map((tag) => tag.value);
+      const allTags = Array.from(new Set([...knownTags, ...existingTags]));
+
+      const sections = [
+        { tag: 'RECOMMENDED', title: 'Realty Canvas Recommended' },
+        { tag: 'TRENDING', title: 'Trending Projects in Gurugram' },
+        { tag: 'NEW', title: 'New Launch Projects in Gurgaon' },
+        { tag: 'BUDGET', title: 'Best Budget Projects in Gurugram' },
+        { tag: 'DREAM', title: 'Dream Properties In The Heart of Gurugram' },
+        { tag: 'BUDGET_PLOTS', title: 'Best Budget Plots in Gurugram' },
+        { tag: 'COMMERCIAL_GURUGRAM', title: 'Commercial Projects in Gurugram' },
+      ];
+
+      const sectionResults = await Promise.all(
+        sections.map(async (section) => {
+          const [projects, totalCount] = await Promise.all([
+            prisma.project.findMany({
+              where: { projectTags: { has: section.tag } },
+              take: tagLimit,
+              orderBy: { updatedAt: 'desc' },
+              select: {
+                id: true,
+                slug: true,
+                title: true,
+                subtitle: true,
+                category: true,
+                status: true,
+                city: true,
+                featuredImage: true,
+                basePrice: true,
+                developerName: true,
+                createdAt: true,
+              },
+            }),
+            prisma.project.count({ where: { projectTags: { has: section.tag } } }),
+          ]);
+
+          return {
+            tag: section.tag,
+            title: section.title,
+            totalCount,
+            projects: projects.map((p) => ({
+              ...p,
+              createdAt: p.createdAt.toISOString(),
+            })),
+          };
+        })
+      );
+
+      const tagDetails = await Promise.all(
+        allTags.map(async (value) => {
+          const meta = getTagMeta(value);
+          const label =
+            meta?.label ||
+            value
+              .toLowerCase()
+              .split('_')
+              .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+              .join(' ');
+          const count = await prisma.project.count({ where: { projectTags: { has: value } } });
+          return { value, label, count };
+        })
+      );
+
+      return NextResponse.json({ sections: sectionResults, tags: tagDetails });
+    }
 
     // ── Slug fetch — no cache needed (admin/detail use) ──
     if (slug) {
@@ -135,6 +213,7 @@ export async function GET(request: NextRequest) {
       category,
       status,
       city,
+      projectTag,
     });
 
     return NextResponse.json(responseData, {
@@ -341,6 +420,7 @@ export async function POST(request: NextRequest) {
 
     revalidatePath('/projects');
     revalidatePath(`/projects/${project.slug}`);
+    revalidateTag(PROJECTS_TAG, 'default');
 
     return NextResponse.json(project, { status: 201 });
   } catch (error) {

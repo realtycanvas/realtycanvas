@@ -18,6 +18,7 @@ id,projectId,label,icon,sortOrder
 084070e7-a23b-4b0e-b7af-ca158280b0c7,5ff0bc90-310e-4041-b86c-812b13c5bdad,Massive Luxury Clubhouse (~1.25–1.5 lakh sq ft),🏢,0
 09328e8b-db68-49d9-ad46-f3d8823b8541,d0e6ac5d-365e-4efb-87da-97f37581be3a,High-Speed Elevators,🛗,0
 09c556e9-1f55-4586-b190-48494794c3ec,8853edc1-08b4-4512-b7d8-5e10800896fe,Jogging Track,🏛️,0
+0a019c08-1b96-4678-9857-acf367856d8f,9f1e5e3d-18bb-450b-bd00-8c0406ff8d2c,Exclusive 3 & 4 BHK Luxury Residences,💎,0
 0a144292-1e04-422c-a5dc-e2b1694cdc03,0ef5cdef-6f02-4591-a386-553534d6cce0,EV Charging Points,⚡,0
 0a88f480-908c-4955-91a8-d5b7abe6f99c,a3af1f05-e6bb-4a25-a7be-1f9115867304,Designed by Benoy,🏛️,0
 0afbbfa1-a803-4f63-b4c1-54267671807a,491d8e64-e144-40cd-bf4b-0273fc49acf7,Exclusive Sky Lounges,🌌,0
@@ -57,10 +58,12 @@ id,projectId,label,icon,sortOrder
 20c790f5-79ea-42f2-9b64-3a0dd9469312,0ef5cdef-6f02-4591-a386-553534d6cce0,4 BHK independent floors,🛏️,0
 216a73f1-ec7f-4d77-ad9f-3c073acde5f8,20e1a7ff-2d5a-4bb7-b658-2b0c95a02d42,Car-Free Green Plaza,🌳,0
 21b8583a-37dc-4df3-b070-44effa30aa3b,a44c5240-3c6f-4c6a-96ee-8ac62af3511e,Mini Theatre & Gaming Lounge,🎮,0
+221b2a46-69aa-49fa-abe2-1aced27effc3,9f1e5e3d-18bb-450b-bd00-8c0406ff8d2c,Panoramic Aravalli Views,⛰️,1
 228c0ceb-9da7-4e95-9b8f-230de27b93ad,ef4d244d-fb32-42d7-a4be-0f515c4ed2c8,Recreational & Meditation Areas,🧘,0
 22bd79e6-f933-4290-ad99-1f6a9fc33f52,8b6a09f7-9696-4811-ad43-bad1dea5f324,3 to 4 Car Parking,🚘,0
 240fe34c-5191-4da2-8ee3-bbf81c2efb15,a9fb2cee-4190-4f2f-9940-8be2199e38e3,NCR's 1st Zone 5 building,🌳,0
 254952d7-0a38-4a5a-aded-cb6aaba4c13d,3fed7102-bc0c-4fe5-a6b4-b30868757223,Rooftop Sky Lounge,🌌,0
+257d3de9-382f-49a8-8a6d-aa30e5eb6073,0442a99c-6f74-4f69-b564-e0ed491e52ac,High Footfall Catchment Area,📈,3
 266e0811-d811-413e-9cf1-46752c8b9781,2a2c45d5-0f68-459c-a286-0509b7bb6073,Panoramic Aravalli Views,🌄,0
 26af11ea-2118-4a8b-a499-e35677e3d9aa,c4348b89-26f3-4e74-9253-4a68bd32df22,"Concierge, Valet & Fine Dining",🍽️,0
 29d15f77-2944-49c8-ac82-aed95f78b050,d9401432-af8d-41fc-8230-594a70cc2a98,Open-to-sky courtyards,🏙️,0
@@ -70,6 +73,7 @@ id,projectId,label,icon,sortOrder
 2b70a723-e631-4a60-8f07-460c356d66f1,7c97e410-c9ab-43a3-bd32-65a83a08fd8b,Dense Residential Catchment,🏙️,0
 2b910a75-6a45-4bdd-93e0-8a80490f65ba,20e1a7ff-2d5a-4bb7-b658-2b0c95a02d42,1 Lakh Sq.Ft. Amenities,🏢,0
 2bb9b803-e27f-44dc-8cd0-d8ab1b69a447,d2afb735-8465-414a-924f-a7226ea3319a,1.75 Lakh Sq.Ft Amenity Zone,🏋,0
+2bfbb185-70ec-4239-af9b-942df9cd3496,0442a99c-6f74-4f69-b564-e0ed491e52ac,Prime Golf Course Ext. Road Location,📍,0
 2c041968-7e4b-4aec-bc65-f0e98a07abc4,982ed68a-ba24-4226-b101-01e7f90de70a,Basement + GF + 4 Floors,🏢,0
 2c0e23b0-e0d0-46c5-896f-968c61c4bf23,b78f7b94-2629-4566-b8a8-a14b578d3434,Central Lake & Water Bodies,🏞️,0
 2c15fde9-de9b-4175-bee2-ff00dce93893,9301a8cc-a2ab-4828-98a8-455229bd4beb,Multiplex & Entertainment Zone,🎥,0
@@ -89,6 +93,7 @@ id,projectId,label,icon,sortOrder
 39d70bd5-cacd-4d2c-9dfa-bffb5629858d,a3af1f05-e6bb-4a25-a7be-1f9115867304,New Gurgaon's 1st Mall with Five Star Hotel,🏨,0
 39e153e2-0f04-42d2-8a57-bc9e63edcefb,049251cb-0089-4e71-8624-88c23074f082,Private Garden in Every Residence,🌱,0
 3a6aedde-61db-4cb3-ae9e-809e72d83e32,d0e6ac5d-365e-4efb-87da-97f37581be3a,Vehicle-Free Central Greens,🌿,0
+3ad33db0-a403-4696-b2a9-a1c811120b8d,0442a99c-6f74-4f69-b564-e0ed491e52ac,Open-air Boulevards & Piazzas,🚶‍♂️,2
 3b0887d8-d148-4cd1-8fef-57784e7effbe,8eab2ac6-fbc3-450e-b4a9-16ae669df765,Indoor Heated Plunge Pool,🏊,0
 3bf17000-3603-4dba-abb0-956ae3237ad6,d2afb735-8465-414a-924f-a7226ea3319a,IGBC Platinum Pre-Certified,🏆,0
 3c4f2e19-ce2e-4dce-b349-61d27094a533,c9b9ee68-248e-48fb-ae77-1b082109a89c,IGBC Platinum Green Building,♻️,0
@@ -189,6 +194,7 @@ id,projectId,label,icon,sortOrder
 75bc5d25-3c9b-45a6-932a-eaf6b9e705f2,728db93d-8501-488a-a01b-8917095530a1,Infinity Pool on the 47th Floor,🏊,0
 76240745-ad7a-4a94-af72-c05e4061e89c,6a3994f8-8b87-441d-8d43-732f7162ac90,Central Water Fountains,💧,0
 76512068-cf3b-4fc5-9e27-d404779e0e53,0ef5cdef-6f02-4591-a386-553534d6cce0,Low-rise gated community,🏡,0
+76b7b6bb-083b-40cc-a37c-6acd38dece9b,9f1e5e3d-18bb-450b-bd00-8c0406ff8d2c,Zero Vehicular Surface Movement,🚗,3
 79536c9f-a152-46f3-b258-4f7e4970112d,bccdee7e-3f5d-4e88-a0c9-070942334caa,Banquet & Event Spaces,🎉,0
 79d9a6ab-1f4b-43e0-8203-6d1f5e53bf4a,254b6fe9-2325-4bb5-a35d-b214cb88764d,Home Automation,💡,0
 79e9ffd7-fc92-4d86-bac5-a2b912423949,6abc2559-f9b4-4173-97fe-9b5e70f47bb1,Panoramic City Views,🌇,0
@@ -218,6 +224,7 @@ id,projectId,label,icon,sortOrder
 88584447-7990-415e-8076-5473ee9d53e6,6a3994f8-8b87-441d-8d43-732f7162ac90,Golf-Themed Landscaping & Vistas,⛳,0
 889ddfdb-5603-4c45-982c-f4670b450b59,ead71e2f-5982-4c58-b243-5e9cd88d9fe9,Imported Marble & Premium Interiors,⚜️,0
 88ca8893-40bb-421a-97fb-df1a94483524,7c97e410-c9ab-43a3-bd32-65a83a08fd8b,High-Street Retail Destination,🏬,0
+88f7d187-2d80-45e7-af69-982a11c1ad6a,b49dd03f-64af-4566-a403-d1e99e39ab97,Elite Concierge Services,🛎️,3
 8a0b75b7-c4b1-4a1d-ac7d-8da2ef392778,60fb584b-a3b6-4ade-9adb-8eb02508682d,8 Acres of Greens & Parks,🌳,0
 8a3633c1-d91a-4f48-a89c-67c22a5a786d,ef4d244d-fb32-42d7-a4be-0f515c4ed2c8,Panoramic Aravalli Views,🏞️,0
 8a62d153-2b82-4f45-8a9c-a0ef00078f11,a44c5240-3c6f-4c6a-96ee-8ac62af3511e,Triple-Height Entrance Lobby,🏢,0
@@ -235,6 +242,7 @@ id,projectId,label,icon,sortOrder
 943bdb43-1098-4e2f-9755-51c972692ad2,254b6fe9-2325-4bb5-a35d-b214cb88764d,Low-Density Living,🏗️,0
 95931a31-ac16-44ba-a7ad-13334f72228c,a9fb2cee-4190-4f2f-9940-8be2199e38e3,85% Green and Open Area,🌿,0
 9766e04d-ed17-4626-8b28-55a0ed073f2e,ead71e2f-5982-4c58-b243-5e9cd88d9fe9,Smart Home Automation,🎛️,0
+977d8c4e-14bc-4259-9b23-529122d930b8,b49dd03f-64af-4566-a403-d1e99e39ab97,Designed by Benoy Architects,🏛️,1
 97cefd3f-d79a-4365-9862-43710629f22b,0ef5cdef-6f02-4591-a386-553534d6cce0,24x7 Security & CCTV Surveillance,🎥,0
 986baa3e-1835-4268-b283-cca0afe7beee,f9b16292-de07-471d-9d9c-d9f92bd44692,Floating Sauna & Scenic Pool,🏊,0
 99cd3929-3e3e-4d7a-b5b5-c9411cd0139f,bccdee7e-3f5d-4e88-a0c9-070942334caa,Babysitting & Kid Zones,🎠,0
@@ -250,6 +258,7 @@ id,projectId,label,icon,sortOrder
 9cf77665-961b-4766-b7e0-333dfc05a99f,0ef5cdef-6f02-4591-a386-553534d6cce0,Basement & terrace for select floors,🏢,0
 9d28d08e-f846-4636-a63d-1908f4894c0f,3fed7102-bc0c-4fe5-a6b4-b30868757223,Imported Marble Flooring,⚜️,0
 9d6a3428-8a01-49ba-b7b8-bd9a0b96c5ee,8b6a09f7-9696-4811-ad43-bad1dea5f324,Low-Density Layout,🏞️,0
+9d6ff498-c8f6-4699-9564-0b0a8d92a171,92cbf452-4a30-4a42-8b55-61bc7ca8baf8,Private Decks & Terraces,🌅,2
 9f88a896-ac9f-42ac-91f3-ce57845d0f85,8eab2ac6-fbc3-450e-b4a9-16ae669df765,Mini Theatre & Business Centre,🎬,0
 a00febc2-2649-48e0-8585-34bd0df644ca,ae24318b-3030-428a-94f6-c9c93e7789f6,Private Elevator Lobby,🛗,0
 a123ca80-1a78-4246-a764-bb871da9bae6,bfdbaac8-419e-473e-ae73-6edd80f14387,Panoramic City Views,🌇,0
@@ -292,6 +301,7 @@ b0e3a1a0-772a-4673-a2e5-f8d9936e8bc6,bd535d19-6a06-45cc-a692-3d56849d8e89,Privat
 b2324323-9049-4ff5-9f1e-34cb63745fdc,b78f7b94-2629-4566-b8a8-a14b578d3434,75% Open Green Space,🌳,0
 b2b577ee-d2c7-4cf9-ad0c-5c5a51774a0c,4c17e492-2ed5-478e-82e3-2756706a85f9,Serviced Lofts,🏠,0
 b34f8e28-e793-4641-bac4-9e5473c1f292,728db93d-8501-488a-a01b-8917095530a1,"Grand Entrance, Gardens, Jogging Tracks",🌳,0
+b3686fdf-a788-4243-8953-50e3a8a31804,0442a99c-6f74-4f69-b564-e0ed491e52ac,Double-Height Retail Shops,🏪,1
 b489cf52-f77e-4f50-89b6-2d8b267e27ad,20e1a7ff-2d5a-4bb7-b658-2b0c95a02d42,Two Community Clubs,🏊,0
 b56bb01d-60c8-4c2f-8261-3acc4e1ceb12,254b6fe9-2325-4bb5-a35d-b214cb88764d,Dedicated Staff Room,🧑‍🔧,0
 b5c16ded-82f4-4c5e-a413-127f91813ead,a3af1f05-e6bb-4a25-a7be-1f9115867304,Triple Height Shops on Ground Floor,🏬,0
@@ -312,8 +322,10 @@ be9430d0-7860-45d2-a975-a749c1aeadbf,c05bb44a-4d96-4c65-9703-923dd67a4b91,World-
 be9efb7d-5490-4e17-9a38-c5ba7d2bccfa,982ed68a-ba24-4226-b101-01e7f90de70a,Plot Sizes 142-491 Sq.Yd.,📐,0
 bedb3e28-8f2c-4811-87b3-5ee2ff3c2c89,bccdee7e-3f5d-4e88-a0c9-070942334caa,Sports Complex & Gym,🏋️,0
 c07927cd-edad-4271-bc5f-4ba5e39c9618,ef4d244d-fb32-42d7-a4be-0f515c4ed2c8,Triple Height Grand Lobby,🏢,0
+c2e82829-f44d-4b09-a6f6-7bef05f8aa9f,92cbf452-4a30-4a42-8b55-61bc7ca8baf8,Ultra-Low Density Living,🧘‍♂️,1
 c3e65725-7df5-45cd-bc8c-226c961c15ab,6b799d00-5a0b-4a72-be56-4bd7c78352b0,Car Parking,🚗,0
 c48a3234-e153-44e1-a13b-fbfcb0aff7d2,d9401432-af8d-41fc-8230-594a70cc2a98,Strategically planned multiple accesses,🌏,0
+c4a47e04-f42b-4178-b48d-479367041ec5,b49dd03f-64af-4566-a403-d1e99e39ab97,Temperature-Controlled Infinity Pool,🏊‍♂️,2
 c4e6c9d0-4bcc-49f7-b8c9-6141aacdc717,bfdbaac8-419e-473e-ae73-6edd80f14387,Swimming Pool & Pool Deck,🏊,0
 c634e98c-0ffe-4a24-826a-52b2cd30c5e3,c4348b89-26f3-4e74-9253-4a68bd32df22,Iconic Glass Facade Twin Towers,🏙️,0
 c652381c-607a-4205-8c38-2619c66a40d3,9301a8cc-a2ab-4828-98a8-455229bd4beb,Fine Dining & F&B Hubs,🍽️,0
@@ -360,11 +372,13 @@ da98fb7b-1287-41f4-81be-ca2bbec02cea,3fed7102-bc0c-4fe5-a6b4-b30868757223,Holist
 db8d2de1-1e19-4ea4-8354-b349a5e0657b,20e1a7ff-2d5a-4bb7-b658-2b0c95a02d42,Smart Home Automation,📱,0
 dbd29452-e554-49d1-ba56-5d0dfd6fbd9c,4c17e492-2ed5-478e-82e3-2756706a85f9,Restaurants & Food Courts,🍽️,0
 dc84a39d-7906-4bad-93e5-a3df2c544976,8e7d9d67-660b-4099-b583-f39f14bf9a26,Private Elevator Lobbies,🎚️,0
+dcdbb935-2024-471c-81d9-fc4bbabdc32e,9f1e5e3d-18bb-450b-bd00-8c0406ff8d2c,Smart Home Automation,📱,2
 ddb190e5-85aa-406e-8981-586f0c4713ff,8b6a09f7-9696-4811-ad43-bad1dea5f324,Aravalli Facing Towers,🌄,0
 ddd0865c-5546-4f2a-8774-0552904aa1ee,3fed7102-bc0c-4fe5-a6b4-b30868757223,5-Tier Security System,🛡️,0
 ddf3afc3-94ea-4e99-93ff-125cc368242f,049251cb-0089-4e71-8624-88c23074f082,Panoramic Golf & Forest Views,🏞️,0
 de1e37f4-58b2-4140-abaf-12eb6ae63610,a44c5240-3c6f-4c6a-96ee-8ac62af3511e,Meditation Pavilion & Zen Lawns,🪷,0
 de50123a-49be-4e6d-9374-86289af6a44b,2a2c45d5-0f68-459c-a286-0509b7bb6073,Ultra-Luxe Clubhouse,🏢,0
+dfe87ae1-281c-4faa-b66e-ffff3ef3e288,92cbf452-4a30-4a42-8b55-61bc7ca8baf8,Only 2 Residences Per Floor,🗝️,3
 e048b2de-5c79-4edd-9a59-72210ed791e2,d6239c57-d7ed-4da1-84cc-3330b1ea324c,Expansive food court & F&B zone,🍽️,0
 e071cedc-44fb-4ca8-8de6-cc0c12886097,6b799d00-5a0b-4a72-be56-4bd7c78352b0,Children's Play Area,🧸,0
 e10ecc64-34a7-4e4e-a90c-70bffa9f74e1,5ff0bc90-310e-4041-b86c-812b13c5bdad,"Ultra-Luxury Residences (4 & 5 BHK, Penthouses)",🏠,0
@@ -381,6 +395,7 @@ e6098c22-118e-4e39-82b4-9dce6e52d105,bd535d19-6a06-45cc-a692-3d56849d8e89,Brande
 e611a896-272c-4754-8ab6-dad0d89ff438,90c0031f-c707-4bed-b8f7-75f690c2b088,Smart Home Features,📱,0
 e66320a2-a641-4989-8c19-c100894bca2a,8853edc1-08b4-4512-b7d8-5e10800896fe,Reflexology Zone,🛡️,0
 e6839090-4b52-48e0-90f1-7ac31bd20620,d2afb735-8465-414a-924f-a7226ea3319a,Proximity to IGI Airport,✈,0
+e698236d-e113-4ec8-ae91-dff311ca83e1,b49dd03f-64af-4566-a403-d1e99e39ab97,Bespoke 4 BHK Penthouses & Duplexes,👑,0
 e776d7d3-dc69-4deb-9e8d-f5a3d7ec623a,986e025d-5bf1-4c5d-90b9-2c5bda59d34a,Ample parking spaces,,0
 e83936bf-08ae-454b-943d-0019ca765c41,254b6fe9-2325-4bb5-a35d-b214cb88764d,1.25 Lac Sq.Ft. Grand Clubhouse,🏛️,0
 e87b56a6-81a2-4241-8f56-e5adaca8c3d3,728db93d-8501-488a-a01b-8917095530a1,6 Towers | 41 Floors | 952 Units,🏢,0
@@ -411,6 +426,7 @@ f7e7a9a7-9473-485b-a9fd-516c5b4a149d,8eab2ac6-fbc3-450e-b4a9-16ae669df765,Multi-
 f7ff314c-2171-417a-b301-0696e0b3eece,bccdee7e-3f5d-4e88-a0c9-070942334caa,Central Lagoon & Outdoor Pool,🏊,0
 f897ab1c-9e57-4aa4-97a9-980e71a8e454,8853edc1-08b4-4512-b7d8-5e10800896fe,Interactive Wall for Kids,🏊,0
 f89d5151-4fe3-4a7a-a845-c00074f11914,8853edc1-08b4-4512-b7d8-5e10800896fe,Observatory Decks,📱,0
+f8c66f41-7b89-48cc-ad40-750b75a640fe,92cbf452-4a30-4a42-8b55-61bc7ca8baf8,75% Open Green Spaces,🌿,0
 f8f3e5cd-882a-4457-ae98-5a5cd7026c52,986e025d-5bf1-4c5d-90b9-2c5bda59d34a,Blend of high street and shopping complex,,0
 f9dd859e-26cf-4f32-be5c-28f6251001ae,bfdbaac8-419e-473e-ae73-6edd80f14387,Expansive Wrap-Around Balcony,🌅,0
 fa13ea62-2baa-424d-a7a2-c0d8fd939378,f9b16292-de07-471d-9d9c-d9f92bd44692,Energy Efficient VRV/VRF Air Conditioning,❄️,0

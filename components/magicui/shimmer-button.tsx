@@ -1,8 +1,10 @@
 import React, { CSSProperties, ComponentPropsWithoutRef } from 'react';
+import { Slot } from 'radix-ui';
 
 import { cn } from '@/lib/utils';
 
 export interface ShimmerButtonProps extends ComponentPropsWithoutRef<'button'> {
+  asChild?: boolean;
   shimmerColor?: string;
   shimmerSize?: string;
   borderRadius?: string;
@@ -15,6 +17,7 @@ export interface ShimmerButtonProps extends ComponentPropsWithoutRef<'button'> {
 export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonProps>(
   (
     {
+      asChild = false,
       shimmerColor = '#ffffff',
       shimmerSize = '0.05em',
       shimmerDuration = '3s',
@@ -26,8 +29,10 @@ export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonPr
     },
     ref
   ) => {
+    const Comp = asChild ? Slot.Root : 'button';
+
     return (
-      <button
+      <Comp
         style={
           {
             '--spread': '90deg',
@@ -47,9 +52,9 @@ export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonPr
         {...props}
       >
         {/* spark container */}
-        <div className={cn('-z-30 blur-[2px]', 'absolute inset-0 overflow-visible [container-type:size]')}>
+        <div className={cn('-z-30 blur-[2px]', 'absolute inset-0 overflow-visible @container-[size]')}>
           {/* spark */}
-          <div className="absolute inset-0 h-[100cqh] animate-shimmer-slide [aspect-ratio:1] [border-radius:0] [mask:none]">
+          <div className="absolute inset-0 h-[100cqh] animate-shimmer-slide aspect-[1] rounded-none [mask:none]">
             {/* spark before */}
             <div className="absolute -inset-full w-auto rotate-0 animate-spin-around [background:conic-gradient(from_calc(270deg-(var(--spread)*0.5)),transparent_0,var(--shimmer-color)_var(--spread),transparent_var(--spread))] [translate:0_0]" />
           </div>
@@ -75,8 +80,8 @@ export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonPr
         />
 
         {/* backdrop */}
-        <div className={cn('absolute -z-20 [background:var(--bg)] [border-radius:var(--radius)] [inset:var(--cut)]')} />
-      </button>
+        <div className={cn('absolute -z-20 [background:var(--bg)] [border-radius:var(--radius)] inset-(--cut)')} />
+      </Comp>
     );
   }
 );

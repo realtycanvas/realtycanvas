@@ -1,6 +1,7 @@
 export type BannerItem = {
   id: string;
-  bannerImage: string;
+  desktopImage: string;
+  mobileImage: string;
   link: string;
   sortOrder: number;
 };
@@ -8,13 +9,15 @@ export type BannerItem = {
 export const banners: BannerItem[] = [
   {
     id: 'home-hero-1',
-    bannerImage: '/home/homepage.webp',
+    desktopImage: '/banner/extended/aipl.webp',
+    mobileImage: '/banner/mobile/aipl.webp',
     link: '/projects',
     sortOrder: 1,
   },
   {
     id: 'home-hero-2',
-    bannerImage: '/home/bannernew.webp',
+    desktopImage: '/banner/extended/downtown.webp',
+    mobileImage: '/banner/mobile/downtown.webp',
     link: '/projects',
     sortOrder: 2,
   },

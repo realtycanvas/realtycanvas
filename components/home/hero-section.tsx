@@ -37,7 +37,7 @@ const HeroSection = ({ className = '', onSearch }: HeroSectionProps) => {
     <section className={`relative ${className}`}>
       <div className="w-full">
         <div className="relative w-full">
-          <div className="relative h-[75vh] w-full overflow-hidden">
+          <div className="relative h-[75vh] w-full overflow-hidden aspect-4/5 md:aspect-video">
             <div
               className="flex h-full transition-transform duration-700 ease-out"
               style={{ transform: `translateX(-${activeIndex * 100}%)` }}
@@ -46,11 +46,20 @@ const HeroSection = ({ className = '', onSearch }: HeroSectionProps) => {
                 <div key={slide.id} className="min-w-full h-full relative">
                   <Link href={slide.link} className="block w-full h-full relative">
                     <Image
-                      src={slide.bannerImage}
+                      src={slide.desktopImage}
                       alt="Hero Banner"
                       fill
                       sizes="100vw"
-                      className="object-cover hover:scale-105 transition-transform duration-500"
+                      className="hidden md:block object-cover object-center hover:scale-105 transition-transform duration-500"
+                      priority={activeIndex === 0}
+                    />
+                    <Image
+                      src={slide.mobileImage}
+                      alt="Hero Banner"
+                      fill
+                      sizes="100vw"
+                      className="md:hidden object-cover object-center hover:scale-105 transition-transform duration-500"
+                      priority={activeIndex === 0}
                     />
                   </Link>
                 </div>
@@ -80,7 +89,12 @@ const HeroSection = ({ className = '', onSearch }: HeroSectionProps) => {
           </div>
         </div>
 
-        <div className="absolute left-1/2 top-[75vh] -translate-x-1/2 -translate-y-1/2 w-full max-w-sm sm:max-w-xl md:max-w-3xl lg:max-w-4xl px-2 sm:px-0">
+        <div className="hidden md:block absolute left-1/2 top-[75vh] -translate-x-1/2 -translate-y-1/2 w-full max-w-sm sm:max-w-xl md:max-w-3xl lg:max-w-4xl px-2 sm:px-0">
+          <div className="rounded-2xl shadow-xl bg-white">
+            <ProjectSearchBar onSearch={onSearch} />
+          </div>
+        </div>
+        <div className="md:hidden mt-12 px-4">
           <div className="rounded-2xl shadow-xl bg-white">
             <ProjectSearchBar onSearch={onSearch} />
           </div>

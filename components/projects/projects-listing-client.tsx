@@ -63,9 +63,12 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
     category: searchParams.get('category') || 'ALL',
     status: searchParams.get('status') || 'ALL',
     city: searchParams.get('city') || '',
+    projectTag: searchParams.get('projectTag') || '',
   });
 
   const abortControllerRef = useRef<AbortController | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
   const fetchProjects = useCallback(
     async (page: number = 1, append: boolean = false) => {
@@ -85,6 +88,7 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
           category: filters.category,
           status: filters.status,
           city: filters.city,
+          projectTag: filters.projectTag,
         });
 
         const response = await fetch(`/api/projects?${params}`, {
@@ -120,11 +124,26 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleLoadMore = () => {
-    if (pagination.hasMore && !loadingMore) {
-      fetchProjects(pagination.page + 1, true);
-    }
-  };
+  useEffect(() => {
+    if (!loadMoreRef.current) return;
+    if (observerRef.current) observerRef.current.disconnect();
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry?.isIntersecting && pagination.hasMore && !loadingMore && !loading) {
+          fetchProjects(pagination.page + 1, true);
+        }
+      },
+      { rootMargin: '200px 0px' }
+    );
+
+    observerRef.current.observe(loadMoreRef.current);
+
+    return () => {
+      observerRef.current?.disconnect();
+    };
+  }, [fetchProjects, loading, loadingMore, pagination.hasMore, pagination.page]);
 
   const getCategoryColor = (category: string) => {
     const colors: { [key: string]: string } = {
@@ -216,9 +235,13 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
             </div>
           </div>
 
-          {(filters.search || filters.category !== 'ALL' || filters.status !== 'ALL' || filters.city) && (
+          {(filters.search ||
+            filters.category !== 'ALL' ||
+            filters.status !== 'ALL' ||
+            filters.city ||
+            filters.projectTag) && (
             <button
-              onClick={() => setFilters({ search: '', category: 'ALL', status: 'ALL', city: '' })}
+              onClick={() => setFilters({ search: '', category: 'ALL', status: 'ALL', city: '', projectTag: '' })}
               className="mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
             >
               Clear Filters
@@ -295,17 +318,11 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
                 </div>
 
                 {pagination.hasMore && (
-                  <div className="flex justify-center mb-10">
-                    <button
-                      onClick={handleLoadMore}
-                      disabled={loadingMore}
-                      className="flex items-center gap-2 px-6 py-2 rounded border border-gray-300 text-gray-800 hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed"
-                    >
-                      {loadingMore && (
-                        <span className="w-4 h-4 border-2 border-gray-300 border-t-yellow-500 rounded-full animate-spin" />
-                      )}
-                      {loadingMore ? 'Loading...' : 'Load More'}
-                    </button>
+                  <div className="flex flex-col items-center gap-3 mb-10">
+                    <div ref={loadMoreRef} className="h-1 w-full" />
+                    {loadingMore && (
+                      <span className="w-4 h-4 border-2 border-gray-300 border-t-yellow-500 rounded-full animate-spin" />
+                    )}
                   </div>
                 )}
               </>
@@ -313,7 +330,7 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
               <div className="text-center pb-12 pt-20 md:pt-32">
                 <p className="text-gray-600 text-lg mb-4">No projects found matching your filters</p>
                 <button
-                  onClick={() => setFilters({ search: '', category: 'ALL', status: 'ALL', city: '' })}
+                  onClick={() => setFilters({ search: '', category: 'ALL', status: 'ALL', city: '', projectTag: '' })}
                   className="px-6 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors cursor-pointer"
                 >
                   Clear Filters

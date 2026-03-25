@@ -324,6 +324,7 @@ export async function PUT(request: NextRequest, { params }: Props) {
 
     revalidatePath('/projects');
     revalidatePath(`/projects/${project.slug}`);
+    revalidateTag(PROJECTS_TAG, 'default');
     return NextResponse.json(project);
   } catch (error) {
     console.error('Project update error:', error);
@@ -370,6 +371,7 @@ export async function DELETE(request: NextRequest, { params }: Props) {
 
     revalidatePath('/projects');
     revalidatePath(`/projects/${normalizedSlug}`);
+    revalidateTag(PROJECTS_TAG, 'default');
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error('Project delete error:', error);

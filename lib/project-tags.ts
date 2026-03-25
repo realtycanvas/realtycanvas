@@ -4,6 +4,9 @@ export const PROJECT_TAGS = [
   { value: 'RECOMMENDED', label: 'Recommended', color: 'bg-blue-100 text-blue-800', emoji: '👍' },
   { value: 'NEW', label: 'New Launch', color: 'bg-green-100 text-green-800', emoji: '🆕' },
   { value: 'DREAM', label: 'Dream', color: 'bg-purple-100 text-purple-800', emoji: '✨' },
+  { value: 'BUDGET', label: 'Best Budget', color: 'bg-emerald-100 text-emerald-800', emoji: '💸' },
+  { value: 'BUDGET_PLOTS', label: 'Budget Plots', color: 'bg-teal-100 text-teal-800', emoji: '🧱' },
+  { value: 'COMMERCIAL_GURUGRAM', label: 'Commercial Gurugram', color: 'bg-indigo-100 text-indigo-800', emoji: '🏢' },
 ] as const;
 
 export type ProjectTag = (typeof PROJECT_TAGS)[number]['value'];
