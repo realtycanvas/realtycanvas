@@ -653,6 +653,7 @@ const seed = async () => {
       seoDescription,
       seoKeywords,
       projectTags,
+      isActive: true,
       totalClicks: toInt(row.totalClicks) ?? 0,
     };
 

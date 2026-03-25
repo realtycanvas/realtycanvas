@@ -143,8 +143,8 @@ const normalizeImageAltMap = (value: unknown): Record<string, string> | null => 
 };
 
 async function getProjectBySlug(slug: string): Promise<Project | null> {
-  const project = await prisma.project.findUnique({
-    where: { slug },
+  const project = await prisma.project.findFirst({
+    where: { slug, isActive: true },
     include: {
       amenities: { orderBy: { sortOrder: 'asc' } },
       highlights: { orderBy: { sortOrder: 'asc' } },

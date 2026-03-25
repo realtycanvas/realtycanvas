@@ -60,6 +60,7 @@ model Project {
   seoDescription      String?
   seoKeywords         String[]        @default([])
   projectTags         String[]        @default([])
+  isActive            Boolean         @default(true)
   totalClicks         Int             @default(0)
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
@@ -83,6 +84,7 @@ model Project {
   @@index([category], map: "idx_project_category")
   @@index([status, updatedAt], map: "idx_project_status_updated")
   @@index([projectTags], map: "idx_project_tags")
+  @@index([isActive], map: "idx_project_is_active")
   @@index([priceMin], map: "idx_project_price_min")
   @@index([priceMax], map: "idx_project_price_max")
   @@index([priceMin, priceMax], map: "idx_project_price_range")
@@ -91,7 +93,7 @@ model Project {
 
 // ─────────────────────────────────────────────
 // HIGHLIGHT — USP bullet points
-// e.g. "✅ RERA Approved", "🚗 Metro – 5 min"
+// e.g. "RERA Approved", "🚗 Metro – 5 min"
 // ─────────────────────────────────────────────
 model Highlight {
   id        String  @id @default(uuid())

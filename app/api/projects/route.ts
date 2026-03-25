@@ -22,7 +22,7 @@ function getProjectsFromDB(filters: {
       const { page, limit, search, category, status, city, projectTag } = filters;
       const skip = (page - 1) * limit;
 
-      const where: Prisma.ProjectWhereInput = {};
+      const where: Prisma.ProjectWhereInput = { isActive: true };
 
       if (search.length >= 2) {
         where.OR = [
@@ -110,6 +110,7 @@ export async function GET(request: NextRequest) {
 
     if (groupByTags) {
       const tagRows = await prisma.project.findMany({
+        where: { isActive: true },
         select: { projectTags: true },
       });
       const existingTags = tagRows.flatMap((row) => row.projectTags || []);
@@ -130,7 +131,7 @@ export async function GET(request: NextRequest) {
         sections.map(async (section) => {
           const [projects, totalCount] = await Promise.all([
             prisma.project.findMany({
-              where: { projectTags: { has: section.tag } },
+              where: { isActive: true, projectTags: { has: section.tag } },
               take: tagLimit,
               orderBy: { updatedAt: 'desc' },
               select: {
@@ -147,7 +148,7 @@ export async function GET(request: NextRequest) {
                 createdAt: true,
               },
             }),
-            prisma.project.count({ where: { projectTags: { has: section.tag } } }),
+            prisma.project.count({ where: { isActive: true, projectTags: { has: section.tag } } }),
           ]);
 
           return {
@@ -172,7 +173,7 @@ export async function GET(request: NextRequest) {
               .split('_')
               .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
               .join(' ');
-          const count = await prisma.project.count({ where: { projectTags: { has: value } } });
+          const count = await prisma.project.count({ where: { isActive: true, projectTags: { has: value } } });
           return { value, label, count };
         })
       );
@@ -187,7 +188,7 @@ export async function GET(request: NextRequest) {
         .replace(/^\/+|\/+$/g, '');
 
       const project = await prisma.project.findFirst({
-        where: { slug: { equals: normalized, mode: 'insensitive' } },
+        where: { slug: { equals: normalized, mode: 'insensitive' }, isActive: true },
         include: {
           amenities: { orderBy: { sortOrder: 'asc' } },
           highlights: { orderBy: { sortOrder: 'asc' } },
@@ -331,6 +332,7 @@ export async function POST(request: NextRequest) {
         galleryImages: body.galleryImages || [],
         videoUrls: body.videoUrls || [],
         projectTags: body.projectTags || [],
+        isActive: body.isActive ?? true,
         highlights: {
           create: (body.highlights || []).map(
             (h: { label?: string; icon?: string; sortOrder?: number }, i: number) => ({

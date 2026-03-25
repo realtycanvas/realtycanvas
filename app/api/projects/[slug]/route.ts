@@ -221,6 +221,7 @@ export async function PUT(request: NextRequest, { params }: Props) {
         galleryImages: body.galleryImages || [],
         videoUrls: body.videoUrls || [],
         projectTags: body.projectTags || [],
+        isActive: body.isActive ?? true,
         highlights: {
           deleteMany: {},
           create: (body.highlights || []).map(

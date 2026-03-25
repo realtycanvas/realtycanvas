@@ -87,6 +87,7 @@ type ProjectResponse = {
   sitePlanTitle?: string | null;
   sitePlanDescription?: string | null;
   projectTags?: string[];
+  isActive?: boolean;
   galleryImages?: string[];
   videoUrls?: string[];
   highlights?: { label: string; icon: string | null }[];
@@ -233,6 +234,7 @@ function CreateProjectPage() {
     description: '',
     category: 'COMMERCIAL',
     status: 'PLANNED',
+    isActive: true,
     // Location
     address: '',
     locality: '',
@@ -377,6 +379,7 @@ function CreateProjectPage() {
             description: project.description || '',
             category: project.category || 'COMMERCIAL',
             status: project.status || 'PLANNED',
+            isActive: project.isActive ?? true,
             address: project.address || '',
             locality: project.locality || '',
             city: project.city || '',
@@ -796,6 +799,19 @@ function CreateProjectPage() {
                       </Select>
                     </div>
                   </G2>
+                  <label className="inline-flex items-center gap-3 rounded border border-gray-200 px-4 py-3 bg-gray-50 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      name="isActive"
+                      checked={f.isActive}
+                      onChange={change}
+                      className="h-4 w-4 rounded border-gray-300 text-yellow-500 focus:ring-yellow-400"
+                    />
+                    <div>
+                      <p className="text-sm font-medium text-gray-800">Project Active</p>
+                      <p className="text-xs text-gray-500">Only active projects are shown on the public website.</p>
+                    </div>
+                  </label>
                   <div>
                     <Label req>Short Description</Label>
                     <Textarea
