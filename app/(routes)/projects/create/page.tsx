@@ -209,7 +209,11 @@ const RowBox = ({ children, onDel }: { children: React.ReactNode; onDel: () => v
 
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 
-function CreateProjectPage() {
+type CreateProjectPageProps = {
+  adminMode?: boolean;
+};
+
+function CreateProjectPage({ adminMode = false }: CreateProjectPageProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const editSlug = searchParams.get('slug')?.trim() || '';
@@ -333,11 +337,11 @@ function CreateProjectPage() {
         const authRes = await fetch('/api/auth/me');
         const authData = await authRes.json();
         if (!authData.user) {
-          router.push('/projects');
+          router.push('/admin/login');
           return;
         }
       } catch {
-        router.push('/projects');
+        router.push('/admin/login');
         return;
       }
 
@@ -588,7 +592,7 @@ function CreateProjectPage() {
       const res = await fetch(`/api/projects/${encodeURIComponent(initialSlug)}`, { method: 'DELETE' });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to delete project');
-      router.push('/projects');
+      router.push(adminMode ? '/admin/projects' : '/projects');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
@@ -724,7 +728,7 @@ function CreateProjectPage() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-gray-50 mt-20">
+    <div className={adminMode ? 'bg-gray-50' : 'min-h-screen bg-gray-50 mt-20'}>
       {/* ── Form Body ──────────────────────────────────────────────────────── */}
       <form id="project-form" onSubmit={submit}>
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 space-y-5">
@@ -1788,7 +1792,7 @@ function CreateProjectPage() {
   );
 }
 
-export default function CreateProjectPageWrapper() {
+export function CreateProjectPageWrapper({ adminMode = false }: CreateProjectPageProps) {
   return (
     <Suspense
       fallback={
@@ -1797,7 +1801,11 @@ export default function CreateProjectPageWrapper() {
         </div>
       }
     >
-      <CreateProjectPage />
+      <CreateProjectPage adminMode={adminMode} />
     </Suspense>
   );
+}
+
+export default function CreateProjectPageDefault() {
+  return <CreateProjectPageWrapper />;
 }

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useEffect, useState, useCallback, useRef } from 'react';
 
 interface Project {
@@ -43,7 +43,6 @@ interface ProjectsListingClientProps {
 }
 
 export default function ProjectsListingClient({ user }: ProjectsListingClientProps) {
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   const [projects, setProjects] = useState<Project[]>([]);
@@ -69,6 +68,18 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
   const abortControllerRef = useRef<AbortController | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
+
+  const mergeUniqueProjects = (list: Project[]) => {
+    const seen = new Set<string>();
+    return list.filter((item) => {
+      const key = item.id || item.slug;
+      if (!key || seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    });
+  };
 
   const fetchProjects = useCallback(
     async (page: number = 1, append: boolean = false) => {
@@ -98,7 +109,7 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
         if (!response.ok) throw new Error('Failed to fetch');
 
         const result = await response.json();
-        setProjects((prev) => (append ? [...prev, ...result.data] : result.data));
+        setProjects((prev) => mergeUniqueProjects(append ? [...prev, ...result.data] : result.data));
         setPagination(result.pagination);
       } catch (error: unknown) {
         const errorName = error instanceof Error ? error.name : '';
@@ -178,7 +189,7 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
           />
           {user && (
             <Link
-              href="/projects/create"
+              href="/admin/projects/create"
               className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-5 py-2 rounded transition w-fit"
             >
               Create Project

@@ -365,7 +365,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
             </button>
             {user && (
               <Link
-                href={`/projects/create?slug=${project.slug}`}
+                href={`/admin/projects/create?slug=${project.slug}`}
                 className="px-3 py-1.5 sm:px-4 sm:py-2 rounded bg-gray-900 hover:bg-gray-800 text-white font-semibold text-sm sm:text-base"
               >
                 Edit Project

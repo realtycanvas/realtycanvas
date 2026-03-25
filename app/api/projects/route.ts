@@ -16,13 +16,14 @@ function getProjectsFromDB(filters: {
   status: string;
   city: string;
   projectTag?: string;
+  includeInactive?: boolean;
 }) {
   return unstable_cache(
     async () => {
-      const { page, limit, search, category, status, city, projectTag } = filters;
+      const { page, limit, search, category, status, city, projectTag, includeInactive } = filters;
       const skip = (page - 1) * limit;
 
-      const where: Prisma.ProjectWhereInput = { isActive: true };
+      const where: Prisma.ProjectWhereInput = includeInactive ? {} : { isActive: true };
 
       if (search.length >= 2) {
         where.OR = [
@@ -61,6 +62,7 @@ function getProjectsFromDB(filters: {
             developerName: true,
             locality: true,
             createdAt: true,
+            isActive: true,
           },
         }),
         prisma.project.count({ where }),
@@ -106,6 +108,7 @@ export async function GET(request: NextRequest) {
     const slug = searchParams.get('slug')?.trim() || '';
     const projectTag = searchParams.get('projectTag')?.trim() || '';
     const groupByTags = searchParams.get('groupByTags') === '1';
+    const includeInactive = searchParams.get('includeInactive') === '1';
     const tagLimit = Math.min(12, Math.max(1, parseInt(searchParams.get('tagLimit') || '6')));
 
     if (groupByTags) {
@@ -215,6 +218,7 @@ export async function GET(request: NextRequest) {
       status,
       city,
       projectTag,
+      includeInactive,
     });
 
     return NextResponse.json(responseData, {
