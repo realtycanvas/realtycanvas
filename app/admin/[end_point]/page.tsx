@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import AdminShell from '@/components/admin/admin-shell';
 import AdminDashboard from '@/components/admin/admin-dashboard';
 import AdminProjectsPage from '@/components/admin/admin-projects-page';
+import AdminLeadsPage from '@/components/admin/admin-leads-page';
 
 type PageProps = {
   params: Promise<{
@@ -24,6 +25,14 @@ export default async function AdminDynamicPage({ params }: PageProps) {
     return (
       <AdminShell title="Project Management" description="Create, edit, and delete projects from one place.">
         <AdminProjectsPage />
+      </AdminShell>
+    );
+  }
+
+  if (end_point === 'lead') {
+    return (
+      <AdminShell title="Lead Management" description="Track and review all captured lead enquiries.">
+        <AdminLeadsPage />
       </AdminShell>
     );
   }

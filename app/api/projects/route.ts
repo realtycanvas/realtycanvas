@@ -17,10 +17,12 @@ function getProjectsFromDB(filters: {
   city: string;
   projectTag?: string;
   includeInactive?: boolean;
+  minPrice?: number;
+  maxPrice?: number;
 }) {
   return unstable_cache(
     async () => {
-      const { page, limit, search, category, status, city, projectTag, includeInactive } = filters;
+      const { page, limit, search, category, status, city, projectTag, includeInactive, minPrice, maxPrice } = filters;
       const skip = (page - 1) * limit;
 
       const where: Prisma.ProjectWhereInput = includeInactive ? {} : { isActive: true };
@@ -38,6 +40,20 @@ function getProjectsFromDB(filters: {
       if (status !== 'ALL') where.status = status as ProjectStatus;
       if (city) where.city = { contains: city, mode: 'insensitive' };
       if (projectTag) where.projectTags = { has: projectTag };
+      const priceFilters: Prisma.ProjectWhereInput[] = [];
+      if (typeof minPrice === 'number' && minPrice > 0) {
+        priceFilters.push({
+          OR: [{ priceMax: { gte: minPrice } }, { priceMax: null }],
+        });
+      }
+      if (typeof maxPrice === 'number' && maxPrice > 0) {
+        priceFilters.push({
+          OR: [{ priceMin: { lte: maxPrice } }, { priceMin: null }],
+        });
+      }
+      if (priceFilters.length > 0) {
+        where.AND = priceFilters;
+      }
 
       const [projects, totalCount] = await Promise.all([
         prisma.project.findMany({
@@ -109,6 +125,10 @@ export async function GET(request: NextRequest) {
     const projectTag = searchParams.get('projectTag')?.trim() || '';
     const groupByTags = searchParams.get('groupByTags') === '1';
     const includeInactive = searchParams.get('includeInactive') === '1';
+    const minPriceRaw = searchParams.get('minPrice')?.trim() || '';
+    const maxPriceRaw = searchParams.get('maxPrice')?.trim() || '';
+    const minPrice = minPriceRaw ? parseInt(minPriceRaw, 10) : 0;
+    const maxPrice = maxPriceRaw ? parseInt(maxPriceRaw, 10) : 0;
     const tagLimit = Math.min(12, Math.max(1, parseInt(searchParams.get('tagLimit') || '6')));
 
     if (groupByTags) {
@@ -219,6 +239,8 @@ export async function GET(request: NextRequest) {
       city,
       projectTag,
       includeInactive,
+      minPrice: Number.isFinite(minPrice) ? minPrice : 0,
+      maxPrice: Number.isFinite(maxPrice) ? maxPrice : 0,
     });
 
     return NextResponse.json(responseData, {

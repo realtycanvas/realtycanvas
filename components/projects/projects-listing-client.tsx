@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { mapTypeToProjectTag, priceRanges, projectCategories, projectStatuses } from '@/lib/project-search-config';
 
 interface Project {
   id: string;
@@ -42,8 +43,25 @@ interface ProjectsListingClientProps {
   user?: User | null;
 }
 
+interface FilterState {
+  search: string;
+  category: string;
+  status: string;
+  city: string;
+  projectTag: string;
+  minPrice: string;
+  maxPrice: string;
+}
+
 export default function ProjectsListingClient({ user }: ProjectsListingClientProps) {
+  const router = useRouter();
   const searchParams = useSearchParams();
+
+  const typeParam = searchParams.get('type') || '';
+  const mappedTagFromType = mapTypeToProjectTag(typeParam);
+  const projectTagParam = searchParams.get('projectTag') || mappedTagFromType;
+  const minPriceParam = searchParams.get('minPrice') || '';
+  const maxPriceParam = searchParams.get('maxPrice') || '';
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,12 +75,14 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
     hasPrevious: false,
   });
 
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<FilterState>({
     search: searchParams.get('search') || '',
     category: searchParams.get('category') || 'ALL',
     status: searchParams.get('status') || 'ALL',
     city: searchParams.get('city') || '',
-    projectTag: searchParams.get('projectTag') || '',
+    projectTag: projectTagParam,
+    minPrice: minPriceParam,
+    maxPrice: maxPriceParam,
   });
 
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -100,6 +120,8 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
           status: filters.status,
           city: filters.city,
           projectTag: filters.projectTag,
+          minPrice: filters.minPrice,
+          maxPrice: filters.maxPrice,
         });
 
         const response = await fetch(`/api/projects?${params}`, {
@@ -131,8 +153,47 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
     fetchProjects(1);
   }, [filters, fetchProjects]);
 
-  const handleFilterChange = (key: string, value: string) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
+  const updateFilters = (next: FilterState) => {
+    setFilters(next);
+    const params = new URLSearchParams();
+    if (next.search.trim()) params.set('search', next.search.trim());
+    if (next.category !== 'ALL') params.set('category', next.category);
+    if (next.status !== 'ALL') params.set('status', next.status);
+    if (next.city.trim()) params.set('city', next.city.trim());
+    if (next.projectTag.trim()) params.set('projectTag', next.projectTag.trim());
+    if (next.minPrice.trim()) params.set('minPrice', next.minPrice.trim());
+    if (next.maxPrice.trim()) params.set('maxPrice', next.maxPrice.trim());
+    const query = params.toString();
+    router.replace(query ? `/projects?${query}` : '/projects');
+  };
+
+  const handleFilterChange = (key: keyof FilterState, value: string) => {
+    updateFilters({ ...filters, [key]: value });
+  };
+
+  const handleBudgetChange = (label: string) => {
+    const selectedRange = priceRanges.find((range) => range.label === label) || priceRanges[0];
+    updateFilters({
+      ...filters,
+      minPrice: selectedRange.min > 0 ? String(selectedRange.min) : '',
+      maxPrice: selectedRange.max > 0 ? String(selectedRange.max) : '',
+    });
+  };
+
+  const selectedBudgetLabel =
+    priceRanges.find((range) => String(range.min) === filters.minPrice && String(range.max) === filters.maxPrice)
+      ?.label || priceRanges[0].label;
+
+  const clearFilters = () => {
+    updateFilters({
+      search: '',
+      category: 'ALL',
+      status: 'ALL',
+      city: '',
+      projectTag: '',
+      minPrice: '',
+      maxPrice: '',
+    });
   };
 
   useEffect(() => {
@@ -211,9 +272,9 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
                 onChange={(e) => handleFilterChange('category', e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-yellow-500"
               >
-                <option value="ALL">All Categories</option>
-                <option value="COMMERCIAL">Commercial</option>
-                <option value="RESIDENTIAL">Residential</option>
+                <option value="ALL">{projectCategories[0]}</option>
+                <option value="COMMERCIAL">{projectCategories[1]}</option>
+                <option value="RESIDENTIAL">{projectCategories[2]}</option>
               </select>
             </div>
 
@@ -224,24 +285,24 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
                 onChange={(e) => handleFilterChange('status', e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-yellow-500"
               >
-                <option value="ALL">All Status</option>
-                <option value="PLANNED">Planned</option>
-                <option value="UNDER_CONSTRUCTION">Under Construction</option>
-                <option value="READY">Ready</option>
+                <option value="ALL">{projectStatuses[0]}</option>
+                <option value="UNDER_CONSTRUCTION">{projectStatuses[1].replaceAll('_', ' ')}</option>
+                <option value="READY">{projectStatuses[2]}</option>
               </select>
             </div>
 
             <div className="w-full">
               <label className="block text-sm font-medium text-gray-700 mb-2">Budget</label>
               <select
-                value={filters.city}
-                onChange={(e) => handleFilterChange('city', e.target.value)}
+                value={selectedBudgetLabel}
+                onChange={(e) => handleBudgetChange(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-yellow-500"
               >
-                <option value="ALL">Any Price</option>
-                <option value="LOW">Low ($0 - $500,000)</option>
-                <option value="MEDIUM">Medium ($500,000 - $1,000,000)</option>
-                <option value="HIGH">High ($1,000,000+)</option>
+                {priceRanges.map((range) => (
+                  <option key={range.label} value={range.label}>
+                    {range.label}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -250,9 +311,11 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
             filters.category !== 'ALL' ||
             filters.status !== 'ALL' ||
             filters.city ||
-            filters.projectTag) && (
+            filters.projectTag ||
+            filters.minPrice ||
+            filters.maxPrice) && (
             <button
-              onClick={() => setFilters({ search: '', category: 'ALL', status: 'ALL', city: '', projectTag: '' })}
+              onClick={clearFilters}
               className="mt-4 px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
             >
               Clear Filters
@@ -341,7 +404,7 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
               <div className="text-center pb-12 pt-20 md:pt-32">
                 <p className="text-gray-600 text-lg mb-4">No projects found matching your filters</p>
                 <button
-                  onClick={() => setFilters({ search: '', category: 'ALL', status: 'ALL', city: '', projectTag: '' })}
+                  onClick={clearFilters}
                   className="px-6 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors cursor-pointer"
                 >
                   Clear Filters

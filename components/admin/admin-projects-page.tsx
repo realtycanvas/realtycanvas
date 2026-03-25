@@ -241,6 +241,9 @@ export default function AdminProjectsPage() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                  S.No
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
                   Name
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
@@ -263,13 +266,16 @@ export default function AdminProjectsPage() {
             <tbody className="divide-y divide-gray-200 bg-white">
               {projects.length === 0 ? (
                 <tr>
-                  <td className="px-4 py-10 text-center text-sm text-gray-500" colSpan={6}>
+                  <td className="px-4 py-10 text-center text-sm text-gray-500" colSpan={7}>
                     No projects found
                   </td>
                 </tr>
               ) : (
-                projects.map((project) => (
+                projects.map((project, index) => (
                   <tr key={project.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-sm text-gray-700">
+                      {(pagination.page - 1) * pagination.limit + index + 1}
+                    </td>
                     <td className="px-4 py-3">
                       <p className="text-sm font-semibold text-gray-900">{project.title}</p>
                       <p className="text-xs text-gray-500">{project.category.replaceAll('_', ' ')}</p>

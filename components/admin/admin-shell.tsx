@@ -44,6 +44,7 @@ export default function AdminShell({ title, description, children }: AdminShellP
     () => [
       { href: '/admin/dashboard', label: 'Dashboard', active: pathname.startsWith('/admin/dashboard') },
       { href: '/admin/projects', label: 'Projects', active: pathname.startsWith('/admin/projects') },
+      { href: '/admin/lead', label: 'Lead', active: pathname.startsWith('/admin/lead') },
     ],
     [pathname]
   );
@@ -57,15 +58,10 @@ export default function AdminShell({ title, description, children }: AdminShellP
   }
 
   return (
-    <div className="min-h-screen pt-24 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="mb-5 rounded border border-gray-200 bg-white p-4">
-          <h1 className="text-xl font-bold text-gray-900">{title}</h1>
-          <p className="mt-1 text-sm text-gray-600">{description}</p>
-          {user && <p className="mt-2 text-xs text-gray-500">Signed in as {user.email}</p>}
-        </div>
-        <div className="flex flex-col lg:flex-row gap-5">
-          <aside className="w-full lg:basis-1/5 lg:max-w-[20%] rounded border border-gray-200 bg-white p-4 h-fit">
+    <div className="pt-24 bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:h-[calc(100vh-6rem)] lg:overflow-hidden">
+        <div className="flex flex-col lg:flex-row gap-5 lg:h-full">
+          <aside className="w-full lg:basis-1/5 lg:max-w-[20%] rounded border border-gray-200 bg-white p-4 lg:h-full lg:overflow-y-auto shrink-0">
             <nav className="flex flex-col gap-2">
               {links.map((link) => (
                 <Link
@@ -83,7 +79,12 @@ export default function AdminShell({ title, description, children }: AdminShellP
               ))}
             </nav>
           </aside>
-          <main className="w-full lg:basis-4/5 lg:max-w-[80%] rounded border border-gray-200 bg-white p-4 sm:p-6 overflow-x-auto">
+          <main className="w-full lg:basis-4/5 lg:max-w-[80%] rounded border border-gray-200 bg-white p-4 sm:p-6 lg:overflow-y-auto overflow-x-auto lg:h-full">
+            <div className="mb-5">
+              <h1 className="text-xl font-bold text-gray-900">{title}</h1>
+              <p className="mt-1 text-sm text-gray-600">{description}</p>
+              {user && <p className="mt-2 text-xs text-gray-500">Signed in as {user.email}</p>}
+            </div>
             {children}
           </main>
         </div>
