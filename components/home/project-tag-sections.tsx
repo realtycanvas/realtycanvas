@@ -49,12 +49,12 @@ const useProjectTagSection = (tag: string) => {
   return { data, loading };
 };
 
-export const ProjectTagSection = ({ tag, title }: { tag: string; title: ReactNode }) => {
+const ProjectTagSection = ({ tag, title, className }: { tag: string; title: ReactNode; className?: string }) => {
   const { data, loading } = useProjectTagSection(tag);
 
   if (loading) {
     return (
-      <section className="py-10 bg-white">
+      <section className={`${className} py-20 bg-gray-200 relative overflow-hidden`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center">
           <span className="w-10 h-10 border-2 border-gray-300 border-t-yellow-500 rounded-full animate-spin" />
         </div>
@@ -65,10 +65,10 @@ export const ProjectTagSection = ({ tag, title }: { tag: string; title: ReactNod
   if (!data.projects.length) return null;
 
   return (
-    <section className="py-10 bg-white">
+    <section className={`${className} py-20 bg-gray-200 relative overflow-hidden`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between gap-4">
-          <div className="text-2xl sm:text-3xl font-bold text-gray-900">{title}</div>
+        <div className="flex items-center justify-between gap-4 mb-10">
+          <div className="text-3xl md:text-4xl font-bold text-gray-900">{title}</div>
           {data.totalCount > data.projects.length && (
             <ViewAllLink href={`/projects?projectTag=${encodeURIComponent(tag)}`} label="View All" />
           )}
@@ -109,26 +109,4 @@ export const ProjectTagSection = ({ tag, title }: { tag: string; title: ReactNod
   );
 };
 
-export const RealtyCanvasRecommendedSection = () => (
-  <ProjectTagSection tag="RECOMMENDED" title="Realty Canvas Recommended" />
-);
-
-export const TrendingProjectsSection = () => <ProjectTagSection tag="TRENDING" title="Trending Projects in Gurugram" />;
-
-export const NewLaunchProjectsSection = () => <ProjectTagSection tag="NEW" title="New Launch Projects in Gurgaon" />;
-
-export const BestBudgetProjectsSection = () => (
-  <ProjectTagSection tag="BUDGET" title="Best Budget Projects in Gurugram" />
-);
-
-export const DreamPropertiesSection = () => (
-  <ProjectTagSection tag="DREAM" title="Dream Properties In The Heart of Gurugram" />
-);
-
-export const BestBudgetPlotsSection = () => (
-  <ProjectTagSection tag="BUDGET_PLOTS" title="Best Budget Plots in Gurugram" />
-);
-
-export const CommercialProjectsSection = () => (
-  <ProjectTagSection tag="COMMERCIAL_GURUGRAM" title="Commercial Projects in Gurugram" />
-);
+export default ProjectTagSection;

@@ -1,0 +1,33 @@
+<svg width="1080" height="1350" viewBox="0 0 1080 1350" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="1080" height="1350" fill="#081A2F"/>
+<rect y="860" width="1080" height="490" fill="#0D2741"/>
+<rect x="60" y="100" width="960" height="1070" rx="28" fill="#0F2945" stroke="#FDB022" stroke-width="4" stroke-dasharray="18 12"/>
+<rect x="100" y="170" width="880" height="920" rx="24" fill="#143451" stroke="#F8FAFC" stroke-opacity="0.22" stroke-width="2" stroke-dasharray="14 10"/>
+<circle cx="845" cy="210" r="120" fill="#FDB022" fill-opacity="0.16"/>
+<circle cx="245" cy="320" r="150" fill="#60A5FA" fill-opacity="0.12"/>
+<path d="M50 980C130 900 170 820 245 760C330 690 370 660 445 660C530 660 560 790 640 790C730 790 755 660 875 660C955 660 1010 735 1060 790V1350H50V980Z" fill="url(#paint0_linear_507_8)"/>
+<rect x="110" y="540" width="170" height="320" rx="18" fill="#1E3A5F"/>
+<rect x="140" y="500" width="120" height="360" rx="16" fill="#335C8D"/>
+<rect x="300" y="440" width="210" height="420" rx="18" fill="#1E3A5F"/>
+<rect x="335" y="400" width="145" height="460" rx="16" fill="#274B77"/>
+<rect x="535" y="360" width="215" height="500" rx="18" fill="#1E3A5F"/>
+<rect x="570" y="320" width="150" height="540" rx="16" fill="#3A6797"/>
+<rect x="780" y="480" width="160" height="380" rx="18" fill="#1E3A5F"/>
+<rect x="810" y="440" width="110" height="420" rx="16" fill="#335C8D"/>
+<text x="540" y="110" fill="#FBBF24" font-family="Arial, sans-serif" font-size="28" font-weight="700" text-anchor="middle">MOBILE BANNER</text>
+<text x="540" y="148" fill="#E2E8F0" font-family="Arial, sans-serif" font-size="22" text-anchor="middle">Canvas: 1080 × 1350 · Ratio: 4:5</text>
+<text x="540" y="260" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="54" font-weight="700" text-anchor="middle">KEEP TEXT IN THIS SAFE BOX</text>
+<text x="540" y="318" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="24" text-anchor="middle">Leave top space for navbar and lower space for search overlay / fold</text>
+<text x="540" y="1045" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="28" font-weight="700" text-anchor="middle">SAFE TEXT ENDS HERE</text>
+<text x="130" y="1185" fill="#94A3B8" font-family="Arial, sans-serif" font-size="24">Top unsafe area: 100px</text>
+<text x="130" y="1225" fill="#94A3B8" font-family="Arial, sans-serif" font-size="24">Bottom unsafe area: 180px</text>
+<text x="130" y="1265" fill="#94A3B8" font-family="Arial, sans-serif" font-size="24">Left / right padding: 60px</text>
+<text x="540" y="1115" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="38" font-weight="700" text-anchor="middle">PROJECT NAME</text>
+<text x="540" y="1160" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="24" text-anchor="middle">Headline · Subheadline · CTA</text>
+<defs>
+<linearGradient id="paint0_linear_507_8" x1="555" y1="660" x2="555" y2="1350" gradientUnits="userSpaceOnUse">
+<stop stop-color="#173657"/>
+<stop offset="1" stop-color="#08121E"/>
+</linearGradient>
+</defs>
+</svg>

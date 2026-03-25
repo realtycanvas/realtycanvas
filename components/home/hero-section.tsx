@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import ProjectSearchBar from './project-search';
 import { banners } from '@/data/banners';
+import { BrandButton } from '@/components/ui/BrandButton';
 
 type HeroSectionProps = {
   className?: string;
@@ -31,6 +32,34 @@ const HeroSection = ({ className = '', onSearch }: HeroSectionProps) => {
 
   const goNext = () => {
     setActiveIndex((prev) => (prev + 1) % slides.length);
+  };
+
+  const handleSearch = (filters: { category: string; status: string; priceRange: { min: number; max: number } }) => {
+    if (onSearch) {
+      onSearch(filters);
+      return;
+    }
+
+    const params = new URLSearchParams();
+
+    if (filters.category && filters.category !== 'All Categories') {
+      params.set('category', filters.category);
+    }
+
+    if (filters.status && filters.status !== 'All Status') {
+      params.set('status', filters.status);
+    }
+
+    if (filters.priceRange.min > 0) {
+      params.set('minPrice', filters.priceRange.min.toString());
+    }
+
+    if (filters.priceRange.max > 0) {
+      params.set('maxPrice', filters.priceRange.max.toString());
+    }
+
+    const query = params.toString();
+    window.location.href = query ? `/projects?${query}` : '/projects';
   };
 
   return (
@@ -87,16 +116,59 @@ const HeroSection = ({ className = '', onSearch }: HeroSectionProps) => {
               </>
             ) : null}
           </div>
+          <div className="absolute inset-0 z-10 bg-linear-to-r from-slate-950/35 via-slate-900/70 to-slate-950/35" />
+          <div className="absolute inset-0 z-20 flex items-center justify-center">
+            <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex w-full flex-col items-center justify-center space-y-6 pt-24 text-center sm:space-y-8 md:pt-20 lg:space-y-10">
+                <div className="mx-auto max-w-4xl space-y-3 sm:space-y-4">
+                  <div className="flex flex-col items-center justify-center gap-2 sm:flex-row sm:gap-3 md:gap-4 flex-wrap">
+                    <h1 className="text-center text-3xl font-bold leading-tight text-white drop-shadow-lg sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl">
+                      Find Your
+                    </h1>
+                    <span className="bg-linear-to-r from-brand-primary to-brand-primary bg-clip-text text-center text-3xl font-bold leading-tight text-transparent drop-shadow-sm sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl">
+                      Dream Project
+                    </span>
+                  </div>
+
+                  <p className="mx-auto max-w-xs text-center text-sm font-medium leading-relaxed text-gray-100 drop-shadow-md sm:max-w-xl sm:text-base md:max-w-2xl md:text-lg lg:max-w-3xl lg:text-xl">
+                    Discover premium residential homes and commercial spaces across Gurgaon with India&apos;s most
+                    trusted real estate consultant.
+                  </p>
+                </div>
+
+                <div className="mx-auto flex w-full max-w-xs flex-col items-center justify-center gap-3 sm:max-w-md sm:flex-row sm:gap-4 md:max-w-lg">
+                  <Link href="/projects" className="w-full sm:w-auto">
+                    <BrandButton
+                      variant="primary"
+                      size="lg"
+                      className="rounded-xl text-sm sm:text-base px-6 py-3 sm:py-4 w-full sm:w-auto min-w-40 shadow-lg hover:scale-105 transition-transform"
+                    >
+                      Explore Projects
+                    </BrandButton>
+                  </Link>
+                  <Link href="/contact" className="w-full sm:w-auto">
+                    <BrandButton
+                      variant="secondary"
+                      size="lg"
+                      className="rounded-xl text-sm sm:text-base px-6 py-3 sm:py-4 w-full sm:w-auto min-w-40 bg-[#112D48]! text-white! hover:bg-[#091a30]! shadow-lg hover:scale-105 transition-transform"
+                    >
+                      Get In Touch
+                    </BrandButton>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="hidden md:block absolute left-1/2 top-[75vh] -translate-x-1/2 -translate-y-1/2 w-full max-w-sm sm:max-w-xl md:max-w-3xl lg:max-w-4xl px-2 sm:px-0">
+        <div className="hidden md:block absolute left-1/2 bottom-0 z-30 -translate-x-1/2 translate-y-1/2 w-full max-w-sm sm:max-w-xl md:max-w-3xl lg:max-w-4xl px-2 sm:px-0">
           <div className="rounded-2xl shadow-xl bg-white">
-            <ProjectSearchBar onSearch={onSearch} />
+            <ProjectSearchBar onSearch={handleSearch} />
           </div>
         </div>
         <div className="md:hidden mt-12 px-4">
           <div className="rounded-2xl shadow-xl bg-white">
-            <ProjectSearchBar onSearch={onSearch} />
+            <ProjectSearchBar onSearch={handleSearch} />
           </div>
         </div>
       </div>
