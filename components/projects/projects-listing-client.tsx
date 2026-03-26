@@ -286,8 +286,9 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
                 className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-yellow-500"
               >
                 <option value="ALL">{projectStatuses[0]}</option>
-                <option value="UNDER_CONSTRUCTION">{projectStatuses[1].replaceAll('_', ' ')}</option>
-                <option value="READY">{projectStatuses[2]}</option>
+                <option value="PLANNED">{projectStatuses[1].replaceAll('_', ' ')}</option>
+                <option value="UNDER_CONSTRUCTION">{projectStatuses[2].replaceAll('_', ' ')}</option>
+                <option value="READY">{projectStatuses[3].replaceAll('_', ' ')}</option>
               </select>
             </div>
 

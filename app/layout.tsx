@@ -9,6 +9,7 @@ import Footer from '@/components/layout/footer';
 import ClientLayout from '@/components/common/ClientLayout';
 
 export const metadata: Metadata = LAYOUT_METADATA;
+export const viewport = { width: 'device-width', initialScale: 1 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (

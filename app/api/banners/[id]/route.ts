@@ -80,6 +80,11 @@ export async function DELETE(request: NextRequest, { params }: Props) {
       return NextResponse.json({ error: 'id is required' }, { status: 400 });
     }
 
+    const totalBanners = await prisma.banner.count();
+    if (totalBanners <= 1) {
+      return NextResponse.json({ error: 'Cannot delete the last remaining banner' }, { status: 400 });
+    }
+
     await prisma.banner.delete({ where: { id } });
 
     revalidatePath('/');

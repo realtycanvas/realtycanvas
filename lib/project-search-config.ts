@@ -1,6 +1,6 @@
 export const projectCategories = ['All Categories', 'COMMERCIAL', 'RESIDENTIAL'] as const;
 
-export const projectStatuses = ['All Status', 'UNDER_CONSTRUCTION', 'READY'] as const;
+export const projectStatuses = ['All Status', 'PLANNED', 'UNDER_CONSTRUCTION', 'READY'] as const;
 
 export const categoryDisplayNames: Record<string, string> = {
   'All Categories': 'All Categories',
@@ -10,6 +10,7 @@ export const categoryDisplayNames: Record<string, string> = {
 
 export const statusDisplayNames: Record<string, string> = {
   'All Status': 'All Status',
+  PLANNED: 'Planned',
   UNDER_CONSTRUCTION: 'Under Construction',
   READY: 'Ready',
 };
