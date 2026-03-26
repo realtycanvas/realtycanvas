@@ -160,7 +160,7 @@ const HeroSection = ({ className = '', onSearch }: HeroSectionProps) => {
     <section className={`relative pb-6 sm:pb-6 md:pb-12 ${className}`}>
       <div className="w-full relative">
         <div className="relative w-full">
-          <div className="relative h-[62vh] sm:h-[64vh] md:h-[500px] lg:h-[520px] w-full overflow-hidden">
+          <div className="relative h-[62vh] sm:h-[64vh] md:h-125 lg:h-130 w-full overflow-hidden">
             <div
               className={`flex h-full ${isAnimating ? 'transition-transform duration-700 ease-out' : ''}`}
               style={{ transform: `translateX(-${activeIndex * 100}%)` }}

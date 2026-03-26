@@ -212,7 +212,7 @@ export default function AdminBannersPage() {
             <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {liveBanners.map((banner) => (
                 <div key={banner.id} className="rounded border border-gray-200 overflow-hidden bg-white">
-                  <div className="aspect-[16/9] bg-gray-100">
+                  <div className="aspect-video bg-gray-100">
                     <img src={banner.desktopImage} alt="Banner" className="h-full w-full object-cover" />
                   </div>
                   <div className="p-3 flex items-center justify-between gap-2">
@@ -306,7 +306,7 @@ export default function AdminBannersPage() {
             <div className="w-8 h-8 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
-          <div className="overflow-auto rounded border border-gray-200 min-h-[320px] bg-white">
+          <div className="overflow-auto rounded border border-gray-200 min-h-80 bg-white">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
