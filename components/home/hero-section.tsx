@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import ProjectSearchBar from './project-search';
 
@@ -28,18 +27,7 @@ type HeroSectionProps = {
 };
 
 const HeroSection = ({ className = '', onSearch }: HeroSectionProps) => {
-  const initialSlides = useMemo(
-    () => [
-      {
-        id: 'banner-2',
-        desktopImage: '/banner/extended/7desktop.webp',
-        mobileImage: '/banner/mobile/2mobile.webp',
-        link: '/projects',
-        sortOrder: 0,
-      },
-    ],
-    []
-  );
+  const initialSlides = useMemo<Slide[]>(() => [], []);
   const [slides, setSlides] = useState<Slide[]>(initialSlides);
 
   useEffect(() => {
@@ -169,26 +157,15 @@ const HeroSection = ({ className = '', onSearch }: HeroSectionProps) => {
               {infiniteSlides.map((slide, index) => (
                 <div key={`${slide.id}-${index}`} className="min-w-full h-full relative">
                   <Link href={slide.link} className="block w-full h-full relative">
-                    <Image
-                      src={slide.desktopImage}
-                      alt="Hero Banner"
-                      fill
-                      sizes="100vw"
-                      quality={100}
-                      unoptimized
-                      className="hidden md:block object-cover object-center"
-                      priority={index === 1}
-                    />
-                    <Image
-                      src={slide.mobileImage}
-                      alt="Hero Banner"
-                      fill
-                      sizes="100vw"
-                      quality={100}
-                      unoptimized
-                      className="md:hidden object-cover object-center"
-                      priority={index === 1}
-                    />
+                    <picture className="absolute inset-0 block">
+                      <source media="(max-width: 767px)" srcSet={slide.mobileImage || slide.desktopImage} />
+                      <img
+                        src={slide.desktopImage}
+                        alt="Hero Banner"
+                        className="h-full w-full object-cover object-center"
+                        loading={index === (slides.length > 1 ? 1 : 0) ? 'eager' : 'lazy'}
+                      />
+                    </picture>
                   </Link>
                 </div>
               ))}

@@ -70,6 +70,7 @@ export default function AdminBannersPage() {
   }, [banners]);
 
   const liveBanners = useMemo(() => sortedBanners.filter((banner) => banner.isActive), [sortedBanners]);
+  const canDeleteBanners = banners.length > 1;
 
   const createBanner = async () => {
     const desktopImage = form.desktopImage.trim();
@@ -167,6 +168,11 @@ export default function AdminBannersPage() {
 
   const confirmDelete = async () => {
     if (!deleteTarget) return;
+    if (!canDeleteBanners) {
+      setError('You cannot delete the last remaining banner.');
+      setDeleteTarget(null);
+      return;
+    }
     try {
       setError('');
       const response = await fetch(`/api/banners/${encodeURIComponent(deleteTarget.id)}`, { method: 'DELETE' });
@@ -231,7 +237,8 @@ export default function AdminBannersPage() {
                       <button
                         type="button"
                         onClick={() => setDeleteTarget(banner)}
-                        className="rounded border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50 transition"
+                        disabled={!canDeleteBanners}
+                        className="rounded border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
                       >
                         Delete
                       </button>
@@ -251,13 +258,13 @@ export default function AdminBannersPage() {
               onChange={(url) =>
                 setForm((prev) => ({ ...prev, desktopImage: Array.isArray(url) ? url[0] || '' : url }))
               }
-              maxSize={100}
+              maxSize={2}
             />
             <ImageUpload
               label="Mobile Banner (optional)"
               value={form.mobileImage}
               onChange={(url) => setForm((prev) => ({ ...prev, mobileImage: Array.isArray(url) ? url[0] || '' : url }))}
-              maxSize={100}
+              maxSize={2}
             />
             <label className="space-y-1">
               <span className="text-xs font-semibold text-gray-600">Link (optional)</span>
@@ -389,7 +396,8 @@ export default function AdminBannersPage() {
                           <button
                             type="button"
                             onClick={() => setDeleteTarget(banner)}
-                            className="rounded border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50 transition"
+                            disabled={!canDeleteBanners}
+                            className="rounded border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
                           >
                             Delete
                           </button>
@@ -406,7 +414,7 @@ export default function AdminBannersPage() {
 
       {deleteTarget ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-md rounded bg-white p-6 shadow-xl">
+          <div className="w-full max-w-md rounded bg-white p-6 shadow-xl max-h-[85vh] overflow-y-auto">
             <h3 className="text-lg font-bold text-gray-900">Delete Banner</h3>
             <p className="mt-2 text-sm text-gray-600">This will remove the banner from the home page rotation.</p>
             <div className="mt-5 flex justify-end gap-2">
@@ -431,7 +439,7 @@ export default function AdminBannersPage() {
 
       {editTarget ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-xl rounded bg-white p-6 shadow-xl">
+          <div className="w-full max-w-xl rounded bg-white p-6 shadow-xl max-h-[85vh] overflow-y-auto">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h3 className="text-lg font-bold text-gray-900">Edit Banner</h3>
@@ -453,7 +461,7 @@ export default function AdminBannersPage() {
                 onChange={(url) =>
                   setEditForm((prev) => ({ ...prev, desktopImage: Array.isArray(url) ? url[0] || '' : url }))
                 }
-                maxSize={100}
+                maxSize={2}
               />
               <ImageUpload
                 label="Mobile Banner (optional)"
@@ -461,7 +469,7 @@ export default function AdminBannersPage() {
                 onChange={(url) =>
                   setEditForm((prev) => ({ ...prev, mobileImage: Array.isArray(url) ? url[0] || '' : url }))
                 }
-                maxSize={100}
+                maxSize={2}
               />
               <label className="space-y-1">
                 <span className="text-xs font-semibold text-gray-600">Link</span>
