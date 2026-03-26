@@ -6,6 +6,22 @@ import Image from 'next/image';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import ProjectSearchBar from './project-search';
 
+type BannerApiRow = {
+  id: string;
+  desktopImage: string;
+  mobileImage: string | null;
+  link: string | null;
+  sortOrder: number;
+};
+
+type Slide = {
+  id: string;
+  desktopImage: string;
+  mobileImage: string;
+  link: string;
+  sortOrder: number;
+};
+
 type HeroSectionProps = {
   className?: string;
   onSearch?: (filters: { category: string; status: string; priceRange: { min: number; max: number } }) => void;
@@ -19,29 +35,30 @@ const HeroSection = ({ className = '', onSearch }: HeroSectionProps) => {
         desktopImage: '/banner/extended/7desktop.webp',
         mobileImage: '/banner/mobile/2mobile.webp',
         link: '/projects',
+        sortOrder: 0,
       },
     ],
     []
   );
-  const [slides, setSlides] = useState(initialSlides);
+  const [slides, setSlides] = useState<Slide[]>(initialSlides);
 
   useEffect(() => {
     const loadBanners = async () => {
       try {
         const response = await fetch('/api/banners', { cache: 'no-store' });
-        const data = (await response.json()) as { data?: any[] };
+        const data = (await response.json()) as { data?: BannerApiRow[] };
         if (!response.ok) return;
         if (!Array.isArray(data.data) || data.data.length === 0) return;
 
         const nextSlides = data.data
-          .map((row) => ({
-            id: String(row?.id || ''),
-            desktopImage: String(row?.desktopImage || ''),
-            mobileImage: String(row?.mobileImage || row?.desktopImage || ''),
-            link: String(row?.link || '/projects'),
-            sortOrder: typeof row?.sortOrder === 'number' ? row.sortOrder : 0,
+          .map<Slide>((row) => ({
+            id: row.id,
+            desktopImage: row.desktopImage,
+            mobileImage: row.mobileImage || row.desktopImage,
+            link: row.link || '/projects',
+            sortOrder: row.sortOrder || 0,
           }))
-          .filter((row) => row.id && row.desktopImage && row.mobileImage);
+          .filter((row) => Boolean(row.id && row.desktopImage && row.mobileImage));
 
         nextSlides.sort((a, b) => a.sortOrder - b.sortOrder);
         if (nextSlides.length > 0) {
@@ -51,7 +68,7 @@ const HeroSection = ({ className = '', onSearch }: HeroSectionProps) => {
     };
 
     loadBanners();
-  }, [initialSlides]);
+  }, []);
 
   const infiniteSlides = useMemo(() => {
     if (slides.length <= 1) return slides;
@@ -62,8 +79,11 @@ const HeroSection = ({ className = '', onSearch }: HeroSectionProps) => {
   const [isAnimating, setIsAnimating] = useState(true);
 
   useEffect(() => {
-    setIsAnimating(true);
-    setActiveIndex(slides.length > 1 ? 1 : 0);
+    const frame = window.requestAnimationFrame(() => {
+      setIsAnimating(true);
+      setActiveIndex(slides.length > 1 ? 1 : 0);
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, [slides.length]);
 
   useEffect(() => {

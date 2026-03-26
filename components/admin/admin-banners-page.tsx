@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import ImageUpload from '@/components/ui/image-upload';
 
 type BannerRow = {
   id: string;
@@ -67,6 +68,8 @@ export default function AdminBannersPage() {
     list.sort((a, b) => a.sortOrder - b.sortOrder || b.createdAt.localeCompare(a.createdAt));
     return list;
   }, [banners]);
+
+  const liveBanners = useMemo(() => sortedBanners.filter((banner) => banner.isActive), [sortedBanners]);
 
   const createBanner = async () => {
     const desktopImage = form.desktopImage.trim();
@@ -177,7 +180,7 @@ export default function AdminBannersPage() {
   };
 
   return (
-    <div className="space-y-4 h-full flex flex-col min-h-0">
+    <div className="h-full flex flex-col min-h-0">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-lg font-bold text-gray-900">Home Banners</h2>
         <button
@@ -190,171 +193,216 @@ export default function AdminBannersPage() {
         </button>
       </div>
 
-      {error && <div className="rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+      <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pt-4">
+        {error && <div className="rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
 
-      <div className="rounded border border-gray-200 bg-white p-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <label className="space-y-1">
-            <span className="text-xs font-semibold text-gray-600">Desktop Image URL / Path</span>
-            <input
-              value={form.desktopImage}
-              onChange={(e) => setForm((prev) => ({ ...prev, desktopImage: e.target.value }))}
-              placeholder="/banner/extended/7desktop.webp or https://..."
-              className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-            />
-          </label>
-          <label className="space-y-1">
-            <span className="text-xs font-semibold text-gray-600">Mobile Image URL / Path (optional)</span>
-            <input
-              value={form.mobileImage}
-              onChange={(e) => setForm((prev) => ({ ...prev, mobileImage: e.target.value }))}
-              placeholder="/banner/mobile/2mobile.webp or https://..."
-              className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-            />
-          </label>
-          <label className="space-y-1">
-            <span className="text-xs font-semibold text-gray-600">Link (optional)</span>
-            <input
-              value={form.link}
-              onChange={(e) => setForm((prev) => ({ ...prev, link: e.target.value }))}
-              placeholder="/projects"
-              className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-            />
-          </label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <label className="space-y-1">
-              <span className="text-xs font-semibold text-gray-600">Sort Order</span>
-              <input
-                type="number"
-                value={form.sortOrder}
-                onChange={(e) => setForm((prev) => ({ ...prev, sortOrder: Number(e.target.value) }))}
-                className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-              />
-            </label>
-            <label className="flex items-center gap-2 pt-6">
-              <input
-                type="checkbox"
-                checked={form.isActive}
-                onChange={(e) => setForm((prev) => ({ ...prev, isActive: e.target.checked }))}
-                className="h-4 w-4"
-              />
-              <span className="text-sm font-semibold text-gray-700">Active</span>
-            </label>
+        <div className="rounded border border-gray-200 bg-white p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 className="text-sm font-bold text-gray-900">Currently Live on Home</h3>
+              <p className="mt-1 text-xs text-gray-600">
+                {liveBanners.length
+                  ? `Showing ${liveBanners.length} active banner(s). First slide is the lowest Sort Order.`
+                  : 'No active banners. Home will fall back to the default banner.'}
+              </p>
+            </div>
           </div>
-        </div>
-        <div className="mt-4">
-          <button
-            type="button"
-            onClick={createBanner}
-            disabled={submitting}
-            className="rounded bg-yellow-500 px-4 py-2 text-sm font-semibold text-white hover:bg-yellow-600 disabled:opacity-60 transition"
-          >
-            {submitting ? 'Adding...' : 'Add Banner'}
-          </button>
-        </div>
-      </div>
 
-      {loading ? (
-        <div className="py-12 flex justify-center">
-          <div className="w-8 h-8 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin" />
-        </div>
-      ) : (
-        <div className="overflow-auto rounded border border-gray-200 flex-1 min-h-[320px] bg-white">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
-                  S.No
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
-                  Desktop
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
-                  Mobile
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
-                  Sort
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
-                  Link
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
-                  Status
-                </th>
-                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wide">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {sortedBanners.length === 0 ? (
-                <tr>
-                  <td className="px-4 py-10 text-center text-sm text-gray-500" colSpan={7}>
-                    No banners found
-                  </td>
-                </tr>
-              ) : (
-                sortedBanners.map((banner, index) => (
-                  <tr key={banner.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-sm text-gray-900">{index + 1}</td>
-                    <td className="px-4 py-3">
-                      <img
-                        src={banner.desktopImage}
-                        alt="Desktop banner"
-                        className="h-14 w-28 rounded object-cover border border-gray-200 bg-gray-100"
-                      />
-                    </td>
-                    <td className="px-4 py-3">
-                      {banner.mobileImage ? (
-                        <img
-                          src={banner.mobileImage}
-                          alt="Mobile banner"
-                          className="h-14 w-10 rounded object-cover border border-gray-200 bg-gray-100"
-                        />
-                      ) : (
-                        <span className="text-xs text-gray-500">—</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-700">{banner.sortOrder}</td>
-                    <td className="px-4 py-3 text-sm text-gray-700">{banner.link || '—'}</td>
-                    <td className="px-4 py-3">
+          {liveBanners.length ? (
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {liveBanners.map((banner) => (
+                <div key={banner.id} className="rounded border border-gray-200 overflow-hidden bg-white">
+                  <div className="aspect-[16/9] bg-gray-100">
+                    <img src={banner.desktopImage} alt="Banner" className="h-full w-full object-cover" />
+                  </div>
+                  <div className="p-3 flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-gray-700 truncate">Sort: {banner.sortOrder}</p>
+                      <p className="text-xs text-gray-500 truncate">{banner.link || '—'}</p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
                       <button
                         type="button"
                         onClick={() => toggleActive(banner)}
-                        className={`rounded px-3 py-1 text-xs font-semibold border ${
-                          banner.isActive
-                            ? 'border-green-200 bg-green-50 text-green-700 hover:bg-green-100'
-                            : 'border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100'
-                        }`}
+                        className="rounded border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-100 transition"
                       >
-                        {banner.isActive ? 'Active' : 'Inactive'}
+                        Inactivate
                       </button>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex justify-end gap-2">
-                        <button
-                          type="button"
-                          onClick={() => openEdit(banner)}
-                          className="rounded border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-100 transition"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setDeleteTarget(banner)}
-                          className="rounded border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50 transition"
-                        >
-                          Delete
-                        </button>
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setDeleteTarget(banner)}
+                        className="rounded border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50 transition"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </div>
+
+        <div className="rounded border border-gray-200 bg-white p-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <ImageUpload
+              label="Desktop Banner"
+              value={form.desktopImage}
+              onChange={(url) =>
+                setForm((prev) => ({ ...prev, desktopImage: Array.isArray(url) ? url[0] || '' : url }))
+              }
+              maxSize={100}
+            />
+            <ImageUpload
+              label="Mobile Banner (optional)"
+              value={form.mobileImage}
+              onChange={(url) => setForm((prev) => ({ ...prev, mobileImage: Array.isArray(url) ? url[0] || '' : url }))}
+              maxSize={100}
+            />
+            <label className="space-y-1">
+              <span className="text-xs font-semibold text-gray-600">Link (optional)</span>
+              <input
+                value={form.link}
+                onChange={(e) => setForm((prev) => ({ ...prev, link: e.target.value }))}
+                placeholder="/projects"
+                className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+              />
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <label className="space-y-1">
+                <span className="text-xs font-semibold text-gray-600">Sort Order</span>
+                <input
+                  type="number"
+                  value={form.sortOrder}
+                  onChange={(e) => setForm((prev) => ({ ...prev, sortOrder: Number(e.target.value) }))}
+                  className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                />
+              </label>
+              <label className="flex items-center gap-2 pt-6">
+                <input
+                  type="checkbox"
+                  checked={form.isActive}
+                  onChange={(e) => setForm((prev) => ({ ...prev, isActive: e.target.checked }))}
+                  className="h-4 w-4"
+                />
+                <span className="text-sm font-semibold text-gray-700">Active</span>
+              </label>
+            </div>
+          </div>
+          <div className="mt-4">
+            <button
+              type="button"
+              onClick={createBanner}
+              disabled={submitting}
+              className="rounded bg-yellow-500 px-4 py-2 text-sm font-semibold text-white hover:bg-yellow-600 disabled:opacity-60 transition"
+            >
+              {submitting ? 'Adding...' : 'Add Banner'}
+            </button>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="py-12 flex justify-center">
+            <div className="w-8 h-8 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : (
+          <div className="overflow-auto rounded border border-gray-200 min-h-[320px] bg-white">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                    S.No
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                    Desktop
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                    Mobile
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                    Sort
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                    Link
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                    Status
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {sortedBanners.length === 0 ? (
+                  <tr>
+                    <td className="px-4 py-10 text-center text-sm text-gray-500" colSpan={7}>
+                      No banners found
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
+                ) : (
+                  sortedBanners.map((banner, index) => (
+                    <tr key={banner.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 text-sm text-gray-900">{index + 1}</td>
+                      <td className="px-4 py-3">
+                        <img
+                          src={banner.desktopImage}
+                          alt="Desktop banner"
+                          className="h-14 w-28 rounded object-cover border border-gray-200 bg-gray-100"
+                        />
+                      </td>
+                      <td className="px-4 py-3">
+                        {banner.mobileImage ? (
+                          <img
+                            src={banner.mobileImage}
+                            alt="Mobile banner"
+                            className="h-14 w-10 rounded object-cover border border-gray-200 bg-gray-100"
+                          />
+                        ) : (
+                          <span className="text-xs text-gray-500">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-700">{banner.sortOrder}</td>
+                      <td className="px-4 py-3 text-sm text-gray-700">{banner.link || '—'}</td>
+                      <td className="px-4 py-3">
+                        <button
+                          type="button"
+                          onClick={() => toggleActive(banner)}
+                          className={`rounded px-3 py-1 text-xs font-semibold border ${
+                            banner.isActive
+                              ? 'border-green-200 bg-green-50 text-green-700 hover:bg-green-100'
+                              : 'border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100'
+                          }`}
+                        >
+                          {banner.isActive ? 'Active' : 'Inactive'}
+                        </button>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => openEdit(banner)}
+                            className="rounded border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-100 transition"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setDeleteTarget(banner)}
+                            className="rounded border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50 transition"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
       {deleteTarget ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
@@ -399,22 +447,22 @@ export default function AdminBannersPage() {
             </div>
 
             <div className="mt-4 grid grid-cols-1 gap-4">
-              <label className="space-y-1">
-                <span className="text-xs font-semibold text-gray-600">Desktop Image</span>
-                <input
-                  value={editForm.desktopImage}
-                  onChange={(e) => setEditForm((prev) => ({ ...prev, desktopImage: e.target.value }))}
-                  className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                />
-              </label>
-              <label className="space-y-1">
-                <span className="text-xs font-semibold text-gray-600">Mobile Image</span>
-                <input
-                  value={editForm.mobileImage}
-                  onChange={(e) => setEditForm((prev) => ({ ...prev, mobileImage: e.target.value }))}
-                  className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                />
-              </label>
+              <ImageUpload
+                label="Desktop Banner"
+                value={editForm.desktopImage}
+                onChange={(url) =>
+                  setEditForm((prev) => ({ ...prev, desktopImage: Array.isArray(url) ? url[0] || '' : url }))
+                }
+                maxSize={100}
+              />
+              <ImageUpload
+                label="Mobile Banner (optional)"
+                value={editForm.mobileImage}
+                onChange={(url) =>
+                  setEditForm((prev) => ({ ...prev, mobileImage: Array.isArray(url) ? url[0] || '' : url }))
+                }
+                maxSize={100}
+              />
               <label className="space-y-1">
                 <span className="text-xs font-semibold text-gray-600">Link</span>
                 <input

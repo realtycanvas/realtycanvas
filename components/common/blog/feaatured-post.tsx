@@ -18,7 +18,7 @@ export default function FeaturedPost({ post }: FeaturedPostProps) {
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="group relative bg-white dark:bg-gray-800 rounded-2xl shadow hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 dark:border-gray-700 hover:border-brand-primary/30 dark:hover:border-brand-primary/40"
+      className="group bg-white dark:bg-gray-800 rounded shadow-lg hover:shadow transition-all duration-300 overflow-hidden border border-gray-100 dark:border-gray-700 hover:border-brand-primary/20 dark:hover:border-brand-primary/30"
     >
       <Link href={`/blog/${post.slug.current}`} className="block">
         <div className="grid lg:grid-cols-2 gap-0">
@@ -34,7 +34,7 @@ export default function FeaturedPost({ post }: FeaturedPostProps) {
 
             {/* Featured Badge */}
             <div className="absolute top-6 left-6">
-              <div className="flex items-center gap-2 px-4 py-2 bg-brand-primary text-white rounded-full shadow-lg">
+              <div className="flex items-center gap-2 px-4 py-2 bg-brand-primary text-white rounded shadow-lg">
                 <Star className="w-4 h-4 fill-current" />
                 <span className="text-sm font-semibold">Featured Article</span>
               </div>
@@ -47,7 +47,7 @@ export default function FeaturedPost({ post }: FeaturedPostProps) {
                   {post.categories.slice(0, 2).map((category) => (
                     <span
                       key={category._id}
-                      className="px-3 py-1 text-xs font-medium rounded-full bg-white/90 text-brand-secondary backdrop-blur-sm"
+                      className="px-3 py-1 text-xs font-medium rounded bg-white/90 text-brand-secondary backdrop-blur-sm"
                     >
                       {category.title}
                     </span>
@@ -65,7 +65,7 @@ export default function FeaturedPost({ post }: FeaturedPostProps) {
                 {post.categories.slice(0, 3).map((category) => (
                   <span
                     key={category._id}
-                    className="px-3 py-1 text-sm font-medium rounded-full bg-secondary-50 text-secondary-600 dark:bg-secondary-800 dark:text-secondary-300"
+                    className="px-3 py-1 text-sm font-medium rounded bg-secondary-50 text-secondary-600 dark:bg-secondary-800 dark:text-secondary-300"
                   >
                     {category.title}
                   </span>
@@ -112,7 +112,7 @@ export default function FeaturedPost({ post }: FeaturedPostProps) {
             <div className="flex items-center justify-between">
               {post.author && (
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-linear-to-br from-brand-primary to-brand-secondary rounded-full flex items-center justify-center">
+                  <div className="w-10 h-10 bg-linear-to-br from-brand-primary to-brand-secondary rounded flex items-center justify-center">
                     <User className="w-5 h-5 text-white" />
                   </div>
                   <div>
@@ -123,7 +123,7 @@ export default function FeaturedPost({ post }: FeaturedPostProps) {
               )}
 
               <div className="flex items-center gap-2 text-brand-primary group-hover:gap-3 transition-all duration-300">
-                <span className="font-semibold">Read Full Article</span>
+                <span className="font-semibold">Read More</span>
                 <ArrowRight className="w-5 h-5" />
               </div>
             </div>
