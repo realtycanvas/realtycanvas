@@ -7,12 +7,14 @@ import FAQSection from '@/components/home/FAQ-section';
 import ProjectTagSection from '@/components/home/project-tag-sections';
 import LatestBlogsSection from '@/components/home/latest-blogs-section';
 import AutoLeadPopup from '@/components/home/auto-lead-popup';
+import FeaturedBlogPreview from '@/components/home/featured-blog-preview';
 
 const page = () => {
   return (
     <div className="">
       <AutoLeadPopup />
       <HeroSection />
+      <FeaturedBlogPreview />
       <ProjectTagSection
         className="md:pt-28"
         tag="RECOMMENDED"
