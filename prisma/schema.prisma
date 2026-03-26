@@ -291,6 +291,20 @@ model Lead {
   @@index([projectSlug])
 }
 
+model Banner {
+  id           String   @id @default(uuid())
+  desktopImage String
+  mobileImage  String?
+  link         String?
+  sortOrder    Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([isActive])
+  @@index([sortOrder])
+}
+
 // ─────────────────────────────────────────────
 // OFFERING — Space type sections
 // e.g. "🛍 High-Street Retail Shops" with description

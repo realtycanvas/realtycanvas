@@ -12,35 +12,47 @@ type HeroSectionProps = {
 };
 
 const HeroSection = ({ className = '', onSearch }: HeroSectionProps) => {
-  const slides = useMemo(
+  const initialSlides = useMemo(
     () => [
       {
-        id: 'banner-1',
-        desktopImage: '/banner/extended/5desktop.webp',
-        mobileImage: '/banner/mobile/1mobile.webp',
-        link: '/projects',
-      },
-      {
         id: 'banner-2',
-        desktopImage: '/banner/extended/2desktop.webp',
+        desktopImage: '/banner/extended/7desktop.webp',
         mobileImage: '/banner/mobile/2mobile.webp',
-        link: '/projects',
-      },
-      {
-        id: 'banner-3',
-        desktopImage: '/banner/extended/3desktop.webp',
-        mobileImage: '/banner/mobile/3mobile.webp',
-        link: '/projects',
-      },
-      {
-        id: 'banner-4',
-        desktopImage: '/banner/extended/4desktop.webp',
-        mobileImage: '/banner/mobile/4mobile.webp',
         link: '/projects',
       },
     ],
     []
   );
+  const [slides, setSlides] = useState(initialSlides);
+
+  useEffect(() => {
+    const loadBanners = async () => {
+      try {
+        const response = await fetch('/api/banners', { cache: 'no-store' });
+        const data = (await response.json()) as { data?: any[] };
+        if (!response.ok) return;
+        if (!Array.isArray(data.data) || data.data.length === 0) return;
+
+        const nextSlides = data.data
+          .map((row) => ({
+            id: String(row?.id || ''),
+            desktopImage: String(row?.desktopImage || ''),
+            mobileImage: String(row?.mobileImage || row?.desktopImage || ''),
+            link: String(row?.link || '/projects'),
+            sortOrder: typeof row?.sortOrder === 'number' ? row.sortOrder : 0,
+          }))
+          .filter((row) => row.id && row.desktopImage && row.mobileImage);
+
+        nextSlides.sort((a, b) => a.sortOrder - b.sortOrder);
+        if (nextSlides.length > 0) {
+          setSlides(nextSlides);
+        }
+      } catch {}
+    };
+
+    loadBanners();
+  }, [initialSlides]);
+
   const infiniteSlides = useMemo(() => {
     if (slides.length <= 1) return slides;
     return [slides[slides.length - 1], ...slides, slides[0]];
@@ -48,6 +60,11 @@ const HeroSection = ({ className = '', onSearch }: HeroSectionProps) => {
 
   const [activeIndex, setActiveIndex] = useState(slides.length > 1 ? 1 : 0);
   const [isAnimating, setIsAnimating] = useState(true);
+
+  useEffect(() => {
+    setIsAnimating(true);
+    setActiveIndex(slides.length > 1 ? 1 : 0);
+  }, [slides.length]);
 
   useEffect(() => {
     if (slides.length <= 1) return;

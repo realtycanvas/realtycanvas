@@ -27,9 +27,8 @@ const page = () => {
         }
       />
       <BenefitsSection />
-      <ServicesSection />
       <ProjectTagSection
-        className="bg-white"
+        className=""
         tag="TRENDING"
         title={
           <h2>
@@ -37,7 +36,9 @@ const page = () => {
           </h2>
         }
       />
+      <ServicesSection />
       <ProjectTagSection
+        className=""
         tag="NEW"
         title={
           <h2>
@@ -46,6 +47,7 @@ const page = () => {
         }
       />
       <ProjectTagSection
+        className="bg-white"
         tag="BUDGET"
         title={
           <h2>
@@ -54,7 +56,6 @@ const page = () => {
         }
       />
       <ProjectTagSection
-        className="bg-white"
         tag="DREAM"
         title={
           <h2>
@@ -63,6 +64,7 @@ const page = () => {
         }
       />
       <ProjectTagSection
+        className="bg-white"
         tag="BUDGET_PLOTS"
         title={
           <h2>
