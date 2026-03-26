@@ -18,7 +18,7 @@ const EnquirySection = () => {
           transition={{ duration: 0.6 }}
           className="w-full"
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-[#0B1A3D] dark:text-white mb-8 leading-tight">
+          <h2 className="text-xl sm:text-4xl md:text-5xl font-bold text-[#0B1A3D] dark:text-white mb-8 leading-tight">
             Ready to Start <span className="text-[#FDB022]">Your Journey?</span>
           </h2>
         </motion.div>

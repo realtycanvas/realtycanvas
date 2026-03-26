@@ -15,7 +15,7 @@ export default async function LatestBlogsSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+            <h2 className="text-xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
               Latest
               <span className="bg-linear-to-r from-brand-primary to-brand-primary bg-clip-text text-transparent">
                 {' '}
