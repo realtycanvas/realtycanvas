@@ -14,7 +14,7 @@ const BenefitSection = () => {
               <span className="font-semibold text-gray-500 uppercase tracking-widest text-sm">
                 Why RealtyCanvas Stands Apart:
               </span>
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900">
+              <h2 className="text-xl sm:text-4xl md:text-5xl font-bold text-gray-900">
                 Benefits of
                 <span className="bg-linear-to-r from-brand-primary to-brand-primary bg-clip-text text-transparent">
                   {' '}

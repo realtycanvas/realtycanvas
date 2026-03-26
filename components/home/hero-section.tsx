@@ -5,7 +5,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import ProjectSearchBar from './project-search';
-import { banners } from '@/data/banners';
 
 type HeroSectionProps = {
   className?: string;
@@ -13,25 +12,84 @@ type HeroSectionProps = {
 };
 
 const HeroSection = ({ className = '', onSearch }: HeroSectionProps) => {
-  const slides = useMemo(() => [...banners].sort((a, b) => a.sortOrder - b.sortOrder), []);
+  const slides = useMemo(
+    () => [
+      {
+        id: 'banner-1',
+        desktopImage: '/banner/extended/5desktop.webp',
+        mobileImage: '/banner/mobile/1mobile.webp',
+        link: '/projects',
+      },
+      {
+        id: 'banner-2',
+        desktopImage: '/banner/extended/2desktop.webp',
+        mobileImage: '/banner/mobile/2mobile.webp',
+        link: '/projects',
+      },
+      {
+        id: 'banner-3',
+        desktopImage: '/banner/extended/3desktop.webp',
+        mobileImage: '/banner/mobile/3mobile.webp',
+        link: '/projects',
+      },
+      {
+        id: 'banner-4',
+        desktopImage: '/banner/extended/4desktop.webp',
+        mobileImage: '/banner/mobile/4mobile.webp',
+        link: '/projects',
+      },
+    ],
+    []
+  );
+  const infiniteSlides = useMemo(() => {
+    if (slides.length <= 1) return slides;
+    return [slides[slides.length - 1], ...slides, slides[0]];
+  }, [slides]);
 
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(slides.length > 1 ? 1 : 0);
+  const [isAnimating, setIsAnimating] = useState(true);
 
   useEffect(() => {
     if (slides.length <= 1) return;
     const timer = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % slides.length);
+      setIsAnimating(true);
+      setActiveIndex((prev) => (prev >= slides.length + 1 ? 2 : prev + 1));
     }, 6000);
     return () => clearInterval(timer);
   }, [slides.length]);
 
   const goPrev = () => {
-    setActiveIndex((prev) => (prev - 1 + slides.length) % slides.length);
+    if (slides.length <= 1) return;
+    setIsAnimating(true);
+    setActiveIndex((prev) => (prev <= 0 ? Math.max(1, slides.length - 1) : prev - 1));
   };
 
   const goNext = () => {
-    setActiveIndex((prev) => (prev + 1) % slides.length);
+    if (slides.length <= 1) return;
+    setIsAnimating(true);
+    setActiveIndex((prev) => (prev >= slides.length + 1 ? 2 : prev + 1));
   };
+
+  const handleTrackTransitionEnd = () => {
+    if (slides.length <= 1) return;
+    if (activeIndex === 0) {
+      setIsAnimating(false);
+      setActiveIndex(slides.length);
+      return;
+    }
+    if (activeIndex === slides.length + 1) {
+      setIsAnimating(false);
+      setActiveIndex(1);
+    }
+  };
+
+  useEffect(() => {
+    if (isAnimating) return;
+    const frame = window.requestAnimationFrame(() => {
+      setIsAnimating(true);
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [isAnimating]);
 
   const handleSearch = (filters: { category: string; status: string; priceRange: { min: number; max: number } }) => {
     if (onSearch) {
@@ -62,32 +120,37 @@ const HeroSection = ({ className = '', onSearch }: HeroSectionProps) => {
   };
 
   return (
-    <section className={`relative ${className}`}>
-      <div className="w-full">
+    <section className={`relative pb-6 sm:pb-6 md:pb-12 ${className}`}>
+      <div className="w-full relative">
         <div className="relative w-full">
-          <div className="relative h-[75vh] w-full overflow-hidden aspect-4/5 md:aspect-video">
+          <div className="relative h-[62vh] sm:h-[64vh] md:h-[500px] lg:h-[520px] w-full overflow-hidden">
             <div
-              className="flex h-full transition-transform duration-700 ease-out"
+              className={`flex h-full ${isAnimating ? 'transition-transform duration-700 ease-out' : ''}`}
               style={{ transform: `translateX(-${activeIndex * 100}%)` }}
+              onTransitionEnd={handleTrackTransitionEnd}
             >
-              {slides.map((slide) => (
-                <div key={slide.id} className="min-w-full h-full relative">
+              {infiniteSlides.map((slide, index) => (
+                <div key={`${slide.id}-${index}`} className="min-w-full h-full relative">
                   <Link href={slide.link} className="block w-full h-full relative">
                     <Image
                       src={slide.desktopImage}
                       alt="Hero Banner"
                       fill
                       sizes="100vw"
-                      className="hidden md:block object-cover object-center hover:scale-105 transition-transform duration-500"
-                      priority={activeIndex === 0}
+                      quality={100}
+                      unoptimized
+                      className="hidden md:block object-cover object-center"
+                      priority={index === 1}
                     />
                     <Image
                       src={slide.mobileImage}
                       alt="Hero Banner"
                       fill
                       sizes="100vw"
-                      className="md:hidden object-cover object-center hover:scale-105 transition-transform duration-500"
-                      priority={activeIndex === 0}
+                      quality={100}
+                      unoptimized
+                      className="md:hidden object-cover object-center"
+                      priority={index === 1}
                     />
                   </Link>
                 </div>
@@ -99,7 +162,7 @@ const HeroSection = ({ className = '', onSearch }: HeroSectionProps) => {
                 <button
                   type="button"
                   onClick={goPrev}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors flex items-center justify-center"
+                  className="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 w-9 h-9 md:w-10 md:h-10 rounded-full bg-black/35 text-white hover:bg-black/55 transition-colors flex items-center justify-center z-30"
                   aria-label="Previous banner"
                 >
                   <ChevronLeftIcon className="w-5 h-5" />
@@ -107,7 +170,7 @@ const HeroSection = ({ className = '', onSearch }: HeroSectionProps) => {
                 <button
                   type="button"
                   onClick={goNext}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors flex items-center justify-center"
+                  className="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 w-9 h-9 md:w-10 md:h-10 rounded-full bg-black/35 text-white hover:bg-black/55 transition-colors flex items-center justify-center z-30"
                   aria-label="Next banner"
                 >
                   <ChevronRightIcon className="w-5 h-5" />
@@ -115,28 +178,7 @@ const HeroSection = ({ className = '', onSearch }: HeroSectionProps) => {
               </>
             ) : null}
           </div>
-          <div className="absolute inset-0 z-10 bg-linear-to-r from-slate-950/35 via-slate-900/70 to-slate-950/35" />
-          <div className="absolute inset-0 z-20 flex items-center justify-center">
-            <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex w-full flex-col items-center justify-center space-y-6 pt-24 text-center sm:space-y-8 md:pt-20 lg:space-y-10">
-                <div className="mx-auto max-w-4xl space-y-3 sm:space-y-4">
-                  <div className="flex flex-col items-center justify-center gap-2 sm:flex-row sm:gap-3 md:gap-4 flex-wrap">
-                    <h1 className="text-center text-3xl font-bold leading-tight text-white drop-shadow-lg sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl">
-                      Find Your
-                    </h1>
-                    <span className="bg-linear-to-r from-brand-primary to-brand-primary bg-clip-text text-center text-3xl font-bold leading-tight text-transparent drop-shadow-sm sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl">
-                      Dream Project
-                    </span>
-                  </div>
-
-                  <p className="mx-auto max-w-xs text-center text-sm font-medium leading-relaxed text-gray-100 drop-shadow-md sm:max-w-xl sm:text-base md:max-w-2xl md:text-lg lg:max-w-3xl lg:text-xl">
-                    Discover premium residential homes and commercial spaces across Gurgaon with India&apos;s most
-                    trusted real estate consultant.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+          <div className="absolute inset-0 z-10 bg-linear-to-r from-black/20 via-transparent to-black/20" />
         </div>
 
         <div className="hidden md:block absolute left-1/2 bottom-0 z-30 -translate-x-1/2 translate-y-1/2 w-full max-w-sm sm:max-w-xl md:max-w-3xl lg:max-w-4xl px-2 sm:px-0">
@@ -144,7 +186,7 @@ const HeroSection = ({ className = '', onSearch }: HeroSectionProps) => {
             <ProjectSearchBar onSearch={handleSearch} />
           </div>
         </div>
-        <div className="md:hidden pt-12 px-4 bg-gray-200">
+        <div className="md:hidden pt-10 pb-2 px-4 bg-white">
           <div className="rounded-2xl shadow-xl bg-white">
             <ProjectSearchBar onSearch={handleSearch} />
           </div>

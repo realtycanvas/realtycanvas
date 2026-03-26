@@ -67,8 +67,8 @@ const ProjectTagSection = ({ tag, title, className }: { tag: string; title: Reac
   return (
     <section className={`${className} py-20 bg-gray-200 relative overflow-hidden`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between gap-4 mb-10">
-          <div className="text-3xl md:text-4xl font-bold text-gray-900">{title}</div>
+        <div className="flex items-start justify-between gap-4 mb-10">
+          <div className="text-xl sm:text-3xl md:text-4xl font-bold text-gray-900">{title}</div>
           {data.totalCount > data.projects.length && (
             <ViewAllLink href={`/projects?projectTag=${encodeURIComponent(tag)}`} label="View All" />
           )}

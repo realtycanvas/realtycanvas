@@ -48,7 +48,7 @@ export default function FAQSection({ faqs }: { faqs?: FAQ[] }) {
     <section className="lg:py-20 py-6 bg-white dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-10 md:mb-14">
-          <h2 className="text-4xl md:text-5xl font-bold text-[#0B1A3D] dark:text-white mb-6 leading-tight">
+          <h2 className="text-xl sm:text-4xl md:text-5xl font-bold text-[#0B1A3D] dark:text-white mb-6 leading-tight">
             Frequently{' '}
             <span className="bg-linear-to-r from-brand-primary to-brand-primary bg-clip-text text-transparent">
               Asked Questions

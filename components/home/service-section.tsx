@@ -11,7 +11,7 @@ export default function ServicesSection() {
 
       <div className="max-w-7xl mx-auto px-4 relative z-10">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
             How We Make
             <span className="bg-linear-to-r from-brand-primary to-brand-primary bg-clip-text text-transparent">
               {' '}

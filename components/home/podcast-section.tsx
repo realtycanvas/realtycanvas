@@ -147,7 +147,7 @@ export default function PodcastSection() {
               </span>
             </div>
 
-            <h2 className="text-4xl md:text-5xl font-bold text-[#0B1A3D] dark:text-white mb-6 leading-tight">
+            <h2 className="text-xl sm:text-4xl md:text-5xl font-bold text-[#0B1A3D] dark:text-white mb-6 leading-tight">
               Realty Canvas <br />
               <span className="text-[#FDB022]">Insights Podcast</span>
             </h2>

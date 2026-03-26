@@ -14,7 +14,9 @@ const page = () => {
     <div className="">
       <AutoLeadPopup />
       <HeroSection />
-      <FeaturedBlogPreview />
+      <div className="pt-0">
+        <FeaturedBlogPreview />
+      </div>
       <ProjectTagSection
         className="md:pt-28"
         tag="RECOMMENDED"
