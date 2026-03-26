@@ -31,6 +31,12 @@ type ModalState = {
   project: ProjectRow | null;
 };
 
+type StatusModalState = {
+  isOpen: boolean;
+  project: ProjectRow | null;
+  nextIsActive: boolean;
+};
+
 export default function AdminProjectsPage() {
   const pageSize = 10;
   const [projects, setProjects] = useState<ProjectRow[]>([]);
@@ -49,10 +55,18 @@ export default function AdminProjectsPage() {
   });
   const [error, setError] = useState('');
   const [deleteError, setDeleteError] = useState('');
+  const [statusError, setStatusError] = useState('');
   const [deletingId, setDeletingId] = useState('');
+  const [updatingStatusId, setUpdatingStatusId] = useState('');
   const [permanentDelete, setPermanentDelete] = useState(false);
   const [modalState, setModalState] = useState<ModalState>({ isOpen: false, project: null });
+  const [statusModalState, setStatusModalState] = useState<StatusModalState>({
+    isOpen: false,
+    project: null,
+    nextIsActive: false,
+  });
   const cancelButtonRef = useRef<HTMLButtonElement | null>(null);
+  const statusCancelButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const loadProjects = useCallback(
     async (targetPage: number, targetQuery: string, isRefresh = false) => {
@@ -115,6 +129,22 @@ export default function AdminProjectsPage() {
     }
   }, [modalState.isOpen]);
 
+  useEffect(() => {
+    if (statusModalState.isOpen) {
+      statusCancelButtonRef.current?.focus();
+      const onEscape = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') {
+          setStatusModalState({ isOpen: false, project: null, nextIsActive: false });
+          setStatusError('');
+        }
+      };
+      window.addEventListener('keydown', onEscape);
+      return () => {
+        window.removeEventListener('keydown', onEscape);
+      };
+    }
+  }, [statusModalState.isOpen]);
+
   const openDeleteModal = (project: ProjectRow) => {
     setPermanentDelete(false);
     setDeleteError('');
@@ -167,6 +197,49 @@ export default function AdminProjectsPage() {
     }
   };
 
+  const openStatusModal = (project: ProjectRow) => {
+    setStatusError('');
+    setStatusModalState({
+      isOpen: true,
+      project,
+      nextIsActive: !project.isActive,
+    });
+  };
+
+  const closeStatusModal = () => {
+    if (updatingStatusId) return;
+    setStatusModalState({ isOpen: false, project: null, nextIsActive: false });
+    setStatusError('');
+  };
+
+  const confirmStatusUpdate = async () => {
+    if (!statusModalState.project) return;
+    try {
+      setStatusError('');
+      setUpdatingStatusId(statusModalState.project.id);
+      const response = await fetch(`/api/projects/${encodeURIComponent(statusModalState.project.slug)}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive: statusModalState.nextIsActive }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.error || 'Failed to update project status');
+      }
+
+      setProjects((prev) =>
+        prev.map((item) =>
+          item.id === statusModalState.project?.id ? { ...item, isActive: statusModalState.nextIsActive } : item
+        )
+      );
+      setStatusModalState({ isOpen: false, project: null, nextIsActive: false });
+    } catch (err: unknown) {
+      setStatusError(err instanceof Error ? err.message : 'Failed to update project status');
+    } finally {
+      setUpdatingStatusId('');
+    }
+  };
+
   const onSearchSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     const nextQuery = searchInput.trim();
@@ -179,6 +252,7 @@ export default function AdminProjectsPage() {
     setSearchQuery('');
     setPage(1);
   };
+  const nextDisabled = loading || !pagination.hasMore;
 
   return (
     <div className="space-y-4 h-full flex flex-col min-h-0">
@@ -230,6 +304,30 @@ export default function AdminProjectsPage() {
       </form>
 
       {error && <div className="rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <p className="text-sm text-gray-600">
+          Showing page {pagination.page} of {pagination.totalPages} · {pagination.totalCount} total project(s)
+        </p>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+            disabled={loading || !pagination.hasPrevious}
+            className="rounded border border-gray-300 px-3 py-1.5 text-sm font-semibold text-gray-700 hover:bg-gray-100 disabled:opacity-50 transition"
+          >
+            Previous
+          </button>
+          <button
+            type="button"
+            onClick={() => setPage((prev) => prev + 1)}
+            disabled={nextDisabled}
+            className="rounded border border-gray-300 px-3 py-1.5 text-sm font-semibold text-gray-700 hover:bg-gray-100 disabled:opacity-50 transition"
+          >
+            Next
+          </button>
+        </div>
+      </div>
 
       {loading ? (
         <div className="py-12 flex justify-center">
@@ -286,13 +384,15 @@ export default function AdminProjectsPage() {
                     <td className="px-4 py-3 text-sm text-gray-700">{project.status.replaceAll('_', ' ')}</td>
                     <td className="px-4 py-3 text-sm text-gray-700">{project.city || '—'}</td>
                     <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
+                      <button
+                        type="button"
+                        onClick={() => openStatusModal(project)}
+                        className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold transition ${
                           project.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                         }`}
                       >
                         {project.isActive ? 'Active' : 'Inactive'}
-                      </span>
+                      </button>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-2">
@@ -335,7 +435,7 @@ export default function AdminProjectsPage() {
           <button
             type="button"
             onClick={() => setPage((prev) => prev + 1)}
-            disabled={loading || !pagination.hasMore}
+            disabled={nextDisabled}
             className="rounded border border-gray-300 px-3 py-1.5 text-sm font-semibold text-gray-700 hover:bg-gray-100 disabled:opacity-50 transition"
           >
             Next
@@ -388,6 +488,45 @@ export default function AdminProjectsPage() {
                 className="rounded bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60 transition"
               >
                 {deletingId ? 'Deleting...' : 'Confirm'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {statusModalState.isOpen && statusModalState.project && (
+        <div className="fixed inset-0 z-80 flex items-center justify-center p-4" role="dialog" aria-modal="true">
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/40"
+            onClick={closeStatusModal}
+            aria-label="Close"
+          />
+          <div className="relative w-full max-w-md rounded bg-white shadow-xl border border-gray-200 p-5">
+            <h3 className="text-lg font-bold text-gray-900">Update Project Visibility</h3>
+            <p className="mt-2 text-sm text-gray-600">
+              Do you want to{' '}
+              <span className="font-semibold">{statusModalState.nextIsActive ? 'activate' : 'inactivate'}</span>{' '}
+              <span className="font-semibold">{statusModalState.project.title}</span>?
+            </p>
+            {statusError && <p className="mt-3 text-sm text-red-600">{statusError}</p>}
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                ref={statusCancelButtonRef}
+                type="button"
+                onClick={closeStatusModal}
+                disabled={Boolean(updatingStatusId)}
+                className="rounded border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 disabled:opacity-60 transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmStatusUpdate}
+                disabled={Boolean(updatingStatusId)}
+                className="rounded bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800 disabled:opacity-60 transition"
+              >
+                {updatingStatusId ? 'Updating...' : 'Confirm'}
               </button>
             </div>
           </div>

@@ -80,6 +80,7 @@ export default function AdminLeadsPage() {
   }, [loadLeads, page, sortOrder]);
 
   const sortLabel = useMemo(() => (sortOrder === 'desc' ? 'Newest First' : 'Oldest First'), [sortOrder]);
+  const nextDisabled = loading || !pagination.hasMore;
 
   return (
     <div className="space-y-4 h-full flex flex-col min-h-0">
@@ -108,6 +109,30 @@ export default function AdminLeadsPage() {
       </div>
 
       {error && <div className="rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <p className="text-sm text-gray-600">
+          Showing page {pagination.page} of {pagination.totalPages} · {pagination.totalCount} total lead(s)
+        </p>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+            disabled={loading || !pagination.hasPrevious}
+            className="rounded border border-gray-300 px-3 py-1.5 text-sm font-semibold text-gray-700 hover:bg-gray-100 disabled:opacity-50 transition"
+          >
+            Previous
+          </button>
+          <button
+            type="button"
+            onClick={() => setPage((prev) => prev + 1)}
+            disabled={nextDisabled}
+            className="rounded border border-gray-300 px-3 py-1.5 text-sm font-semibold text-gray-700 hover:bg-gray-100 disabled:opacity-50 transition"
+          >
+            Next
+          </button>
+        </div>
+      </div>
 
       {loading ? (
         <div className="py-12 flex justify-center">
@@ -182,7 +207,7 @@ export default function AdminLeadsPage() {
           <button
             type="button"
             onClick={() => setPage((prev) => prev + 1)}
-            disabled={loading || !pagination.hasMore}
+            disabled={nextDisabled}
             className="rounded border border-gray-300 px-3 py-1.5 text-sm font-semibold text-gray-700 hover:bg-gray-100 disabled:opacity-50 transition"
           >
             Next

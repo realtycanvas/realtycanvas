@@ -401,3 +401,34 @@ export async function DELETE(request: NextRequest, { params }: Props) {
     return NextResponse.json({ error: 'Failed to delete project' }, { status: 500 });
   }
 }
+
+export async function PATCH(request: NextRequest, { params }: Props) {
+  try {
+    const { slug } = await params;
+    if (!slug) {
+      return NextResponse.json({ error: 'Slug is required' }, { status: 400 });
+    }
+
+    const body = await request.json();
+    if (typeof body?.isActive !== 'boolean') {
+      return NextResponse.json({ error: 'isActive boolean is required' }, { status: 400 });
+    }
+
+    const normalizedSlug = decodeURIComponent(slug).toLowerCase().trim();
+
+    const project = await prisma.project.update({
+      where: { slug: normalizedSlug },
+      data: { isActive: body.isActive },
+      select: { id: true, slug: true, isActive: true },
+    });
+
+    revalidatePath('/projects');
+    revalidatePath(`/projects/${normalizedSlug}`);
+    revalidatePath('/admin/projects');
+    revalidateTag(PROJECTS_TAG, 'default');
+    return NextResponse.json({ ok: true, project });
+  } catch (error) {
+    console.error('Project status update error:', error);
+    return NextResponse.json({ error: 'Failed to update project status' }, { status: 500 });
+  }
+}
