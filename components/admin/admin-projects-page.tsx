@@ -334,7 +334,7 @@ export default function AdminProjectsPage() {
           <div className="w-8 h-8 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin" />
         </div>
       ) : (
-        <div className="overflow-auto rounded border border-gray-200 flex-1 min-h-[320px]">
+        <div className="overflow-auto rounded border border-gray-200 flex-1 min-h-80">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>

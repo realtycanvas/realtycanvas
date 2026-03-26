@@ -3,6 +3,7 @@ import AdminShell from '@/components/admin/admin-shell';
 import AdminDashboard from '@/components/admin/admin-dashboard';
 import AdminProjectsPage from '@/components/admin/admin-projects-page';
 import AdminLeadsPage from '@/components/admin/admin-leads-page';
+import AdminBannersPage from '@/components/admin/admin-banners-page';
 
 type PageProps = {
   params: Promise<{
@@ -41,6 +42,18 @@ export default async function AdminDynamicPage({ params }: PageProps) {
         contentScrollable={false}
       >
         <AdminLeadsPage />
+      </AdminShell>
+    );
+  }
+
+  if (end_point === 'banner') {
+    return (
+      <AdminShell
+        title="Banner Management"
+        description="Add and reorder home page hero banners."
+        contentScrollable={false}
+      >
+        <AdminBannersPage />
       </AdminShell>
     );
   }

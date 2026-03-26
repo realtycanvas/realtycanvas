@@ -4,7 +4,7 @@ import { services } from '@/data/services';
 
 export default function ServicesSection() {
   return (
-    <section className="py-20 bg-gray-200 relative overflow-hidden">
+    <section className="py-20 relative overflow-hidden">
       {/* Background elements */}
       <div className="absolute top-10 right-10 w-32 h-32 bg-linear-to-r from-brand-primary/10 to-brand-primary/10 rounded-full blur-3xl"></div>
       <div className="absolute bottom-10 left-10 w-40 h-40 bg-linear-to-r from-pink-500/10 to-purple-500/10 rounded-full blur-3xl"></div>

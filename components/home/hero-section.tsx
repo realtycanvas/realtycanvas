@@ -6,41 +6,70 @@ import Image from 'next/image';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import ProjectSearchBar from './project-search';
 
+type BannerApiRow = {
+  id: string;
+  desktopImage: string;
+  mobileImage: string | null;
+  link: string | null;
+  sortOrder: number;
+};
+
+type Slide = {
+  id: string;
+  desktopImage: string;
+  mobileImage: string;
+  link: string;
+  sortOrder: number;
+};
+
 type HeroSectionProps = {
   className?: string;
   onSearch?: (filters: { category: string; status: string; priceRange: { min: number; max: number } }) => void;
 };
 
 const HeroSection = ({ className = '', onSearch }: HeroSectionProps) => {
-  const slides = useMemo(
+  const initialSlides = useMemo(
     () => [
       {
-        id: 'banner-1',
-        desktopImage: '/banner/extended/5desktop.webp',
-        mobileImage: '/banner/mobile/1mobile.webp',
-        link: '/projects',
-      },
-      {
         id: 'banner-2',
-        desktopImage: '/banner/extended/2desktop.webp',
+        desktopImage: '/banner/extended/7desktop.webp',
         mobileImage: '/banner/mobile/2mobile.webp',
         link: '/projects',
-      },
-      {
-        id: 'banner-3',
-        desktopImage: '/banner/extended/3desktop.webp',
-        mobileImage: '/banner/mobile/3mobile.webp',
-        link: '/projects',
-      },
-      {
-        id: 'banner-4',
-        desktopImage: '/banner/extended/4desktop.webp',
-        mobileImage: '/banner/mobile/4mobile.webp',
-        link: '/projects',
+        sortOrder: 0,
       },
     ],
     []
   );
+  const [slides, setSlides] = useState<Slide[]>(initialSlides);
+
+  useEffect(() => {
+    const loadBanners = async () => {
+      try {
+        const response = await fetch('/api/banners', { cache: 'no-store' });
+        const data = (await response.json()) as { data?: BannerApiRow[] };
+        if (!response.ok) return;
+        if (!Array.isArray(data.data) || data.data.length === 0) return;
+
+        const nextSlides = data.data
+          .map<Slide>((row) => ({
+            id: row.id,
+            desktopImage: row.desktopImage,
+            mobileImage: row.mobileImage || row.desktopImage,
+            link: row.link || '/projects',
+            sortOrder: row.sortOrder || 0,
+          }))
+          .filter((row) => Boolean(row.id && row.desktopImage && row.mobileImage));
+
+        nextSlides.sort((a, b) => a.sortOrder - b.sortOrder);
+        if (nextSlides.length > 0) {
+          setSlides(nextSlides);
+        }
+      } catch {}
+    };
+
+    loadBanners();
+  }, []);
+
   const infiniteSlides = useMemo(() => {
     if (slides.length <= 1) return slides;
     return [slides[slides.length - 1], ...slides, slides[0]];
@@ -48,6 +77,14 @@ const HeroSection = ({ className = '', onSearch }: HeroSectionProps) => {
 
   const [activeIndex, setActiveIndex] = useState(slides.length > 1 ? 1 : 0);
   const [isAnimating, setIsAnimating] = useState(true);
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      setIsAnimating(true);
+      setActiveIndex(slides.length > 1 ? 1 : 0);
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [slides.length]);
 
   useEffect(() => {
     if (slides.length <= 1) return;
@@ -123,7 +160,7 @@ const HeroSection = ({ className = '', onSearch }: HeroSectionProps) => {
     <section className={`relative pb-6 sm:pb-6 md:pb-12 ${className}`}>
       <div className="w-full relative">
         <div className="relative w-full">
-          <div className="relative h-[62vh] sm:h-[64vh] md:h-[500px] lg:h-[520px] w-full overflow-hidden">
+          <div className="relative h-[62vh] sm:h-[64vh] md:h-125 lg:h-130 w-full overflow-hidden">
             <div
               className={`flex h-full ${isAnimating ? 'transition-transform duration-700 ease-out' : ''}`}
               style={{ transform: `translateX(-${activeIndex * 100}%)` }}
