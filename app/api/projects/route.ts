@@ -41,18 +41,28 @@ function getProjectsFromDB(filters: {
       if (city) where.city = { contains: city, mode: 'insensitive' };
       if (projectTag) where.projectTags = { has: projectTag };
       const priceFilters: Prisma.ProjectWhereInput[] = [];
-      if (typeof minPrice === 'number' && minPrice > 0) {
+      const hasMin = typeof minPrice === 'number' && minPrice > 0;
+      const hasMax = typeof maxPrice === 'number' && maxPrice > 0;
+
+      if (hasMin && hasMax) {
         priceFilters.push({
-          OR: [{ priceMax: { gte: minPrice } }, { priceMax: null }],
+          priceMin: { gte: minPrice },
+        });
+        priceFilters.push({
+          priceMin: { lte: maxPrice },
+        });
+      } else if (hasMin) {
+        priceFilters.push({
+          priceMin: { gte: minPrice },
+        });
+      } else if (hasMax) {
+        priceFilters.push({
+          priceMin: { lte: maxPrice },
         });
       }
-      if (typeof maxPrice === 'number' && maxPrice > 0) {
-        priceFilters.push({
-          OR: [{ priceMin: { lte: maxPrice } }, { priceMin: null }],
-        });
-      }
+
       if (priceFilters.length > 0) {
-        where.AND = priceFilters;
+        where.AND = Array.isArray(where.AND) ? [...where.AND, ...priceFilters] : priceFilters;
       }
 
       const [projects, totalCount] = await Promise.all([
@@ -127,8 +137,13 @@ export async function GET(request: NextRequest) {
     const includeInactive = searchParams.get('includeInactive') === '1';
     const minPriceRaw = searchParams.get('minPrice')?.trim() || '';
     const maxPriceRaw = searchParams.get('maxPrice')?.trim() || '';
-    const minPrice = minPriceRaw ? parseInt(minPriceRaw, 10) : 0;
-    const maxPrice = maxPriceRaw ? parseInt(maxPriceRaw, 10) : 0;
+    let minPrice = minPriceRaw ? parseInt(minPriceRaw, 10) : 0;
+    let maxPrice = maxPriceRaw ? parseInt(maxPriceRaw, 10) : 0;
+    if (minPrice > 0 && maxPrice > 0 && minPrice > maxPrice) {
+      const temp = minPrice;
+      minPrice = maxPrice;
+      maxPrice = temp;
+    }
     const tagLimit = Math.min(12, Math.max(1, parseInt(searchParams.get('tagLimit') || '6')));
 
     if (groupByTags) {

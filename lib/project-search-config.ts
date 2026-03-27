@@ -1,6 +1,6 @@
 export const projectCategories = ['All Categories', 'COMMERCIAL', 'RESIDENTIAL'] as const;
 
-export const projectStatuses = ['All Status', 'PLANNED', 'UNDER_CONSTRUCTION', 'READY'] as const;
+export const projectStatuses = ['All Status', 'UNDER_CONSTRUCTION', 'READY'] as const;
 
 export const categoryDisplayNames: Record<string, string> = {
   'All Categories': 'All Categories',
@@ -10,7 +10,6 @@ export const categoryDisplayNames: Record<string, string> = {
 
 export const statusDisplayNames: Record<string, string> = {
   'All Status': 'All Status',
-  PLANNED: 'Planned',
   UNDER_CONSTRUCTION: 'Under Construction',
   READY: 'Ready',
 };
@@ -21,7 +20,7 @@ export const priceRanges = [
   { label: '₹1Cr - ₹5Cr', min: 10000000, max: 50000000 },
   { label: '₹5Cr - ₹10Cr', min: 50000000, max: 100000000 },
   { label: '₹10Cr - ₹25Cr', min: 100000000, max: 250000000 },
-  { label: '₹25Cr+', min: 250000000, max: 1000000000 },
+  { label: '₹25Cr+', min: 250000000, max: 0 },
 ];
 
 export const mapTypeToProjectTag = (typeValue: string) => {

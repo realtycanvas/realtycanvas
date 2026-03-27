@@ -75,10 +75,13 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
     hasPrevious: false,
   });
 
+  const statusFromUrl = searchParams.get('status') || 'ALL';
+  const normalizedStatus = statusFromUrl === 'UNDER_CONSTRUCTION' || statusFromUrl === 'READY' ? statusFromUrl : 'ALL';
+
   const [filters, setFilters] = useState<FilterState>({
     search: searchParams.get('search') || '',
     category: searchParams.get('category') || 'ALL',
-    status: searchParams.get('status') || 'ALL',
+    status: normalizedStatus,
     city: searchParams.get('city') || '',
     projectTag: projectTagParam,
     minPrice: minPriceParam,
@@ -180,9 +183,11 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
     });
   };
 
+  const normalizedMaxPriceForMatch = filters.maxPrice.trim() || '0';
   const selectedBudgetLabel =
-    priceRanges.find((range) => String(range.min) === filters.minPrice && String(range.max) === filters.maxPrice)
-      ?.label || priceRanges[0].label;
+    priceRanges.find(
+      (range) => String(range.min) === filters.minPrice && String(range.max) === normalizedMaxPriceForMatch
+    )?.label || priceRanges[0].label;
 
   const clearFilters = () => {
     updateFilters({
@@ -286,9 +291,8 @@ export default function ProjectsListingClient({ user }: ProjectsListingClientPro
                 className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-yellow-500"
               >
                 <option value="ALL">{projectStatuses[0]}</option>
-                <option value="PLANNED">{projectStatuses[1].replaceAll('_', ' ')}</option>
-                <option value="UNDER_CONSTRUCTION">{projectStatuses[2].replaceAll('_', ' ')}</option>
-                <option value="READY">{projectStatuses[3].replaceAll('_', ' ')}</option>
+                <option value="UNDER_CONSTRUCTION">{projectStatuses[1].replaceAll('_', ' ')}</option>
+                <option value="READY">{projectStatuses[2].replaceAll('_', ' ')}</option>
               </select>
             </div>
 
