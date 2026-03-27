@@ -9,8 +9,8 @@ export type BannerItem = {
 export const banners: BannerItem[] = [
   {
     id: 'home-hero-1',
-    desktopImage: '/home/homepage.webp',
-    mobileImage: '/home/homepage.webp',
+    desktopImage: '/banner/extended/7desktop.webp',
+    mobileImage: '/banner/mobile/2mobile.webp',
     link: '/projects',
     sortOrder: 1,
   },
