@@ -38,7 +38,7 @@ type PricingTableRow = {
   reraArea: string;
   price: string;
   pricePerSqft: string | null;
-  availableUnits: number | null;
+  availabilityStatus: string | null;
   floorNumbers: string | null;
   features: unknown;
 };

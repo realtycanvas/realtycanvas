@@ -98,7 +98,7 @@ type ProjectResponse = {
     reraArea: string;
     price: string;
     pricePerSqft?: string | null;
-    availableUnits?: number | null;
+    availabilityStatus?: string | null;
     floorNumbers?: string | null;
   }[];
   nearbyPoints?: { type: string; name: string; distanceKm?: number | null; travelTimeMin?: number | null }[];
@@ -307,7 +307,7 @@ function CreateProjectPage({ adminMode = false }: CreateProjectPageProps) {
       reraArea: '',
       price: '',
       pricePerSqft: '',
-      availableUnits: '',
+      availabilityStatus: 'available',
       floorNumbers: '',
     },
   ]);
@@ -463,7 +463,7 @@ function CreateProjectPage({ adminMode = false }: CreateProjectPageProps) {
                   reraArea: p.reraArea || '',
                   price: p.price || '',
                   pricePerSqft: p.pricePerSqft || '',
-                  availableUnits: toStr(p.availableUnits),
+                  availabilityStatus: p.availabilityStatus || 'available',
                   floorNumbers: p.floorNumbers || '',
                 }))
               : [
@@ -472,7 +472,7 @@ function CreateProjectPage({ adminMode = false }: CreateProjectPageProps) {
                     reraArea: '',
                     price: '',
                     pricePerSqft: '',
-                    availableUnits: '',
+                    availabilityStatus: 'available',
                     floorNumbers: '',
                   },
                 ]
@@ -658,7 +658,7 @@ function CreateProjectPage({ adminMode = false }: CreateProjectPageProps) {
         .filter((p) => p.type.trim())
         .map((p) => ({
           ...p,
-          availableUnits: p.availableUnits ? parseInt(p.availableUnits) : null,
+          availabilityStatus: p.availabilityStatus || null,
         })),
 
       nearbyPoints: nearby
@@ -1160,13 +1160,14 @@ function CreateProjectPage({ adminMode = false }: CreateProjectPageProps) {
                           />
                         </div>
                         <div>
-                          <Label>Available Units</Label>
-                          <Input
-                            type="number"
-                            value={row.availableUnits}
-                            onChange={(e) => updRow(setPricing, i, 'availableUnits', e.target.value)}
-                            placeholder="e.g. 142"
-                          />
+                          <Label>Status</Label>
+                          <Select
+                            value={row.availabilityStatus}
+                            onChange={(e) => updRow(setPricing, i, 'availabilityStatus', e.target.value)}
+                          >
+                            <option value="available">Available</option>
+                            <option value="not-available">Not Available</option>
+                          </Select>
                         </div>
                         <div>
                           <Label>Floor Numbers</Label>
@@ -1186,7 +1187,7 @@ function CreateProjectPage({ adminMode = false }: CreateProjectPageProps) {
                         reraArea: '',
                         price: '',
                         pricePerSqft: '',
-                        availableUnits: '',
+                        availabilityStatus: 'available',
                         floorNumbers: '',
                       })
                     }
