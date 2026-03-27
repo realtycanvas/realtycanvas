@@ -10,7 +10,7 @@ export const banners: BannerItem[] = [
   {
     id: 'home-hero-1',
     desktopImage: '/banner/extended/7desktop.webp',
-    mobileImage: '/banner/mobile/2mobile.webp',
+    mobileImage: '/banner/mobile/1.webp',
     link: '/projects',
     sortOrder: 1,
   },
