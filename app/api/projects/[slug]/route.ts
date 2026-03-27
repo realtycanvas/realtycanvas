@@ -262,7 +262,7 @@ export async function PUT(request: NextRequest, { params }: Props) {
               reraArea?: string;
               price?: string;
               pricePerSqft?: string;
-              availableUnits?: number | null;
+              availabilityStatus?: string | null;
               floorNumbers?: string;
               features?: unknown;
             }) => ({
@@ -270,7 +270,7 @@ export async function PUT(request: NextRequest, { params }: Props) {
               reraArea: p.reraArea?.trim() || '',
               price: p.price?.trim() || '',
               pricePerSqft: p.pricePerSqft?.trim() || null,
-              availableUnits: p.availableUnits ?? null,
+              availabilityStatus: p.availabilityStatus?.trim() || null,
               floorNumbers: p.floorNumbers?.trim() || null,
               features: p.features ?? null,
             })

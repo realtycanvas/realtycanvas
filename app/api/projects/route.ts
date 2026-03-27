@@ -395,7 +395,7 @@ export async function POST(request: NextRequest) {
               reraArea?: string;
               price?: string;
               pricePerSqft?: string;
-              availableUnits?: number | null;
+              availabilityStatus?: string | null;
               floorNumbers?: string;
               features?: unknown;
             }) => ({
@@ -403,7 +403,7 @@ export async function POST(request: NextRequest) {
               reraArea: p.reraArea?.trim() || '',
               price: p.price?.trim() || '',
               pricePerSqft: p.pricePerSqft?.trim() || null,
-              availableUnits: p.availableUnits ?? null,
+              availabilityStatus: p.availabilityStatus?.trim() || null,
               floorNumbers: p.floorNumbers?.trim() || null,
               features: p.features ?? null,
             })

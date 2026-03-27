@@ -28,7 +28,7 @@ type PricingTableRow = {
   reraArea: string;
   price: string;
   pricePerSqft: string | null;
-  availableUnits: number | null;
+  availabilityStatus: string | null;
   floorNumbers: string | null;
   features: unknown;
 };
@@ -259,7 +259,15 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
   const imageAltMap = project.seo?.imageAltMap ?? {};
   const defaultAlt = project.seo?.featuredImgAlt || project.title;
   const primaryHeading = project.seo?.h1Tag || project.title;
-  const getImageAlt = (src: string) => imageAltMap[src] || defaultAlt;
+  const normalizeImageSrc = (src: string) => {
+    const trimmed = src.trim();
+    if (!trimmed) return trimmed;
+    if (trimmed.startsWith('/')) return trimmed;
+    if (trimmed.startsWith('data:')) return trimmed;
+    const cleaned = trimmed.replace(/[)\]]+$/, '');
+    return cleaned;
+  };
+  const getImageAlt = (src: string) => imageAltMap[src] || imageAltMap[normalizeImageSrc(src)] || defaultAlt;
   const investTitle = shortProjectTitle(project.title);
 
   const amenityCategories = useMemo(
@@ -389,7 +397,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
             <div className="relative h-[40vh] sm:h-[50vh] md:h-[55vh] lg:h-[60vh] rounded overflow-hidden">
               {galleryImages[activeImageIndex] && (
                 <Image
-                  src={galleryImages[activeImageIndex]}
+                  src={normalizeImageSrc(galleryImages[activeImageIndex])}
                   alt={getImageAlt(galleryImages[activeImageIndex])}
                   fill
                   className="object-cover"
@@ -429,7 +437,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                         }`}
                       >
                         <Image
-                          src={img}
+                          src={normalizeImageSrc(img)}
                           alt={getImageAlt(img)}
                           width={64}
                           height={64}
@@ -492,7 +500,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                 {project.sitePlanImage && (
                   <div className="relative aspect-video rounded overflow-hidden mt-4 sm:mt-6">
                     <Image
-                      src={project.sitePlanImage}
+                      src={normalizeImageSrc(project.sitePlanImage)}
                       alt={getImageAlt(project.sitePlanImage)}
                       fill
                       className="object-cover"
@@ -585,7 +593,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                               Price / Sq.ft
                             </th>
                             <th className="py-2.5 px-3 sm:py-3 sm:px-4 font-semibold rounded-tr text-xs sm:text-sm">
-                              Availability
+                              Status
                             </th>
                           </tr>
                         </thead>
@@ -605,7 +613,11 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                                 {row.pricePerSqft || '—'}
                               </td>
                               <td className="py-2.5 px-3 sm:py-3 sm:px-4 text-gray-600 text-xs sm:text-sm">
-                                {row.availableUnits ?? '—'}
+                                {row.availabilityStatus === 'available'
+                                  ? 'Available'
+                                  : row.availabilityStatus === 'not-available'
+                                    ? 'Not Available'
+                                    : row.availabilityStatus || '—'}
                               </td>
                             </tr>
                           ))}
@@ -676,7 +688,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                     <div key={plan.id} className="border border-gray-200 rounded overflow-hidden">
                       <div className="relative aspect-video">
                         <Image
-                          src={plan.imageUrl}
+                          src={normalizeImageSrc(plan.imageUrl)}
                           alt={`${plan.level} floor plan`}
                           fill
                           className="object-cover"
@@ -856,7 +868,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
             <div className="flex-1 grid grid-rows-[1fr_auto] overflow-hidden">
               <div className="relative bg-black overflow-hidden">
                 <Image
-                  src={galleryImages[activeImageIndex]}
+                  src={normalizeImageSrc(galleryImages[activeImageIndex])}
                   alt={getImageAlt(galleryImages[activeImageIndex])}
                   fill
                   className="object-contain"
@@ -889,7 +901,7 @@ export default function ProjectDetailClient({ project }: { project: Project }) {
                       }`}
                     >
                       <Image
-                        src={img}
+                        src={normalizeImageSrc(img)}
                         alt={getImageAlt(img)}
                         width={96}
                         height={80}

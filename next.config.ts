@@ -60,6 +60,16 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'm3mgurugram.co.in',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.m3mgurugram.co.in',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'm3mjewel.commercial-gurgaon.in',
         pathname: '/img/**',
       },

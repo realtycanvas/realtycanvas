@@ -447,8 +447,9 @@ const buildPricingTableFromUnits = (projectId: string, units: CsvRow[], projectB
         reraArea: uniqueStrings(areas).slice(0, 2).join(' / ') || 'On Request',
         price: prices[0] || projectBasePrice || 'On Request',
         pricePerSqft: rates[0] || null,
-        availableUnits:
-          rows.filter((row) => cleanText(row.availability).toUpperCase() === 'AVAILABLE').length || rows.length,
+        availabilityStatus: rows.some((row) => cleanText(row.availability).toUpperCase() === 'AVAILABLE')
+          ? 'available'
+          : 'not-available',
         floorNumbers: floor || null,
         features: {
           note: cleanText(rows[0]?.notes) || null,
@@ -756,7 +757,7 @@ const seed = async () => {
           reraArea: pricingRow.reraArea,
           price: pricingRow.price,
           pricePerSqft: pricingRow.pricePerSqft,
-          availableUnits: pricingRow.availableUnits,
+          availabilityStatus: pricingRow.availabilityStatus,
           floorNumbers: pricingRow.floorNumbers,
           features: pricingRow.features,
         },
