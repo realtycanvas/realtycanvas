@@ -21,7 +21,7 @@ export const banners: BannerItem[] = [
   {
     id: 'home-hero-downtown',
     desktopImage: '/banner/extended/downtown-desktop.webp',
-    mobileImage: '/banner/mobile/downtown-mobile.webp',
+    mobileImage: '/banner/mobile/downtown-Mobile.webp',
     tabletImage: '/banner/tablet/downtown-tablet.webp',
     tvImage: '/banner/tv/downtown-tv.webp',
     link: '/projects/bptp-downtown-66',
